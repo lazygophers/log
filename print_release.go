@@ -12,7 +12,9 @@ func init() {
 }
 
 func Debug(args ...interface{}) {
+	std.Debug(args...)
 }
 
 func Debugf(format string, args ...interface{}) {
+	std.Debugf(format, args...)
 }
