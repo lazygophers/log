@@ -5,7 +5,7 @@ import "time"
 type Entry struct {
 	Pid     int
 	Gid     int64
-	TraceId []byte
+	TraceId string
 
 	Time  time.Time
 	Level Level
@@ -27,7 +27,7 @@ func NewEntry() *Entry {
 
 func (p *Entry) Reset() {
 	p.Gid = 0
-	p.TraceId = p.TraceId[:0]
+	p.TraceId = ""
 	p.File = ""
 	p.Message = ""
 	p.CallerName = ""

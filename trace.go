@@ -1,34 +1,34 @@
 package log
 
 import (
+	"github.com/google/uuid"
 	"sync"
 
-	"github.com/nats-io/nuid"
 	"github.com/petermattis/goid"
 )
 
 var traceMap sync.Map
 
-func getTrace(gid int64) []byte {
+func getTrace(gid int64) string {
 	tid, ok := traceMap.Load(gid)
 	if !ok {
-		return nil
+		return ""
 	}
-	return tid.([]byte)
+	return tid.(string)
 }
 
 func setTrace(gid int64, traceId string) {
 	if traceId == "" {
 		traceId = GenTraceId()
 	}
-	traceMap.Store(gid, []byte(traceId))
+	traceMap.Store(gid, traceId)
 }
 
 func delTrace(gid int64) {
 	traceMap.Delete(gid)
 }
 
-func GetTrace() []byte {
+func GetTrace() string {
 	return getTrace(goid.Get())
 }
 
@@ -44,8 +44,6 @@ func DelTrace() {
 	delTrace(goid.Get())
 }
 
-var nid = nuid.New()
-
 func GenTraceId() string {
-	return nid.Next()[16:]
+	return uuid.NewString()[16:]
 }

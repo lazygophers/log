@@ -65,8 +65,8 @@ func (p *Formatter) format(entry *Entry) []byte {
 			b.Write([]byte(" "))
 		}
 
-		if len(entry.TraceId) > 0 {
-			b.Write(entry.TraceId)
+		if entry.TraceId != "" {
+			b.WriteString(entry.TraceId)
 			b.Write([]byte(" "))
 		}
 
