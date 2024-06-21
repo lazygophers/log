@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/google/uuid"
+	"strings"
 	"sync"
 
 	"github.com/petermattis/goid"
@@ -45,5 +46,5 @@ func DelTrace() {
 }
 
 func GenTraceId() string {
-	return uuid.NewString()[16:]
+	return strings.ReplaceAll(uuid.NewString(), "-", "")[16:]
 }
