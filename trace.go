@@ -10,6 +10,8 @@ import (
 
 var traceMap sync.Map
 
+var DisableTrance bool
+
 func getTrace(gid int64) string {
 	tid, ok := traceMap.Load(gid)
 	if !ok {
@@ -19,6 +21,9 @@ func getTrace(gid int64) string {
 }
 
 func setTrace(gid int64, traceId string) {
+	if DisableTrance {
+		return
+	}
 	if traceId == "" {
 		traceId = GenTraceId()
 	}
