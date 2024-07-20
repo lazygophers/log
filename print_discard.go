@@ -2,7 +2,10 @@
 
 package log
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 func init() {
 	SetOutput(io.Discard)
