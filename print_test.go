@@ -1,7 +1,9 @@
 package log_test
 
 import (
+	"github.com/elliotchance/pie/v2"
 	"github.com/lazygophers/log"
+	"github.com/lazygophers/utils/candy"
 	"os"
 	"sync"
 	"testing"
@@ -38,6 +40,10 @@ func TestFilename(t *testing.T) {
 		t.Errorf("err:%v", err)
 		return
 	}
+
+	candy.Each([]int{1, 2, 3, 4, 5}, func(i int) {
+		t.Log(i)
+	})
 
 	pie.Each(
 		pie.SortUsing(

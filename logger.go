@@ -12,9 +12,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type logLine struct {
-}
-
 type Logger struct {
 	level Level
 
@@ -47,8 +44,18 @@ func (p *Logger) SetPrefixMsg(prefixMsg string) *Logger {
 	return p
 }
 
+func (p *Logger) AppendPrefixMsg(prefixMsg string) *Logger {
+	p.PrefixMsg = []byte(string(p.PrefixMsg)+prefixMsg)
+	return p
+}
+
 func (p *Logger) SetSuffixMsg(suffixMsg string) *Logger {
 	p.SuffixMsg = []byte(suffixMsg)
+	return p
+}
+
+func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
+	p.SuffixMsg = []byte(string(p.SuffixMsg)+suffixMsg)
 	return p
 }
 

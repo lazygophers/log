@@ -11,9 +11,6 @@ var (
 )
 
 func init() {
-	//std.SetFormatter(logFmt)
-	//std.SetReportCaller(false)
-	//std.SetOutput(os.Stdout)
 }
 
 func New() *Logger {
@@ -44,8 +41,16 @@ func SetPrefixMsg(prefixMsg string) *Logger {
 	return std.SetPrefixMsg(prefixMsg)
 }
 
+func AppendPrefixMsg(prefixMsg string) *Logger {
+	return std.AppendPrefixMsg(prefixMsg)
+}
+
 func SetSuffixMsg(suffixMsg string) *Logger {
 	return std.SetSuffixMsg(suffixMsg)
+}
+
+func AppendSuffixMsg(suffixMsg string) *Logger {
+	return std.AppendSuffixMsg(suffixMsg)
 }
 
 func ParsingAndEscaping(disable bool) *Logger {
