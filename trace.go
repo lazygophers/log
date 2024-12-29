@@ -62,8 +62,8 @@ func DelTrace() {
 	delTrace(goid.Get())
 }
 
-func GenTraceIdWithGID(gid int64) string {
-	return GenTraceId()
+func DelTraceWithGID(gid int64) {
+	delTrace(gid)
 }
 
 func GenTraceId() string {
