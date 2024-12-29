@@ -38,6 +38,10 @@ func GetTrace() string {
 	return getTrace(goid.Get())
 }
 
+func GetTraceWithGID(gid int64) string {
+	return getTrace(gid)
+}
+
 func SetTrace(traceId ...string) {
 	if len(traceId) > 0 {
 		setTrace(goid.Get(), traceId[0])
@@ -46,8 +50,20 @@ func SetTrace(traceId ...string) {
 	setTrace(goid.Get(), "")
 }
 
+func SetTraceWithGID(gid int64, traceId ...string) {
+	if len(traceId) > 0 {
+		setTrace(gid, traceId[0])
+		return
+	}
+	setTrace(gid, "")
+}
+
 func DelTrace() {
 	delTrace(goid.Get())
+}
+
+func GenTraceIdWithGID(gid int64) string {
+	return GenTraceId()
 }
 
 func GenTraceId() string {
