@@ -15,10 +15,6 @@ func SetOutput(writes ...io.Writer) *Logger {
 	return std.SetOutput(writes...)
 }
 
-func AddOutput(writes ...io.Writer) *Logger {
-	return std.AddOutput(writes...)
-}
-
 func GetOutputWriter(filename string) io.Writer {
 	if filepath.Dir(filename) != filename && !isDir(filepath.Dir(filename)) {
 		err := os.MkdirAll(filepath.Dir(filename), os.ModePerm)

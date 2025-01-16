@@ -15,7 +15,7 @@ import (
 type Logger struct {
 	level Level
 
-	outList []zapcore.WriteSyncer
+	out zapcore.WriteSyncer
 
 	Format Format
 
@@ -28,7 +28,7 @@ type Logger struct {
 func newLogger() *Logger {
 	return &Logger{
 		level:       DebugLevel,
-		outList:     []zapcore.WriteSyncer{os.Stdout},
+		out:         os.Stdout,
 		Format:      &Formatter{},
 		callerDepth: 4,
 	}
@@ -45,7 +45,7 @@ func (p *Logger) SetPrefixMsg(prefixMsg string) *Logger {
 }
 
 func (p *Logger) AppendPrefixMsg(prefixMsg string) *Logger {
-	p.PrefixMsg = []byte(string(p.PrefixMsg)+prefixMsg)
+	p.PrefixMsg = []byte(string(p.PrefixMsg) + prefixMsg)
 	return p
 }
 
@@ -55,14 +55,14 @@ func (p *Logger) SetSuffixMsg(suffixMsg string) *Logger {
 }
 
 func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
-	p.SuffixMsg = []byte(string(p.SuffixMsg)+suffixMsg)
+	p.SuffixMsg = []byte(string(p.SuffixMsg) + suffixMsg)
 	return p
 }
 
 func (p *Logger) Clone() *Logger {
 	l := Logger{
 		level:       p.level,
-		outList:     p.outList,
+		out:         p.out,
 		callerDepth: p.callerDepth,
 		PrefixMsg:   p.PrefixMsg,
 		SuffixMsg:   p.SuffixMsg,
@@ -92,14 +92,13 @@ func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	for _, write := range writes {
 		ws = append(ws, zapcore.AddSync(write))
 	}
-	p.outList = ws
-	return p
-}
 
-func (p *Logger) AddOutput(writes ...io.Writer) *Logger {
-	for _, write := range writes {
-		p.outList = append(p.outList, zapcore.AddSync(write))
+	if len(ws) == 1 {
+		p.out = ws[0]
+	} else {
+		p.out = zapcore.NewMultiWriteSyncer(ws...)
 	}
+
 	return p
 }
 
@@ -149,9 +148,7 @@ func (p *Logger) log(level Level, msg string) {
 }
 
 func (p *Logger) write(level Level, buf []byte) {
-	for _, out := range p.outList {
-		_, _ = out.Write(buf)
-	}
+	_, _ = p.out.Write(buf)
 
 	if level == PanicLevel {
 		p.Sync()
@@ -231,9 +228,7 @@ func (p *Logger) Panicf(format string, args ...interface{}) {
 }
 
 func (p *Logger) Sync() {
-	for _, out := range p.outList {
-		_ = out.Sync()
-	}
+	_ = p.out.Sync()
 }
 
 func (p *Logger) ParsingAndEscaping(disable bool) *Logger {
