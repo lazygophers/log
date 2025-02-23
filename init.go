@@ -10,6 +10,10 @@ var (
 	pid = os.Getpid()
 )
 
+func Pid() int {
+	return pid
+}
+
 func init() {
 }
 
