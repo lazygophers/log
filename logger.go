@@ -183,6 +183,10 @@ func (p *Logger) Warn(args ...interface{}) {
 	p.Log(WarnLevel, args...)
 }
 
+func (p *Logger) Warning(args ...interface{}) {
+	p.Log(WarnLevel, args...)
+}
+
 func (p *Logger) Error(args ...interface{}) {
 	p.Log(ErrorLevel, args...)
 }
@@ -212,6 +216,10 @@ func (p *Logger) Infof(format string, args ...interface{}) {
 }
 
 func (p *Logger) Warnf(format string, args ...interface{}) {
+	p.Logf(WarnLevel, format, args...)
+}
+
+func (p *Logger) Warningf(format string, args ...interface{}) {
 	p.Logf(WarnLevel, format, args...)
 }
 
