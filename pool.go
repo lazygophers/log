@@ -16,6 +16,9 @@ func GetBuffer() *bytes.Buffer {
 }
 
 func PutBuffer(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
 	buf.Reset()
 	bufPool.Put(buf)
 }

@@ -2,11 +2,12 @@ package log
 
 import (
 	"fmt"
-	"github.com/elliotchance/pie/v2"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/elliotchance/pie/v2"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )

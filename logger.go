@@ -90,10 +90,15 @@ func (p *Logger) Level() Level {
 func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	var ws []zapcore.WriteSyncer
 	for _, write := range writes {
+		if write == nil {
+			continue
+		}
 		ws = append(ws, zapcore.AddSync(write))
 	}
 
-	if len(ws) == 1 {
+	if len(ws) == 0 {
+		p.out = nil
+	} else if len(ws) == 1 {
 		p.out = ws[0]
 	} else {
 		p.out = zapcore.NewMultiWriteSyncer(ws...)
