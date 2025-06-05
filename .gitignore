@@ -1,12 +1,4 @@
-.idea/**
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
-.idea/**/gradle.xml
-.idea/**/libraries
+**/.idea/**
 cmake-build-*/
 .idea/**/mongoSettings.xml
 *.iws
@@ -377,10 +369,11 @@ node_modules
 *.sln.docstates
 *.userprefs
 mono_crash.*
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
+# 构建目录
+build/
+bin/
+obj/
+dist/
 x64/
 x86/
 [Ww][Ii][Nn]32/
