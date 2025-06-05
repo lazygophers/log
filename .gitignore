@@ -1,11 +1,4 @@
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
-.idea/**/aws.xml
-.idea/**/contentModel.xml
-.idea/**/dataSources/
+.idea/**
 .idea/**/dataSources.ids
 .idea/**/dataSources.local.xml
 .idea/**/sqlDataSources.xml
@@ -605,3 +598,4 @@ next-env.d.ts
 secring.*
 
 Makefile
+/memory-bank/
