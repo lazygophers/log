@@ -12,19 +12,27 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Logger 结构体用于管理日志记录器的配置和行为
 type Logger struct {
+	// level: 当前日志级别，控制输出日志的详细程度
 	level Level
 
+	// out: 日志输出目标（支持多路复用）
 	out zapcore.WriteSyncer
 
+	// Format: 日志格式化器，定义日志输出格式
 	Format Format
 
+	// callerDepth: 调用者深度，用于确定日志中显示的调用位置
 	callerDepth int
 
+	// PrefixMsg: 日志消息前缀（字节切片）
 	PrefixMsg []byte
+	// SuffixMsg: 日志消息后缀（字节切片）
 	SuffixMsg []byte
 }
 
+// newLogger 创建默认日志记录器实例
 func newLogger() *Logger {
 	return &Logger{
 		level:       DebugLevel,
@@ -34,31 +42,48 @@ func newLogger() *Logger {
 	}
 }
 
+// SetCallerDepth 设置调用者深度
+// 参数 callerDepth: 整数，表示调用栈深度
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) SetCallerDepth(callerDepth int) *Logger {
 	p.callerDepth = callerDepth
 	return p
 }
 
+// SetPrefixMsg 设置消息前缀
+// 参数 prefixMsg: 字符串，将被转换为字节切片
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) SetPrefixMsg(prefixMsg string) *Logger {
 	p.PrefixMsg = []byte(prefixMsg)
 	return p
 }
 
+// AppendPrefixMsg 追加消息前缀
+// 参数 prefixMsg: 字符串，将被追加到现有前缀
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) AppendPrefixMsg(prefixMsg string) *Logger {
 	p.PrefixMsg = []byte(string(p.PrefixMsg) + prefixMsg)
 	return p
 }
 
+// SetSuffixMsg 设置消息后缀
+// 参数 suffixMsg: 字符串，将被转换为字节切片
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) SetSuffixMsg(suffixMsg string) *Logger {
 	p.SuffixMsg = []byte(suffixMsg)
 	return p
 }
 
+// AppendSuffixMsg 追加消息后缀
+// 参数 suffixMsg: 字符串，将被追加到现有后缀
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
 	p.SuffixMsg = []byte(string(p.SuffixMsg) + suffixMsg)
 	return p
 }
 
+// Clone 创建Logger的深拷贝实例
+// 返回: 新的Logger指针
 func (p *Logger) Clone() *Logger {
 	l := Logger{
 		level:       p.level,
@@ -78,15 +103,23 @@ func (p *Logger) Clone() *Logger {
 	return &l
 }
 
+// SetLevel 设置日志级别
+// 参数 level: 目标日志级别
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) SetLevel(level Level) *Logger {
 	p.level = level
 	return p
 }
 
+// Level 获取当前日志级别
+// 返回: 当前配置的日志级别
 func (p *Logger) Level() Level {
 	return p.level
 }
 
+// SetOutput 设置日志输出目标
+// 参数 writes: 一个或多个io.Writer接口实现
+// 返回: 当前Logger实例（支持链式调用）
 func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	var ws []zapcore.WriteSyncer
 	for _, write := range writes {
@@ -107,10 +140,17 @@ func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	return p
 }
 
+// Log 通用日志记录方法
+// 参数 level: 日志级别
+// 参数 args: 任意类型参数，将被转换为字符串
 func (p *Logger) Log(level Level, args ...interface{}) {
 	p.log(level, fmt.Sprint(args...))
 }
 
+// Logf 格式化日志记录方法
+// 参数 level: 日志级别
+// 参数 format: 格式化字符串
+// 参数 args: 格式化参数
 func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	p.log(level, fmt.Sprintf(format, args...))
 }
@@ -121,6 +161,9 @@ var entryPool = sync.Pool{
 	},
 }
 
+// log 内部日志处理方法
+// 参数 level: 日志级别
+// 参数 msg: 已格式化的日志消息
 func (p *Logger) log(level Level, msg string) {
 	if !p.levelEnabled(level) {
 		return
