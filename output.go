@@ -5,9 +5,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
-
-	"github.com/elliotchance/pie/v2"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )
@@ -71,32 +70,31 @@ func GetOutputWriterHourly(filename string) Writer {
 					continue
 				}
 
-				pie.Each(
-					pie.DropTop(
-						pie.SortUsing(
-							pie.Map(
-								files,
-								func(file os.DirEntry) string {
-									return file.Name()
-								},
-							),
-							func(a, b string) bool {
-								return a > b
-							},
-						),
-						12,
-					),
-					func(s string) {
-						if s == ".log" {
-							return
-						}
+				filesOnly := make([]string, 0, len(files))
+				for _, file := range files {
+					filesOnly = append(filesOnly, file.Name())
+				}
 
-						fmt.Printf("remove:%s\n", s)
-						err = os.Remove(filepath.Join(filepath.Dir(filename), s))
-						if err != nil {
-							Errorf("err:%v", err)
-						}
-					})
+				// 自定义排序函数，按字符串降序排列
+				sort.Slice(filesOnly, func(i, j int) bool {
+					return filesOnly[i] > filesOnly[j]
+				})
+
+				// 跳过前12个保留的文件，删除其余文件
+				for i, s := range filesOnly {
+					if i < 12 {
+						continue
+					}
+					if s == ".log" {
+						continue
+					}
+
+					fmt.Printf("remove:%s\n", s)
+					err = os.Remove(filepath.Join(filepath.Dir(filename), s))
+					if err != nil {
+						Errorf("err:%v", err)
+					}
+				}
 
 				time.Sleep(time.Minute * 10)
 			}
