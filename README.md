@@ -1,20 +1,41 @@
-### 模块说明
-1. **AsyncWriter**（`writer_async.go`）
-   - 实现 Writer 接口适配 🔄 (`Write([]byte)`)
-   - 基于 sync.Pool 构建零值优化 ∞ (`entryPool`, `bufPool`)
-   - 通过 channel 实现内存安全写入 🔐
+# lazygophers/log
 
-2. **Formatter**（`formatter.go`）
-   - 支持 ZapHook 集成 🔄 (`NewZapHook(Logger)`)
-   - 实现颜色编码与包名解析 🎨
-   - 通过 sync.Pool 缓冲 byte 数组 📦 `msgBufPool` 
+## 功能特性
 
-3. **池化架构**
-   - entryPool: `var entryPool = sync.Pool{...}`
-   - bufPool: `var bufPool = sync.Pool{...}`
-   - 零值初始化优化性能 💡
+- **高性能日志系统**：基于sync.Pool优化内存分配
+- **多输出支持**：同时写入多个输出目标（文件/终端/网络）
+- **灵活格式化**：支持JSON、文本、Zap集成等多种格式
+- **分布式追踪**：内置trace ID上下文传递能力
+- **多级日志控制**：Debug/Info/Warn/Error/Fatal级别管理
 
-4. **ZapHook 机制**
-   - 接口类型: `func(entry zapcore.Entry) error`
-   - 通过 `NewZapHook(Logger)` 初始化
-   - 与 Write([]byte) 实现解耦设计
+## 快速开始
+
+```go
+// 基础使用示例
+logger.Info("系统启动", "组件", "main")
+```
+
+## 核心组件
+
+### Logger
+
+- `NewLogger()` - 创建日志记录器
+- `SetLevel()` - 动态调整日志级别
+- `With()` - 创建带上下文的子记录器
+
+### 输出管理
+
+- `AddOutput()` - 添加新输出目标
+
+## 性能优化
+
+- 使用sync.Pool管理Entry和缓冲区对象
+- 异步写入模式(writer_async.go)降低延迟
+- 零内存分配的格式化实现
+
+## 贡献指南
+
+1. 环境要求: Go 1.21+
+2. 开发流程:
+   - `go mod tidy` 更新依赖
+   - 提交规范: `feat(module): description` / `fix(module): description`
