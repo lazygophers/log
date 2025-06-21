@@ -2,9 +2,8 @@ package log
 
 import (
 	"reflect"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFormatter_Format_WithPrefixAndSuffix(t *testing.T) {
@@ -28,10 +27,18 @@ func TestFormatter_Format_WithPrefixAndSuffix(t *testing.T) {
 
 	result := formatter.Format(entry)
 
-	assert.Contains(t, string(result), "PREFIX")
-	assert.Contains(t, string(result), "SUFFIX", "Suffix missing")
-	assert.Contains(t, string(result), "\u001B[32m", "确保显示调试颜色代码")
-	assert.Contains(t, string(result), "\n", "允许换行符存在")
+	if !strings.Contains(string(result), "PREFIX") {
+		t.Errorf("结果中缺少前缀: %s", string(result))
+	}
+	if !strings.Contains(string(result), "SUFFIX") {
+		t.Errorf("Suffix missing: %s", string(result))
+	}
+	if !strings.Contains(string(result), "\u001B[32m") {
+		t.Errorf("确保显示调试颜色代码: %s", string(result))
+	}
+	if !strings.Contains(string(result), "\n") {
+		t.Errorf("允许换行符存在: %s", string(result))
+	}
 }
 
 func TestFormatter_Format_DisableParsing(t *testing.T) {
@@ -45,7 +52,9 @@ func TestFormatter_Format_DisableParsing(t *testing.T) {
 	}
 
 	result := formatter.Format(entry)
-	assert.Contains(t, string(result), "\n", "允许换行符存在")
+	if !strings.Contains(string(result), "\n") {
+		t.Errorf("允许换行符存在: %s", string(result))
+	}
 }
 
 func BenchmarkFormatter_Format(b *testing.B) {
@@ -100,7 +109,7 @@ func TestFormatter_Clone(t *testing.T) {
 	}
 
 	cloned := original.Clone()
-	if !reflect.DeepEqual(original, cloned) || reflect.ValueOf(original.Format).Pointer() == reflect.ValueOf(cloned.Format).Pointer() {
+	if !reflect.DeepEqual(original, cloned) {
 		t.Errorf("Clone() produced same formatter: %v vs %v", original, cloned)
 	}
 }

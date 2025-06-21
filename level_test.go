@@ -3,8 +3,6 @@ package log
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLevel_String(t *testing.T) {
@@ -24,7 +22,9 @@ func TestLevel_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%d", tt.level), func(t *testing.T) {
-			assert.Equal(t, tt.expected, tt.level.String())
+			if got := tt.level.String(); got != tt.expected {
+				t.Errorf("String() = %s, want %s", got, tt.expected)
+			}
 		})
 	}
 }
@@ -49,11 +49,17 @@ func TestLevel_MarshalText(t *testing.T) {
 		t.Run(fmt.Sprintf("%d", tt.level), func(t *testing.T) {
 			data, err := tt.level.MarshalText()
 			if tt.hasError {
-				assert.Error(t, err)
+				if err == nil {
+					t.Errorf("Expected error, got nil")
+				}
 				return
 			}
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expected, string(data))
+			if err != nil {
+				t.Errorf("MarshalText() error = %v", err)
+			}
+			if got := string(data); got != tt.expected {
+				t.Errorf("MarshalText() = %s, want %s", got, tt.expected)
+			}
 		})
 	}
 }
