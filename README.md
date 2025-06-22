@@ -1,4 +1,11 @@
-# lazygophers/log
+# log
+
+<p>
+	<a href="https://deepwiki.com/lazygophers/log">
+		<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki" height="20"/>
+	</a>
+</p>
+
 
 ## 功能特性
 
