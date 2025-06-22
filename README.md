@@ -1,11 +1,6 @@
 # log
 
-<p>
-	<a href="https://deepwiki.com/lazygophers/log">
-		<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki" height="20"/>
-	</a>
-</p>
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lazygophers/log)
 
 ## 功能特性
 
