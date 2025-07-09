@@ -12,23 +12,23 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// Logger 结构体用于管理日志记录器的配置和行为
+// Logger 管理日志记录器的配置和行为
 type Logger struct {
-	// level: 当前日志级别，控制输出日志的详细程度
+	// level 控制输出日志的详细程度
 	level Level
 
-	// out: 日志输出目标（支持多路复用）
+	// out 日志输出目标（支持多路复用）
 	out zapcore.WriteSyncer
 
-	// Format: 日志格式化器，定义日志输出格式
+	// Format 定义日志输出格式
 	Format Format
 
-	// callerDepth: 调用者深度，用于确定日志中显示的调用位置
+	// callerDepth 用于确定日志中显示的调用位置
 	callerDepth int
 
-	// PrefixMsg: 日志消息前缀（字节切片）
+	// PrefixMsg 日志消息前缀
 	PrefixMsg []byte
-	// SuffixMsg: 日志消息后缀（字节切片）
+	// SuffixMsg 日志消息后缀
 	SuffixMsg []byte
 }
 
@@ -207,78 +207,97 @@ func (p *Logger) write(level Level, buf []byte) {
 	}
 }
 
+// levelEnabled 检查指定级别是否启用
 func (p *Logger) levelEnabled(level Level) bool {
 	return p.level >= level
 }
 
+// Trace 记录TRACE级别日志
 func (p *Logger) Trace(args ...interface{}) {
 	p.Log(TraceLevel, args...)
 }
 
+// Debug 记录DEBUG级别日志
 func (p *Logger) Debug(args ...interface{}) {
 	p.Log(DebugLevel, args...)
 }
 
+// Print 记录DEBUG级别日志（Print的别名）
 func (p *Logger) Print(args ...interface{}) {
 	p.Log(DebugLevel, args...)
 }
 
+// Info 记录INFO级别日志
 func (p *Logger) Info(args ...interface{}) {
 	p.Log(InfoLevel, args...)
 }
 
+// Warn 记录WARN级别日志
 func (p *Logger) Warn(args ...interface{}) {
 	p.Log(WarnLevel, args...)
 }
 
+// Warning 记录WARN级别日志（Warn的别名）
 func (p *Logger) Warning(args ...interface{}) {
 	p.Log(WarnLevel, args...)
 }
 
+// Error 记录ERROR级别日志
 func (p *Logger) Error(args ...interface{}) {
 	p.Log(ErrorLevel, args...)
 }
 
+// Panic 记录PANIC级别日志并触发panic
 func (p *Logger) Panic(args ...interface{}) {
 	p.Log(PanicLevel, args...)
 }
 
+// Fatal 记录FATAL级别日志并退出程序
 func (p *Logger) Fatal(args ...interface{}) {
 	p.Log(FatalLevel, args...)
 }
 
+// Tracef 格式化记录TRACE级别日志
 func (p *Logger) Tracef(format string, args ...interface{}) {
 	p.Logf(TraceLevel, format, args...)
 }
 
+// Printf 格式化记录DEBUG级别日志
 func (p *Logger) Printf(format string, args ...interface{}) {
 	p.Logf(DebugLevel, format, args...)
 }
 
+// Debugf 格式化记录DEBUG级别日志
 func (p *Logger) Debugf(format string, args ...interface{}) {
 	p.Logf(DebugLevel, format, args...)
 }
 
+// Infof 格式化记录INFO级别日志
 func (p *Logger) Infof(format string, args ...interface{}) {
 	p.Logf(InfoLevel, format, args...)
 }
 
+// Warnf 格式化记录WARN级别日志
 func (p *Logger) Warnf(format string, args ...interface{}) {
 	p.Logf(WarnLevel, format, args...)
 }
 
+// Warningf 格式化记录WARN级别日志（Warnf的别名）
 func (p *Logger) Warningf(format string, args ...interface{}) {
 	p.Logf(WarnLevel, format, args...)
 }
 
+// Errorf 格式化记录ERROR级别日志
 func (p *Logger) Errorf(format string, args ...interface{}) {
 	p.Logf(ErrorLevel, format, args...)
 }
 
+// Fatalf 格式化记录FATAL级别日志并退出程序
 func (p *Logger) Fatalf(format string, args ...interface{}) {
 	p.Logf(FatalLevel, format, args...)
 }
 
+// Panicf 格式化记录PANIC级别日志并触发panic
 func (p *Logger) Panicf(format string, args ...interface{}) {
 	p.Logf(PanicLevel, format, args...)
 }
