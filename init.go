@@ -37,6 +37,10 @@ func Clone() *Logger {
 	return std.Clone()
 }
 
+func CloneToCtx() *LoggerWithCtx {
+	return std.CloneToCtx()
+}
+
 func SetCallerDepth(callerDepth int) *Logger {
 	return std.SetCallerDepth(callerDepth)
 }
