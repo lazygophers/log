@@ -5,6 +5,19 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// NewZapHook 创建用于zap日志库的钩子函数
+// 参数:
+//
+//	log: 目标日志记录器，用于输出转换后的日志
+//
+// 返回值:
+//
+//	钩子函数，接收zap日志条目并转发到目标日志记录器
+//
+// 功能说明:
+//   - 从goroutine上下文中获取traceId
+//   - 将zap日志级别转换为内部日志级别
+//   - 添加自定义前缀/后缀消息
 func NewZapHook(log *Logger) func(entry zapcore.Entry) error {
 	return func(entry zapcore.Entry) error {
 		logEntry := entryPool.Get().(*Entry)
