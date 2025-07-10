@@ -7,27 +7,24 @@ import (
 	"strings"
 )
 
-// Format defines the interface for formatting a log entry.
 type Format interface {
-	// Format takes a log entry and returns the formatted byte slice.
 	Format(entry *Entry) []byte
 }
 
-// FormatFull extends the Format interface with additional configuration methods.
 type FormatFull interface {
 	Format
-	// ParsingAndEscaping enables/disables message parsing and escaping
+
 	ParsingAndEscaping(disable bool)
-	// Caller enables/disables caller information in log output
+
 	Caller(disable bool)
-	// Clone creates a copy of the formatter
+
 	Clone() Format
 }
 
 type Formatter struct {
-	Module                    string // Name of the logging module
-	DisableParsingAndEscaping bool   // If true, disables message parsing/escaping
-	DisableCaller             bool   // If true, disables caller information
+	Module                    string
+	DisableParsingAndEscaping bool
+	DisableCaller             bool
 }
 
 func (p *Formatter) format(entry *Entry) []byte {
@@ -75,8 +72,6 @@ func (p *Formatter) format(entry *Entry) []byte {
 	return b.Bytes()
 }
 
-// Format implements the Format interface. It processes the log entry and returns formatted bytes.
-// If parsing is enabled, it splits multi-line messages into separate log entries.
 func (p *Formatter) Format(entry *Entry) []byte {
 	if p.DisableParsingAndEscaping {
 		return p.format(entry)
@@ -90,18 +85,14 @@ func (p *Formatter) Format(entry *Entry) []byte {
 	return b.Bytes()
 }
 
-// ParsingAndEscaping controls whether log messages are parsed and escaped.
-// When disabled, messages are logged as-is without processing.
 func (p *Formatter) ParsingAndEscaping(disable bool) {
 	p.DisableParsingAndEscaping = disable
 }
 
-// Caller controls whether caller information (file, line, function) is included in logs.
 func (p *Formatter) Caller(disable bool) {
 	p.DisableCaller = disable
 }
 
-// Clone creates a deep copy of the Formatter instance.
 func (p *Formatter) Clone() Format {
 	return &Formatter{
 		Module:                    p.Module,
@@ -111,16 +102,16 @@ func (p *Formatter) Clone() Format {
 }
 
 var (
-	colorBlack   = []byte("\u001B[30m") // ANSI black
-	colorRed     = []byte("\u001B[31m") // ANSI red
-	colorGreen   = []byte("\u001B[32m") // ANSI green
-	colorYellow  = []byte("\u001B[33m") // ANSI yellow
-	colorBlue    = []byte("\u001B[34m") // ANSI blue
-	colorMagenta = []byte("\u001B[35m") // ANSI magenta
-	colorCyan    = []byte("\u001B[36m") // ANSI cyan
-	colorGray    = []byte("\u001B[37m") // ANSI gray
-	colorWhite   = []byte("\u001B[38m") // ANSI white
-	colorEnd     = []byte("\u001B[0m")  // ANSI reset
+	colorBlack   = []byte("\u001B[30m")
+	colorRed     = []byte("\u001B[31m")
+	colorGreen   = []byte("\u001B[32m")
+	colorYellow  = []byte("\u001B[33m")
+	colorBlue    = []byte("\u001B[34m")
+	colorMagenta = []byte("\u001B[35m")
+	colorCyan    = []byte("\u001B[36m")
+	colorGray    = []byte("\u001B[37m")
+	colorWhite   = []byte("\u001B[38m")
+	colorEnd     = []byte("\u001B[0m")
 )
 
 func getColorByLevel(level Level) []byte {
@@ -136,11 +127,6 @@ func getColorByLevel(level Level) []byte {
 	}
 }
 
-// SplitPackageName splits a fully qualified function name into directory and function parts.
-// Input: fully qualified function name (e.g., "github.com/user/pkg.Function")
-// Output:
-//   - callDir: package path (e.g., "github.com/user/pkg")
-//   - callFunc: function name (e.g., "Function")
 func SplitPackageName(f string) (callDir string, callFunc string) {
 	slashIndex := strings.LastIndex(f, "/")
 	if slashIndex > 0 {

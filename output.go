@@ -75,12 +75,10 @@ func GetOutputWriterHourly(filename string) Writer {
 					filesOnly = append(filesOnly, file.Name())
 				}
 
-				// 自定义排序函数，按字符串降序排列
 				sort.Slice(filesOnly, func(i, j int) bool {
 					return filesOnly[i] > filesOnly[j]
 				})
 
-				// 跳过前12个保留的文件，删除其余文件
 				for i, s := range filesOnly {
 					if i < 12 {
 						continue
