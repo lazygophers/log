@@ -20,7 +20,6 @@ type FormatFull interface {
 
 	// ParsingAndEscaping 控制是否禁用消息解析和转义
 	// disable: true 表示禁用，false 表示启用
-
 	ParsingAndEscaping(disable bool)
 
 	Caller(disable bool)

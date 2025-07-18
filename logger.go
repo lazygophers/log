@@ -29,9 +29,11 @@ type Logger struct {
 
 func newLogger() *Logger {
 	return &Logger{
-		level:       DebugLevel,
-		out:         os.Stdout,
-		Format:      &Formatter{},
+		level: DebugLevel,
+		out:   os.Stdout,
+		Format: &Formatter{
+			DisableParsingAndEscaping: true,
+		},
 		callerDepth: 4,
 	}
 }
