@@ -1,14 +1,14 @@
 //go:build !debug && !release && !discard
 
-// 构建约束：仅在非debug、非release和非discard模式下生效
+// 构建约束：仅在非debug、非release和非discard模式下生效。
 
-// 本文件提供标准日志级别下的调试日志功能
+// 本文件提供标准日志级别下的调试日志功能。
 package log
 
 import "fmt"
 
-// Debug 条件性记录调试日志
-// 功能：当日志级别≥DebugLevel时记录提供的日志内容
+// Debug 条件性记录调试日志。
+// 功能：当日志级别≥DebugLevel时记录提供的日志内容。
 // 参数：
 //
 //	args: 可变参数，接收任意类型的日志内容

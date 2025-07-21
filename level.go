@@ -30,7 +30,7 @@ const (
 	TraceLevel
 )
 
-// String 返回日志级别的字符串表示
+// String 返回日志级别的字符串表示。
 //
 // 参数:
 //
@@ -60,7 +60,7 @@ func (level Level) String() string {
 	}
 }
 
-// MarshalText 将日志级别编码为文本形式
+// MarshalText 将日志级别编码为文本形式。
 //
 // 参数:
 //

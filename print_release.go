@@ -10,12 +10,13 @@ import (
 	"path/filepath"
 )
 
-// init 初始化发布模式下的日志输出
+// init 初始化发布模式下的日志输出。
 //
 // 功能：
-//   - 设置日志输出为按小时分割的文件
-//   - 文件存储在临时目录的lazygophers/log子目录下
-//   - 示例路径: /tmp/lazygophers/log/2023071015.log (每小时生成新文件)
+//   - 设置日志输出为按小时分割的文件。
+//   - 文件存储在临时目录的lazygophers/log子目录下。
+//   - 示例路径: /tmp/lazygophers/log/2023071015.log，
+//     每小时生成新文件。
 func init() {
 	SetOutput(GetOutputWriterHourly(filepath.Join(os.TempDir(), "lazygophers", "log")))
 }
