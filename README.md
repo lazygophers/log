@@ -28,22 +28,19 @@ package main
 import "github.com/lazygophers/log"
 
 func main() {
-    // 创建日志实例
-    logger := log.NewLogger()
-    
     // 设置日志级别
-    logger.SetLevel(log.InfoLevel)
+    log.SetLevel(log.InfoLevel)
     
     // 记录日志
-    logger.Info("Application started")
-    logger.Debug("This is debug message") // 不会被输出
-    logger.Warn("Something might be wrong")
+    log.Info("Application started")
+    log.Debug("This is debug message") // 不会被输出
+    log.Warn("Something might be wrong")
     
     // 格式化日志
-    logger.Infof("User %s logged in", "Alice")
+    log.Infof("User %s logged in", "Alice")
     
     // 记录错误
-    logger.Error("Failed to connect database")
+    log.Error("Failed to connect database")
 }
 ```
 
@@ -51,7 +48,7 @@ func main() {
 
 ### 核心结构
 
-- `Logger`: 日志记录器主体
+- `log`: 日志记录器主体
   - `SetLevel(level Level)`: 设置日志级别
   - `SetOutput(writers ...io.Writer)`: 设置输出目标
   - `Clone()`: 创建副本
