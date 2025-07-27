@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sync"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -46,13 +47,7 @@ func SetOutput(writes ...io.Writer) *Logger {
 //   - 一个实现了 `io.Writer` 接口的日志输出器。
 func GetOutputWriter(filename string) io.Writer {
 	// 确保日志文件所在的目录存在
-	dir := filepath.Dir(filename)
-	if dir != "." && !isDir(dir) {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			// 在创建目录失败时记录错误，但不中断程序
-			Errorf("无法创建日志目录 %s: %v", dir, err)
-		}
-	}
+	ensureDir(filepath.Dir(filename))
 
 	// 初始化 rotatelogs，即使不轮转，也用它来管理文件写入
 	hook, err := rotatelogs.New(filename)
@@ -61,6 +56,24 @@ func GetOutputWriter(filename string) io.Writer {
 		std.Panicf("创建日志文件写入器 %s 失败: %v", filename, err)
 	}
 	return hook
+}
+
+// ensureDir 确保指定的目录存在。
+// 如果目录不存在，它会尝试创建该目录（包括所有必需的父目录）。
+// 这是一个内部辅助函数，用于简化日志写入器初始化时的目录检查和创建逻辑。
+//
+// 参数：
+//   - dir: 需要确保其存在的目录路径。
+func ensureDir(dir string) {
+	// 当目录路径不为 "." (当前目录) 且路径本身不是一个目录时，执行创建逻辑。
+	// 这样做可以避免在不必要的情况下调用 os.MkdirAll，并处理路径已存在的情况。
+	if dir != "." && !isDir(dir) {
+		// 使用 os.ModePerm 权限创建目录。如果创建失败，记录一条错误日志。
+		// 这里选择记录错误而不是 panic，是因为目录创建失败不应总是导致整个应用程序崩溃。
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			Errorf("无法创建日志目录 %s: %v", dir, err)
+		}
+	}
 }
 
 // isDir 检查给定路径是否为一个有效的目录。
@@ -90,6 +103,12 @@ var (
 	// key: 日志文件的基础名称
 	// value: bool，标记是否已启动清理协程
 	cleanRotatelogOnce = make(map[string]bool)
+
+	// cleanMutex 是一个互斥锁，用于保护对 `cleanRotatelogOnce` 的并发访问。
+	// 在高并发场景下，多个 goroutine 可能会同时调用 `GetOutputWriterHourly`，
+	// 如果没有锁，可能会导致对同一个日志文件启动多个清理协程，造成资源浪费和潜在的竞争问题。
+	// 使用此锁可确保 "只启动一次" 的逻辑在并发环境下是安全的。
+	cleanMutex = &sync.Mutex{}
 )
 
 // GetOutputWriterHourly 创建一个按小时轮转和自动清理的日志输出器。
@@ -108,12 +127,7 @@ var (
 //   - 一个实现了 `Writer` 接口（即 `io.Writer`）的日志输出器。
 func GetOutputWriterHourly(filename string) Writer {
 	// 确保日志文件所在的目录存在
-	dir := filepath.Dir(filename)
-	if dir != "." && !isDir(dir) {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			Errorf("无法创建日志目录 %s: %v", dir, err)
-		}
-	}
+	ensureDir(filepath.Dir(filename))
 
 	// 配置 rotatelogs 实现日志轮转
 	hook, err := rotatelogs.New(
@@ -127,10 +141,17 @@ func GetOutputWriterHourly(filename string) Writer {
 		std.Panicf("创建按小时轮转的日志写入器 %s 失败: %v", filename, err)
 	}
 
-	// 确保对每个文件只启动一个清理协程
+	// 通过加锁来确保对 `cleanRotatelogOnce` 的检查和写入是原子操作，防止并发场景下的 race condition。
+	cleanMutex.Lock()
+	// 检查是否已经为该日志文件启动了清理协程
 	if _, ok := cleanRotatelogOnce[filename]; !ok {
+		// 如果尚未启动，则标记为已启动，并释放锁，然后启动一个新的 goroutine 执行清理任务。
+		// 必须在启动 goroutine 之前释放锁，以避免潜在的死锁或长时间的锁持有。
+		cleanRotatelogOnce[filename] = true
+		cleanMutex.Unlock()
+
 		go func() {
-			// 无限循环，定期执行清理任务
+			// 后台清理协程：这是一个无限循环，旨在定期清理旧的日志文件，以防磁盘空间被占满。
 			for {
 				// 读取日志目录下的所有文件
 				files, err := os.ReadDir(filepath.Dir(filename))
@@ -172,8 +193,9 @@ func GetOutputWriterHourly(filename string) Writer {
 				time.Sleep(time.Minute * 10)
 			}
 		}()
-		// 标记该文件的清理协程已启动
-		cleanRotatelogOnce[filename] = true
+	} else {
+		// 如果清理协程已经启动，则直接释放锁。
+		cleanMutex.Unlock()
 	}
 
 	return hook

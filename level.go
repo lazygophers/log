@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Level 表示日志级别
+// Level 表示日志级别，与 logrus 库兼容。
 type Level uint32
 
 const (
@@ -30,15 +30,7 @@ const (
 	TraceLevel
 )
 
-// String 返回日志级别的字符串表示。
-//
-// 参数:
-//
-//	level: 要转换的日志级别
-//
-// 返回值:
-//
-//	日志级别的字符串名称
+// String 实现了 fmt.Stringer 接口，返回日志级别的小写字符串表示。
 func (level Level) String() string {
 	switch level {
 	case TraceLevel:
@@ -56,20 +48,13 @@ func (level Level) String() string {
 	case PanicLevel:
 		return "panic"
 	default:
+		// 默认返回 "trace"，确保在遇到未知或未定义的级别时有一个安全的回退值。
 		return "trace"
 	}
 }
 
-// MarshalText 将日志级别编码为文本形式。
-//
-// 参数:
-//
-//	level: 要编码的日志级别
-//
-// 返回值:
-//
-//	[]byte: 编码后的字节切片
-//	error: 编码错误（如果级别无效）
+// MarshalText 实现了 encoding.TextMarshaler 接口，
+// 用于将日志级别序列化为文本格式（例如，在 JSON 编码中），以兼容 logrus。
 func (level Level) MarshalText() ([]byte, error) {
 	switch level {
 	case TraceLevel:
@@ -79,6 +64,7 @@ func (level Level) MarshalText() ([]byte, error) {
 	case InfoLevel:
 		return []byte("info"), nil
 	case WarnLevel:
+		// 注意：在文本序列化时，WarnLevel 使用 "warning" 而非 "warn"，以保持与 logrus 的兼容性。
 		return []byte("warning"), nil
 	case ErrorLevel:
 		return []byte("error"), nil
@@ -87,6 +73,5 @@ func (level Level) MarshalText() ([]byte, error) {
 	case PanicLevel:
 		return []byte("panic"), nil
 	}
-
 	return nil, fmt.Errorf("not a valid logrus level %d", level)
 }

@@ -5,38 +5,35 @@ import (
 	"sync"
 )
 
-// bufPool a pool of byte buffers.
+// bufPool 是一个字节缓冲区的池。
+// 它用于重用预先分配的缓冲区，从而减少内存分配开销。
 //
-// It is used to reuse pre-allocated buffers, reducing memory allocation overhead.
+// sync.Pool 的工作原理：
+//   - 每个处理器（P）都维护一个本地池，以减少锁竞争。
+//   - 当本地池为空时，它会尝试从其他处理器窃取或创建一个新对象。
+//   - 池中的对象可能会在垃圾回收（GC）期间被清理。
 //
-// How sync.Pool works:
-//   - Each processor (P) maintains a local pool, reducing lock contention.
-//   - When the local pool is empty, it will try to steal from other processors or create a new object.
-//   - Objects in the pool may be cleaned up during GC.
-//
-// Use cases:
-//   - Suitable for objects that are frequently created/destroyed and have a high creation cost.
-//   - Especially suitable for reusing buffers in high-frequency operations such as logging.
+// 使用场景：
+//   - 适用于频繁创建/销毁且创建成本较高的对象。
+//   - 特别适用于在日志记录等高频操作中重用缓冲区。
 var bufPool = sync.Pool{
 	New: func() any {
-		// Create a new bytes.Buffer instance.
+		// 创建一个新的 bytes.Buffer 实例。
 		return &bytes.Buffer{}
 	},
 }
 
-// GetBuffer retrieves a buffer from the pool.
-//
-// It returns a reusable *bytes.Buffer instance.
+// GetBuffer 从池中检索一个缓冲区。
+// 它返回一个可重用的 *bytes.Buffer 实例。
 func GetBuffer() *bytes.Buffer {
 	return bufPool.Get().(*bytes.Buffer)
 }
 
-// PutBuffer returns a buffer to the pool.
+// PutBuffer 将缓冲区返回到池中。
+// 在放回池中之前，缓冲区会被重置。
+// 如果缓冲区为 nil，函数将直接返回。
 //
-// The buffer is reset before being put back into the pool.
-// If the buffer is nil, the function will return directly.
-//
-// buf is the buffer instance to be returned.
+// buf 是要返回的缓冲区实例。
 func PutBuffer(buf *bytes.Buffer) {
 	if buf == nil {
 		return

@@ -11,15 +11,14 @@ package log
 
 import "fmt"
 
-// Debug 使用默认日志器记录调试日志。
-// 参数 args: 要记录的日志内容，支持多个参数。
+// Debug 使用默认日志器（std）记录调试级别的日志。
+// 日志内容由多个参数 `args` 拼接而成。
 func Debug(args ...interface{}) {
 	std.Debug(args...)
 }
 
-// Debugf 使用默认日志器记录格式化调试日志
-// 参数 format: 格式化字符串
-// 参数 args: 格式化字符串的参数
+// Debugf 使用默认日志器（std）记录格式化的调试级别日志。
+// `format` 是格式化模板，`args` 是对应的参数。
 func Debugf(format string, args ...interface{}) {
 	std.Debug(fmt.Sprintf(format, args...))
 }

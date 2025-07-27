@@ -8,64 +8,64 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestGetSetDelTrace tests basic Get/Set/Del operations for the current goroutine.
+// TestGetSetDelTrace 测试针对当前 goroutine 的基本 Get/Set/Del 操作。
 func TestGetSetDelTrace(t *testing.T) {
-	// Initially, trace should be empty
+	// 初始时，追踪信息应为空
 	assert.Empty(t, GetTrace(), "Initial trace should be empty")
 
-	// Set a trace ID
+	// 设置一个追踪ID
 	SetTrace("test-id")
 	assert.Equal(t, "test-id", GetTrace(), "Trace ID should be 'test-id'")
 
-	// Delete the trace
+	// 删除追踪信息
 	DelTrace()
 	assert.Empty(t, GetTrace(), "Trace should be empty after deletion")
 
-	// Set an empty trace ID, should generate a new one
+	// 设置一个空的追踪ID，此时应自动生成一个新的
 	SetTrace()
 	assert.NotEmpty(t, GetTrace(), "A new trace ID should be generated when set with no arguments")
 	assert.Len(t, GetTrace(), 16, "Generated trace ID should have a length of 16")
 	DelTrace()
 }
 
-// TestGetSetDelTraceWithGID tests basic Get/Set/Del operations for a specific goroutine ID.
+// TestGetSetDelTraceWithGID 测试针对指定 goroutine ID 的基本 Get/Set/Del 操作。
 func TestGetSetDelTraceWithGID(t *testing.T) {
 	const gid int64 = 12345
 
-	// Initially, trace for GID should be empty
+	// 初始时，指定 GID 的追踪信息应为空
 	assert.Empty(t, GetTraceWithGID(gid), "Initial trace for GID should be empty")
 
-	// Set a trace ID for GID
+	// 为指定 GID 设置一个追踪ID
 	SetTraceWithGID(gid, "test-id-gid")
 	assert.Equal(t, "test-id-gid", GetTraceWithGID(gid), "Trace ID for GID should be 'test-id-gid'")
 
-	// Delete the trace for GID
+	// 删除指定 GID 的追踪信息
 	DelTraceWithGID(gid)
 	assert.Empty(t, GetTraceWithGID(gid), "Trace for GID should be empty after deletion")
 
-	// Set an empty trace ID for GID, should generate a new one
+	// 为指定 GID 设置一个空的追踪ID，此时应自动生成一个新的
 	SetTraceWithGID(gid)
 	assert.NotEmpty(t, GetTraceWithGID(gid), "A new trace ID should be generated for GID")
 	assert.Len(t, GetTraceWithGID(gid), 16, "Generated trace ID for GID should have a length of 16")
 	DelTraceWithGID(gid)
 }
 
-// TestDisableTrace tests the functionality of the DisableTrace switch.
+// TestDisableTrace 测试禁用追踪功能的开关是否有效。
 func TestDisableTrace(t *testing.T) {
 	DisableTrace = true
-	defer func() { DisableTrace = false }() // Reset after test
+	defer func() { DisableTrace = false }() // 测试结束后恢复
 
 	SetTrace("no-trace")
 	assert.Empty(t, GetTrace(), "GetTrace should return empty when tracing is disabled")
 }
 
-// TestGenTraceId tests the trace ID generation.
+// TestGenTraceId 测试追踪ID的生成函数。
 func TestGenTraceId(t *testing.T) {
 	traceId := GenTraceId()
 	assert.Len(t, traceId, 16, "Generated trace ID should be 16 characters long")
 }
 
-// TestConcurrencySafety tests the thread safety of traceMap.
+// TestConcurrencySafety 测试 traceMap 的并发安全性。
 func TestConcurrencySafety(t *testing.T) {
 	var wg sync.WaitGroup
 	numGoroutines := 100
@@ -75,14 +75,14 @@ func TestConcurrencySafety(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 
-			// Each goroutine sets its own trace ID
+			// 每个 goroutine 设置自己的追踪ID
 			traceID := fmt.Sprintf("goroutine-%d", i)
 			SetTrace(traceID)
 
-			// Verify the trace ID is correctly set for this goroutine
+			// 验证当前 goroutine 的追踪ID是否设置正确
 			assert.Equal(t, traceID, GetTrace(), "Trace ID should be correctly set for each goroutine")
 
-			// Simulate some work and re-verify
+			// 模拟一些工作并再次验证
 			assert.Equal(t, traceID, GetTrace(), "Trace ID should remain consistent within the same goroutine")
 
 			DelTrace()
@@ -93,49 +93,51 @@ func TestConcurrencySafety(t *testing.T) {
 	wg.Wait()
 }
 
-// BenchmarkSetTrace 测试 SetTrace 函数的性能
+// BenchmarkSetTrace 测试 SetTrace 函数的性能。
 func BenchmarkSetTrace(b *testing.B) {
+	// 循环 b.N 次，b.N 由 testing 框架自动调整
 	for i := 0; i < b.N; i++ {
 		SetTrace("benchmark-trace-id")
 	}
 }
 
-// BenchmarkGetTrace 测试 GetTrace 函数的性能
+// BenchmarkGetTrace 测试 GetTrace 函数的性能。
 func BenchmarkGetTrace(b *testing.B) {
-	SetTrace("benchmark-trace-id") // 先设置一个值
-	b.ResetTimer()                 // 重置计时器
+	SetTrace("benchmark-trace-id") // 准备测试数据
+	b.ResetTimer()                 // 重置计时器，忽略准备数据的时间
 	for i := 0; i < b.N; i++ {
 		GetTrace()
 	}
 }
 
-// BenchmarkSetGetTraceParallel 测试并发场景下 SetTrace 和 GetTrace 的性能
+// BenchmarkSetGetTraceParallel 测试在并发场景下 SetTrace 和 GetTrace 的综合性能。
 func BenchmarkSetGetTraceParallel(b *testing.B) {
+	// RunParallel 会创建多个 goroutine 并发执行测试
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			SetTrace()
-			GetTrace()
+			SetTrace() // 设置自动生成的追踪ID
+			GetTrace() // 获取追踪ID
 		}
 	})
 }
 
-// Example_package 展示了 log 包的基本用法。
+// Example_package 展示了 trace 功能的基本用法。
 //
-// 这个示例演示了如何设置一个自定义的追踪ID，然后获取它，
-// 最后再将它删除，并验证它已被成功移除。
+// 这个可执行的示例代码演示了如何设置一个自定义追踪ID，
+// 接着获取并验证它，最后删除该ID并确认其已被移除。
 func Example_package() {
-	// 1. 设置一个自定义的追踪ID
+	// 步骤 1: 设置一个自定义的追踪ID
 	myTraceID := "my-awesome-trace-id"
 	SetTrace(myTraceID)
 
-	// 2. 获取并打印当前的追踪ID
+	// 步骤 2: 获取并打印当前 goroutine 的追踪ID
 	retrievedTraceID := GetTrace()
 	fmt.Println(retrievedTraceID)
 
-	// 3. 清理追踪ID
+	// 步骤 3: 清理当前 goroutine 的追踪ID
 	DelTrace()
 
-	// 4. 再次获取，确认已被删除
+	// 步骤 4: 再次获取，以确认追踪ID已被成功删除
 	afterDeleteTraceID := GetTrace()
 	fmt.Printf("Trace ID after deletion: '%s'\n", afterDeleteTraceID)
 

@@ -5,45 +5,35 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// NewZapHook 创建用于zap日志库的钩子函数
-// 参数:
-//
-//	log: 目标日志记录器，用于输出转换后的日志
-//
-// 返回值:
-//
-//	钩子函数，接收zap日志条目并转发到目标日志记录器
-//
-// 功能说明:
-//   - 从goroutine上下文中获取traceId
-//   - 将zap日志级别转换为内部日志级别
-//   - 添加自定义前缀/后缀消息
+// NewZapHook 创建一个 zap core hook，用于将 zap 的日志条目适配到当前日志系统中。
+// 这个钩子函数会从池中获取一个 Entry 实例，填充必要信息，然后写入目标日志。
 func NewZapHook(log *Logger) func(entry zapcore.Entry) error {
 	return func(entry zapcore.Entry) error {
+		// 从对象池中获取一个 Entry 对象，以减少内存分配
 		logEntry := entryPool.Get().(*Entry)
+		// 使用 defer 确保 Entry 对象在函数结束时被重置并放回池中
 		defer func() {
 			logEntry.Reset()
 			entryPool.Put(logEntry)
 		}()
-		logEntry.Gid = goid.Get()
-		logEntry.TraceId = getTrace(logEntry.Gid)
-		logEntry.Time = entry.Time
-		logEntry.Message = entry.Message
 
-		//if entry.Stack != "" {
-		//	logEntry.Message += " "
-		//	logEntry.Message += entry.Stack
-		//}
+		// 填充日志条目的基础信息
+		logEntry.Gid = goid.Get()                 // 获取当前 goroutine ID
+		logEntry.TraceId = getTrace(logEntry.Gid) // 获取追踪 ID
+		logEntry.Time = entry.Time                // 设置日志时间
+		logEntry.Message = entry.Message          // 设置日志消息
+		logEntry.SuffixMsg = log.SuffixMsg        // 设置日志后缀
+		logEntry.PrefixMsg = log.PrefixMsg        // 设置日志前缀
 
-		logEntry.SuffixMsg = log.SuffixMsg
-		logEntry.PrefixMsg = log.PrefixMsg
+		// 填充调用者信息
+		logEntry.File = entry.Caller.File           // 文件路径
+		logEntry.CallerLine = entry.Caller.Line     // 行号
+		logEntry.CallerName = entry.Caller.Function // 函数名
 
-		logEntry.File = entry.Caller.File
-		logEntry.CallerLine = entry.Caller.Line
-		logEntry.CallerName = entry.Caller.Function
-
+		// 解析包名和函数名
 		logEntry.CallerDir, logEntry.CallerFunc = SplitPackageName(entry.Caller.Function)
 
+		// 将 zap 的日志级别转换为内部定义的日志级别
 		switch entry.Level {
 		case zapcore.DebugLevel:
 			logEntry.Level = DebugLevel
@@ -60,9 +50,11 @@ func NewZapHook(log *Logger) func(entry zapcore.Entry) error {
 		case zapcore.FatalLevel:
 			logEntry.Level = FatalLevel
 		default:
+			// 对于未知的日志级别，默认为 ErrorLevel
 			logEntry.Level = ErrorLevel
 		}
 
+		// 格式化日志条目并写入
 		log.write(logEntry.Level, log.Format.Format(logEntry))
 
 		return nil

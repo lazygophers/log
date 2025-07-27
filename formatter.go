@@ -38,27 +38,38 @@ type Formatter struct {
 // entry: 需要格式化的日志条目
 // 返回: 格式化后的字节数组
 func (p *Formatter) format(entry *Entry) []byte {
+	// 从缓冲池获取一个字节缓冲，用完后放回
 	b := GetBuffer()
 	defer PutBuffer(b)
 
+	// 写入前缀消息
 	if len(entry.PrefixMsg) > 0 {
 		b.Write(entry.PrefixMsg)
 		b.Write([]byte(" "))
 	}
 
+	// 写入进程ID和协程ID
 	b.WriteString(fmt.Sprintf("(%d.%d) ", entry.Pid, entry.Gid))
+	// 写入格式化的时间戳
 	b.WriteString(entry.Time.Format("2006-01-02 15:04:05.999Z07:00"))
+	// 根据日志级别获取颜色
 	color := getColorByLevel(entry.Level)
+	// 写入颜色代码
 	b.Write(color)
+	// 写入日志级别
 	b.Write([]byte(" ["))
 	b.WriteString(entry.Level.String())
 	b.Write([]byte("] "))
+	// 写入颜色结束代码
 	b.Write(colorEnd)
+	// 写入日志正文
 	b.WriteString(strings.TrimSpace(entry.Message))
 
+	// 如果未禁用调用者信息或存在TraceID，则写入额外信息
 	if !p.DisableCaller || len(entry.TraceId) > 0 {
 		b.Write(colorCyan)
 		b.WriteString(" [ ")
+		// 如果未禁用调用者信息，则写入文件名、行号和函数名
 		if !p.DisableCaller {
 			b.WriteString(path.Join(entry.CallerDir, path.Base(entry.File)))
 			b.Write([]byte(":"))
@@ -67,6 +78,7 @@ func (p *Formatter) format(entry *Entry) []byte {
 			b.WriteString(entry.CallerFunc)
 			b.Write([]byte(" "))
 		}
+		// 如果存在TraceID，则写入
 		if entry.TraceId != "" {
 			b.WriteString(entry.TraceId)
 			b.Write([]byte(" "))
@@ -75,9 +87,11 @@ func (p *Formatter) format(entry *Entry) []byte {
 		b.Write(colorEnd)
 	}
 
+	// 写入后缀消息
 	if len(entry.SuffixMsg) > 0 {
 		b.Write(entry.SuffixMsg)
 	}
+	// 写入换行符
 	b.WriteByte('\n')
 	return b.Bytes()
 }

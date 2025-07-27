@@ -57,24 +57,28 @@ func Logf(level Level, format string, args ...interface{}) {
 }
 
 // Infof 记录信息级别格式化日志。
+// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Info 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Infof(format string, args ...interface{}) {
 	std.Info(fmt.Sprintf(format, args...))
 }
 
 // Warnf 记录警告级别格式化日志。
+// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Warn 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Warnf(format string, args ...interface{}) {
 	std.Warn(fmt.Sprintf(format, args...))
 }
 
 // Errorf 记录错误级别格式化日志。
+// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Error 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Errorf(format string, args ...interface{}) {
 	std.Error(fmt.Sprintf(format, args...))
 }
 
 // Panicf 记录致命错误格式化日志并触发panic。
+// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Panic，这将最终触发 panic。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Panicf(format string, args ...interface{}) {
 	std.Panic(fmt.Sprintf(format, args...))
