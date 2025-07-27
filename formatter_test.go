@@ -60,6 +60,32 @@ func TestFormatter_Format(t *testing.T) {
 			},
 			expected: []string{"带调用者", "example/pkg/example.go:42", "TestFunction"},
 		},
+		{
+			name: "空消息",
+			entry: Entry{
+				Message: "",
+				Level:   InfoLevel,
+			},
+			expected: []string{""},
+		},
+		{
+			name: "仅包含换行符的消息",
+			entry: Entry{
+				Message: "\n\n",
+				Level:   InfoLevel,
+			},
+			expected: []string{"", ""},
+		},
+		{
+			name: "带前缀和后缀的消息",
+			entry: Entry{
+				Message:   "带前后缀",
+				Level:     InfoLevel,
+				PrefixMsg: []byte("前缀:"),
+				SuffixMsg: []byte(":后缀"),
+			},
+			expected: []string{"前缀:", "带前后缀", ":后缀"},
+		},
 	}
 
 	for _, tc := range testCases {

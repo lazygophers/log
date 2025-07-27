@@ -1,6 +1,9 @@
 package log
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 // Entry 表示一个日志条目
 type Entry struct {
@@ -36,4 +39,10 @@ func (p *Entry) Reset() {
 	p.CallerFunc = ""
 	p.PrefixMsg = p.PrefixMsg[:0]
 	p.SuffixMsg = p.SuffixMsg[:0]
+}
+
+var entryPool = sync.Pool{
+	New: func() any {
+		return NewEntry()
+	},
 }

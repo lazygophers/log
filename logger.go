@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/petermattis/goid"
@@ -149,12 +148,6 @@ func (p *Logger) Log(level Level, args ...interface{}) {
 // args: 格式化参数
 func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	p.log(level, fmt.Sprintf(format, args...))
-}
-
-var entryPool = sync.Pool{
-	New: func() any {
-		return NewEntry()
-	},
 }
 
 func (p *Logger) log(level Level, msg string) {
