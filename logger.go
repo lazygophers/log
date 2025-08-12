@@ -149,6 +149,9 @@ func (p *Logger) Log(level Level, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Logf(level Level, format string, args ...interface{}) {
+	if !p.levelEnabled(level) {
+		return
+	}
 	p.log(level, fmt.Sprintf(format, args...))
 }
 
@@ -159,10 +162,6 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 // 最后，它使用指定的格式化器格式化 Entry，并将结果写入输出。
 // 完成后，Entry 对象被重置并放回对象池。
 func (p *Logger) log(level Level, msg string) {
-	if !p.levelEnabled(level) {
-		return
-	}
-
 	entry := entryPool.Get().(*Entry)
 	defer func() {
 		entry.Reset()
@@ -267,6 +266,9 @@ func (p *Logger) Fatal(args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Tracef(format string, args ...interface{}) {
+	if !p.levelEnabled(TraceLevel) {
+		return
+	}
 	p.Logf(TraceLevel, format, args...)
 }
 
@@ -274,6 +276,9 @@ func (p *Logger) Tracef(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Printf(format string, args ...interface{}) {
+	if !p.levelEnabled(DebugLevel) {
+		return
+	}
 	p.Logf(DebugLevel, format, args...)
 }
 
@@ -281,6 +286,9 @@ func (p *Logger) Printf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Debugf(format string, args ...interface{}) {
+	if !p.levelEnabled(DebugLevel) {
+		return
+	}
 	p.Logf(DebugLevel, format, args...)
 }
 
@@ -288,6 +296,9 @@ func (p *Logger) Debugf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Infof(format string, args ...interface{}) {
+	if !p.levelEnabled(InfoLevel) {
+		return
+	}
 	p.Logf(InfoLevel, format, args...)
 }
 
@@ -295,6 +306,9 @@ func (p *Logger) Infof(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Warnf(format string, args ...interface{}) {
+	if !p.levelEnabled(WarnLevel) {
+		return
+	}
 	p.Logf(WarnLevel, format, args...)
 }
 
@@ -302,6 +316,9 @@ func (p *Logger) Warnf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Warningf(format string, args ...interface{}) {
+	if !p.levelEnabled(WarnLevel) {
+		return
+	}
 	p.Logf(WarnLevel, format, args...)
 }
 
@@ -309,6 +326,9 @@ func (p *Logger) Warningf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Errorf(format string, args ...interface{}) {
+	if !p.levelEnabled(ErrorLevel) {
+		return
+	}
 	p.Logf(ErrorLevel, format, args...)
 }
 
@@ -316,6 +336,9 @@ func (p *Logger) Errorf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Fatalf(format string, args ...interface{}) {
+	if !p.levelEnabled(FatalLevel) {
+		return
+	}
 	p.Logf(FatalLevel, format, args...)
 }
 
@@ -323,6 +346,9 @@ func (p *Logger) Fatalf(format string, args ...interface{}) {
 // format: 格式化字符串
 // args: 格式化参数
 func (p *Logger) Panicf(format string, args ...interface{}) {
+	if !p.levelEnabled(PanicLevel) {
+		return
+	}
 	p.Logf(PanicLevel, format, args...)
 }
 
