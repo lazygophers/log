@@ -3,3 +3,5 @@
 *.out
 .roomodes
 .roo/
+*.coverage
+coverage.html
