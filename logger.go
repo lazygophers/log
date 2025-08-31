@@ -27,10 +27,10 @@ type Logger struct {
 }
 
 // newLogger 创建一个新的 Logger 实例，并设置默认值。
-// 默认日志级别为 DebugLevel，输出到 os.Stdout。
+// 默认日志级别为 InfoLevel，输出到 os.Stdout。
 func newLogger() *Logger {
 	return &Logger{
-		level: DebugLevel,
+		level:     DebugLevel,
 		out:   os.Stdout,
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
@@ -141,6 +141,9 @@ func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 // level: 日志级别
 // args: 日志内容参数
 func (p *Logger) Log(level Level, args ...interface{}) {
+	if !p.levelEnabled(level) {
+		return
+	}
 	p.log(level, fmt.Sprint(args...))
 }
 

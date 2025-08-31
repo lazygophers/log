@@ -12,69 +12,69 @@ import (
 // 这个新的 LoggerWithCtx 实例将继承原 Logger 的所有设置。
 func (p *Logger) CloneToCtx() *LoggerWithCtx {
 	return &LoggerWithCtx{
-		Logger: *p.Clone(),
+		Logger: p.Clone(),
 	}
 }
 
 // LoggerWithCtx 是一个带有 context.Context 的日志记录器。
 // 它内嵌了 Logger，并扩展了其功能，使其所有日志记录方法都接受 context.Context 作为第一个参数。
 type LoggerWithCtx struct {
-	Logger
+	*Logger
 }
 
 // newLoggerWithCtx 创建并返回一个新的 LoggerWithCtx 实例。
 func newLoggerWithCtx() *LoggerWithCtx {
 	return &LoggerWithCtx{
-		Logger: *newLogger(),
+		Logger: newLogger(),
 	}
 }
 
 // SetCallerDepth 设置调用者深度，用于正确显示调用日志的文件和行号。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) SetCallerDepth(callerDepth int) *LoggerWithCtx {
-	p.SetCallerDepth(callerDepth)
+	p.Logger.SetCallerDepth(callerDepth)
 	return p
 }
 
 // SetPrefixMsg 设置日志消息的前缀。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) SetPrefixMsg(prefixMsg string) *LoggerWithCtx {
-	p.SetPrefixMsg(prefixMsg)
+	p.Logger.SetPrefixMsg(prefixMsg)
 	return p
 }
 
 // AppendPrefixMsg 在现有前缀的末尾追加内容。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) AppendPrefixMsg(prefixMsg string) *LoggerWithCtx {
-	p.AppendPrefixMsg(prefixMsg)
+	p.Logger.AppendPrefixMsg(prefixMsg)
 	return p
 }
 
 // SetSuffixMsg 设置日志消息的后缀。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) SetSuffixMsg(suffixMsg string) *LoggerWithCtx {
-	p.SetSuffixMsg(suffixMsg)
+	p.Logger.SetSuffixMsg(suffixMsg)
 	return p
 }
 
 // AppendSuffixMsg 在现有后缀的末尾追加内容。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) AppendSuffixMsg(suffixMsg string) *LoggerWithCtx {
-	p.AppendSuffixMsg(suffixMsg)
+	p.Logger.AppendSuffixMsg(suffixMsg)
 	return p
 }
 
 // Clone 创建并返回一个当前 LoggerWithCtx 实例的深拷贝。
 func (p *LoggerWithCtx) Clone() *LoggerWithCtx {
 	return &LoggerWithCtx{
-		Logger: *p.Logger.Clone(),
+		Logger: p.Logger.Clone(),
 	}
 }
 
 // SetLevel 设置日志记录级别。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) SetLevel(level Level) *LoggerWithCtx {
-	p.SetLevel(level)
+	p.Logger.SetLevel(level)
 	return p
 }
 
@@ -104,11 +104,19 @@ func (p *LoggerWithCtx) SetOutput(writes ...io.Writer) *LoggerWithCtx {
 
 // Log 记录一条通用日志。
 func (p *LoggerWithCtx) Log(ctx context.Context, level Level, args ...interface{}) {
+	if !p.levelEnabled(level) {
+		return
+	}
+
 	p.log(level, fmt.Sprint(args...))
 }
 
 // Logf 记录一条格式化的通用日志。
 func (p *LoggerWithCtx) Logf(ctx context.Context, level Level, format string, args ...interface{}) {
+	if !p.levelEnabled(level) {
+		return
+	}
+
 	p.log(level, fmt.Sprintf(format, args...))
 }
 
@@ -205,13 +213,13 @@ func (p *LoggerWithCtx) Panicf(ctx context.Context, format string, args ...inter
 // ParsingAndEscaping 控制是否禁用HTML转义。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) ParsingAndEscaping(disable bool) *LoggerWithCtx {
-	p.ParsingAndEscaping(disable)
+	p.Logger.ParsingAndEscaping(disable)
 	return p
 }
 
 // Caller 控制是否在日志中记录调用者信息。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) Caller(disable bool) *LoggerWithCtx {
-	p.Caller(disable)
+	p.Logger.Caller(disable)
 	return p
 }

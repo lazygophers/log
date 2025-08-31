@@ -66,7 +66,7 @@ func (p *Formatter) format(entry *Entry) []byte {
 	b.WriteString(strings.TrimSpace(entry.Message))
 
 	// 如果未禁用调用者信息或存在TraceID，则写入额外信息
-	if !p.DisableCaller || len(entry.TraceId) > 0 {
+	if !p.DisableCaller || entry.TraceId != "" {
 		b.Write(colorCyan)
 		b.WriteString(" [ ")
 		// 如果未禁用调用者信息，则写入文件名、行号和函数名
@@ -85,6 +85,14 @@ func (p *Formatter) format(entry *Entry) []byte {
 		}
 		b.Write([]byte("]"))
 		b.Write(colorEnd)
+	} else if !p.DisableCaller {
+		b.WriteString(" ")
+		b.WriteString(path.Join(entry.CallerDir, path.Base(entry.File)))
+		b.Write([]byte(":"))
+		b.WriteString(strconv.Itoa(entry.CallerLine))
+		b.Write([]byte(" "))
+		b.WriteString(entry.CallerFunc)
+		b.Write([]byte(" "))
 	}
 
 	// 写入后缀消息
@@ -119,9 +127,8 @@ func (p *Formatter) ParsingAndEscaping(disable bool) {
 }
 
 // Caller 设置是否禁用调用者信息显示。
-// disable: true 表示禁用，false 表示启用
-func (p *Formatter) Caller(disable bool) {
-	p.DisableCaller = disable
+func (p *Formatter) Caller(enable bool) {
+	p.DisableCaller = !enable
 }
 
 // Clone 创建 Formatter 的深拷贝。
