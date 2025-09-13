@@ -1,0 +1,184 @@
+# LazyGophers Log - LLM Context File
+
+This is a high-performance Go logging library (`github.com/lazygophers/log`) designed for production applications with extensive customization, performance optimization, and multi-environment support.
+
+## Project Overview
+
+**Repository**: https://github.com/lazygophers/log
+**Language**: Go 1.24+
+**License**: MIT
+**Test Coverage**: 94.2% (125/138 functions, excluding Fatal/Panic)
+
+## Core Architecture
+
+### 1. Logger System
+- **Entry Point**: `logger.go` - Main Logger struct with configurable levels, outputs, formatters
+- **Performance Optimized**: Object pooling with sync.Pool, conditional feature enabling
+- **Multi-writer Support**: Uses zap's WriteSyncer for multiple output targets
+- **Configurable Features**: EnableCaller(), EnableTrace() for performance tuning
+
+### 2. Log Entry Management
+- **Entry Structure**: `entry.go` - Log record with metadata (PID, GID, TraceID, timestamp, caller info)
+- **Object Pooling**: High-performance entry reuse with optimized Reset() method
+- **Memory Layout**: 200-byte structure optimized for CPU cache efficiency
+
+### 3. Level System
+- **7 Levels**: Trace, Debug, Info, Warn, Error, Fatal, Panic (compatible with logrus)
+- **Filtering**: Level-based filtering for performance
+- **Interfaces**: fmt.Stringer and encoding.TextMarshaler support
+
+### 4. Formatting System
+- **Pluggable**: Format interface for custom log formatting
+- **Advanced**: FormatFull interface with parsing/escaping controls
+- **Buffer Pooling**: Efficient string building with reusable buffers
+- **Color Support**: Terminal color formatting capabilities
+
+### 5. Output Management
+- **File Rotation**: Hourly log rotation with cleanup (`rotator.go`)
+- **Async Writing**: High-throughput async writer (`writer_async.go`)
+- **Multi-output**: Support for multiple concurrent writers
+- **Build Tags**: Different output behaviors (debug/release/discard modes)
+
+### 6. Distributed Tracing
+- **High-Performance**: RWMutex + map for read-heavy workloads (5.8x faster than sync.Map)
+- **Goroutine Binding**: Per-goroutine trace ID management
+- **Zero Allocation**: Optimized for minimal memory allocation
+- **TraceID Generation**: Fast crypto/rand based ID generation
+
+## Key Files Structure
+
+### Core Components
+- `logger.go` - Main logger implementation with performance optimizations
+- `entry.go` - Log entry structure and object pool management
+- `level.go` - Log level definitions and marshaling
+- `formatter.go` - Log formatting interfaces and implementations
+- `trace.go` - Distributed tracing system (highly optimized)
+
+### I/O and Output
+- `output.go` - Output writer management and configuration
+- `writer.go` - Writer interface definitions
+- `writer_async.go` - Asynchronous writer for high-throughput scenarios
+- `rotator.go` - Time-based log file rotation system
+
+### Integration and Utilities
+- `init.go` - Package initialization and global logger functions
+- `pool.go` - Buffer pool management for performance
+- `zap.go` - Zap logger framework integration hooks
+- `logger_ctx.go` - Context-aware logging with goroutine isolation
+
+### Build Tag Support
+- `print_debug.go` - Debug build behavior
+- `print_release.go` - Release build behavior  
+- `print_discard.go` - Discard build for benchmarking
+- `debug.go` - Debug-specific functionality
+
+## Performance Characteristics
+
+### Logger Performance (Recent Optimizations)
+- **Standard Mode**: 1138 ns/op, 360 B/op, 9 allocs/op
+- **Maximum Performance**: 438 ns/op, 72 B/op, 4 allocs/op (2.6x faster, 5x less memory)
+- **No Caller Info**: 470 ns/op, 80 B/op, 5 allocs/op (2.4x faster)
+
+### Trace System Performance  
+- **GetTrace**: 6.113 ns/op, 0 allocs (1.5x faster than sync.Map)
+- **SetTrace**: 11.55 ns/op, 0 allocs (5.8x faster, zero allocation)
+- **GenTraceId**: 92.49 ns/op, 16 B/op (4.3x faster, 6x less memory)
+- **Concurrent Mixed**: 10.08 ns/op (7.1x faster under concurrent load)
+
+### Entry System Performance
+- **Reset Operation**: Batch field assignment for cache efficiency
+- **Pool Management**: Inline functions with //go:inline optimization
+- **Memory Layout**: 200-byte structure exceeds cache line (known limitation)
+
+## Usage Patterns
+
+### Basic Usage
+```go
+import "github.com/lazygophers/log"
+
+log.Info("Simple message")
+log.Infof("Formatted message: %s", value)
+```
+
+### Performance-Optimized Usage
+```go
+logger := log.New()
+logger.EnableCaller(false)  // Disable caller info for performance
+logger.EnableTrace(false)   // Disable tracing for maximum speed
+logger.Info("High-performance logging")
+```
+
+### Context-Aware Logging
+```go
+ctxLogger := log.CloneToCtx()
+log.SetTrace("request-id-12345")
+ctxLogger.Info("Request processed") // Includes trace ID
+```
+
+### Build Tag Usage
+```go
+// Different behavior based on build tags
+// +build debug
+// +build release  
+// +build discard
+```
+
+## Dependencies
+
+### Required
+- `github.com/petermattis/goid` - Goroutine ID extraction for tracing
+- `go.uber.org/zap` - WriteSyncer and multi-writer functionality
+- `golang.org/x/net` - Network utilities
+
+### Optional/Development
+- `github.com/stretchr/testify` - Testing framework
+- `go.uber.org/multierr` - Error handling utilities
+
+## Design Patterns
+
+### Performance Optimization
+- **Object Pooling**: Extensive use of sync.Pool for Entry objects and byte buffers
+- **Conditional Compilation**: Build tags for environment-specific behaviors
+- **Inline Functions**: Strategic use of //go:inline for hot paths
+- **Zero-Allocation Paths**: Optimized code paths to minimize GC pressure
+
+### Concurrency Safety
+- **Thread-Safe**: All public APIs are goroutine-safe
+- **Lock-Free Reads**: Optimized for read-heavy workloads in tracing
+- **Async Processing**: Non-blocking async writer for high throughput
+
+### Extensibility
+- **Interface-Based**: Pluggable formatters, writers, and hooks
+- **Chain Configuration**: Fluent API for logger configuration
+- **Integration Friendly**: Zap compatibility and custom writer support
+
+## Testing Structure
+
+### Test Coverage
+- **Unit Tests**: Co-located with source files (*_test.go)
+- **Performance Tests**: Dedicated benchmark files (*_performance_test.go)
+- **Analysis Tests**: Deep performance analysis (*_analysis_test.go)
+- **Build Tag Tests**: Multi-environment testing support
+
+### Key Test Files
+- `logger_test.go` - Core logger functionality
+- `logger_performance_test.go` - Performance benchmarks
+- `entry_test.go` - Entry system testing
+- `trace_test.go` - Distributed tracing tests
+- `buildtags_test.go` - Build configuration testing
+
+## Development Guidelines
+
+### Code Style
+- Minimal comments focusing on essential functionality
+- Performance-first design with measurable optimizations
+- Consistent error handling and resource cleanup
+- Comprehensive test coverage for all build configurations
+
+### Performance Considerations
+- Always benchmark performance-critical changes
+- Use object pooling for frequently allocated objects
+- Implement conditional features for performance tuning
+- Measure memory allocation and GC impact
+
+This library is production-ready with extensive testing, performance optimization, and real-world usage validation across different deployment environments.
