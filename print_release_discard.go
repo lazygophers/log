@@ -4,7 +4,16 @@
 // 在此模式下，所有日志输出都将被重定向到 io.Discard，以实现零日志开销，从而最大化运行时性能。
 package log
 
-import "io"
+import (
+	"io"
+	"os"
+	"path/filepath"
+)
+
+// ReleaseLogPath specifies the file path for logs in release+discard mode.
+// Since logs are discarded in this mode, this path is not actually used
+// but defined for compatibility with build tag requirements.
+var ReleaseLogPath string = filepath.Join(os.TempDir(), "lazygophers", "log")
 
 // init 函数在包初始化时执行。
 // 它通过调用 SetOutput(io.Discard) 将全局日志输出重定向到空设备，

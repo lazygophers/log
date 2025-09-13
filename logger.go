@@ -12,6 +12,36 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// WriteSyncerWrapper 实现 zapcore.WriteSyncer 接口
+type WriteSyncerWrapper struct {
+	writer io.Writer
+}
+
+// Write 实现 io.Writer 接口
+func (w *WriteSyncerWrapper) Write(p []byte) (n int, err error) {
+	return w.writer.Write(p)
+}
+
+// Sync 实现 zapcore.WriteSyncer 接口
+func (w *WriteSyncerWrapper) Sync() error {
+	// 如果 writer 实现了 Sync 方法，则调用它
+	if syncer, ok := w.writer.(interface{ Sync() error }); ok {
+		return syncer.Sync()
+	}
+	// 否则返回 nil（大多数标准 writer 不需要 sync）
+	return nil
+}
+
+// wrapWriter 将 io.Writer 包装为 zapcore.WriteSyncer
+func wrapWriter(w io.Writer) zapcore.WriteSyncer {
+	// 如果已经是 WriteSyncer，直接返回
+	if ws, ok := w.(zapcore.WriteSyncer); ok {
+		return ws
+	}
+	// 否则包装它
+	return &WriteSyncerWrapper{writer: w}
+}
+
 // Logger 是日志记录器核心结构，负责日志的输出控制和格式配置
 type Logger struct {
 	level Level
@@ -39,7 +69,7 @@ func newLogger() *Logger {
 	
 	return &Logger{
 		level:     DebugLevel,
-		out:       out,
+		out:       wrapWriter(out),
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},
@@ -398,5 +428,5 @@ func (p *Logger) Caller(disable bool) *Logger {
 
 // StartMsg 记录一条表示新日志开始的INFO级别消息。
 func (p *Logger) StartMsg() {
-	Infof("========== start new log ==========")
+	p.Infof("========== start new log ==========")
 }
