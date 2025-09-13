@@ -66,7 +66,7 @@ func ensureDir(dir string) {
 		// 使用 os.ModePerm 权限创建目录。如果创建失败，记录一条错误日志。
 		// 这里选择记录错误而不是 panic，是因为目录创建失败不应总是导致整个应用程序崩溃。
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			Errorf("无法创建日志目录 %s: %v", dir, err)
+			std.Errorf("无法创建日志目录 %s: %v", dir, err)
 		}
 	}
 }

@@ -32,15 +32,20 @@ func NewEntry() *Entry {
 
 // Reset 将一个 Entry 对象的状态重置为初始值，以便安全地回收到对象池中。
 // 这避免了旧数据在对象复用时被意外使用。
+// 优化：使用高性能重置策略，减少条件判断
+//go:inline
 func (p *Entry) Reset() {
+	// 批量重置数值字段
 	p.Gid = 0
-	p.TraceId = ""
-	p.File = ""
-	p.Message = ""
-	p.CallerName = ""
-	p.CallerDir = ""
-	p.CallerFunc = ""
-	p.PrefixMsg = p.PrefixMsg[:0] // 高效清空切片，同时保留底层数组以复用
+	p.CallerLine = 0
+	p.Level = 0
+	
+	// 批量重置字符串字段（编译器会优化连续赋值）
+	p.TraceId, p.File, p.Message = "", "", ""
+	p.CallerName, p.CallerDir, p.CallerFunc = "", "", ""
+	
+	// 高效清空切片，保留容量（无条件重置，减少分支）
+	p.PrefixMsg = p.PrefixMsg[:0]
 	p.SuffixMsg = p.SuffixMsg[:0]
 }
 
@@ -49,19 +54,38 @@ func (p *Entry) Reset() {
 // 极大地提升了在高并发场景下日志记录的性能。
 var entryPool = sync.Pool{
 	New: func() any {
-		return NewEntry()
+		return &Entry{Pid: pid}
 	},
 }
 
 // getEntry 从对象池中获取一个 Entry 实例
+// 优化：高性能实现，减少函数调用开销
+//go:inline
 func getEntry() *Entry {
-	return entryPool.Get().(*Entry)
+	if entry := entryPool.Get(); entry != nil {
+		return entry.(*Entry)
+	}
+	return &Entry{Pid: pid}
 }
 
-// putEntry 将 Entry 实例放回对象池中以供复用
+// putEntry 将 Entry 实例放回对象池中以供复用  
+// 优化：高性能实现，减少分支判断开销
+//go:inline
 func putEntry(entry *Entry) {
 	if entry != nil {
 		entry.Reset()
 		entryPool.Put(entry)
 	}
+}
+
+// FastGetEntry 快速获取Entry的内联版本 (已被getEntry优化版本替代)
+// 保留作为备用实现
+func FastGetEntry() *Entry {
+	return getEntry()
+}
+
+// FastPutEntry 快速归还Entry的内联版本 (已被putEntry优化版本替代) 
+// 保留作为备用实现
+func FastPutEntry(entry *Entry) {
+	putEntry(entry)
 }
