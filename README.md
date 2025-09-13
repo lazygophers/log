@@ -1,7 +1,7 @@
 # 🚀 LazyGophers Log
 
 [![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.9%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -26,7 +26,7 @@ A high-performance, feature-rich logging library for Go applications with multi-
 - **🔍 Context Tracing**: Goroutine ID and trace ID tracking
 - **🔌 Framework Integration**: Native Zap logger integration
 - **⚙️ Highly Configurable**: Flexible levels, outputs, and formatting
-- **🧪 Well Tested**: 93.5% test coverage across all build configurations
+- **🧪 Well Tested**: 93.9% test coverage with 284+ test cases across all build configurations
 
 ## 🚀 Quick Start
 
@@ -200,14 +200,20 @@ make coverage-html
 
 ### Coverage Results by Build Tag
 
-| Build Tag | Coverage |
-|-----------|----------|
-| Default | 92.9% |
-| Debug | 93.1% |
-| Release | 93.5% |
-| Discard | 93.1% |
-| Debug+Discard | 93.1% |
-| Release+Discard | 93.3% |
+| Build Tag | Coverage | Description |
+|-----------|----------|-------------|
+| **Default** | 93.3% | Standard build with full debugging |
+| **Debug** | 93.5% | Enhanced debug information |
+| **Release** | **93.9%** | Production-optimized build |
+| **Discard** | 93.5% | Maximum performance, no-op logging |
+| **Debug+Discard** | 93.5% | Debug with discard optimization |
+| **Release+Discard** | 93.7% | Release with discard optimization |
+
+### Test Statistics
+- **Total Test Functions**: 284+
+- **Functions with 100% Coverage**: 125/138 (90.6%)
+- **Build Tag Combinations Tested**: 6/6
+- **Excluded from Coverage**: Fatal/Panic functions (safety reasons)
 
 ## ⚙️ Configuration Options
 

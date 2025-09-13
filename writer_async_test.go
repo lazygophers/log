@@ -286,33 +286,57 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 
 // TestAsyncWriter_BufferFull tests the ErrAsyncWriterFull error case
 func TestAsyncWriter_BufferFull(t *testing.T) {
-	// Create a very slow writer that will block the background goroutine
-	slowWriter := &SlowWriter{delay: 500 * time.Millisecond}
+	// Create a writer that writes very slowly
+	slowWriter := &VerySlowWriter{delay: 1 * time.Second} 
 	asyncWriter := NewAsyncWriter(slowWriter)
-	defer asyncWriter.Close()
 	
-	// Fill up the channel buffer by writing many items quickly
-	errorOccurred := false
-	for i := 0; i < 1000; i++ { // Try to write more than channel capacity
-		_, err := asyncWriter.Write([]byte("test"))
-		if err == ErrAsyncWriterFull {
-			errorOccurred = true
-			break
-		}
-		if err != nil && err != ErrAsyncWriterFull {
-			t.Errorf("Unexpected error: %v", err)
-		}
+	// Use a timeout to prevent hanging
+	done := make(chan bool, 1)
+	var errorOccurred bool
+	
+	go func() {
+		defer func() { done <- true }()
 		
-		// Small delay to allow some processing, but not too much
-		if i%10 == 0 {
-			time.Sleep(time.Millisecond)
+		// Fill up the channel buffer very quickly
+		for i := 0; i < 1000; i++ { // Write many items to fill the buffer
+			_, err := asyncWriter.Write([]byte("test data"))
+			if err == ErrAsyncWriterFull {
+				errorOccurred = true
+				t.Logf("Successfully triggered ErrAsyncWriterFull on attempt %d", i+1)
+				return
+			}
+			if err != nil && err != ErrAsyncWriterFull {
+				t.Errorf("Unexpected error: %v", err)
+				return
+			}
 		}
+	}()
+	
+	// Wait for either completion or timeout
+	select {
+	case <-done:
+		// Test completed
+	case <-time.After(3 * time.Second):
+		t.Log("Test timed out - this might be expected if buffer doesn't fill")
 	}
+	
+	asyncWriter.Close()
 	
 	if !errorOccurred {
-		t.Log("ErrAsyncWriterFull was not triggered - this might be expected depending on timing")
-		// This is not a failure since it depends on timing and channel size
-	} else {
-		t.Log("Successfully triggered ErrAsyncWriterFull")
+		t.Log("ErrAsyncWriterFull was not triggered - buffer might be larger than expected")
 	}
+}
+
+// VerySlowWriter writes very slowly to help fill the buffer
+type VerySlowWriter struct {
+	delay time.Duration
+}
+
+func (vsw *VerySlowWriter) Write(p []byte) (n int, err error) {
+	time.Sleep(vsw.delay)
+	return len(p), nil
+}
+
+func (vsw *VerySlowWriter) Close() error {
+	return nil
 }

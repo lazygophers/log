@@ -10,7 +10,12 @@
       "Bash(TEST_FATAL=1 go test -v -run TestLogger_Fatal -timeout=2s)",
       "Bash(grep:*)",
       "Bash(make:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr view:*)",
+      "Bash(go list:*)",
+      "Bash(git commit:*)",
+      "Bash(timeout 30s go test -cover -coverprofile=coverage-improved.out ./...)"
     ],
     "deny": [],
     "ask": []
