@@ -17,7 +17,9 @@
       "Bash(git commit:*)",
       "Bash(timeout 30s go test -cover -coverprofile=coverage-improved.out ./...)",
       "Bash(timeout 30s go test -cover -coverprofile=coverage.out ./...)",
-      "Bash(timeout 30s go test -cover -coverprofile=coverage-entry.out ./...)"
+      "Bash(timeout 30s go test -cover -coverprofile=coverage-entry.out ./...)",
+      "Bash(timeout 30s go test -cover -coverprofile=coverage-optimized.out ./...)",
+      "Bash(timeout 30s go test -cover -coverprofile=coverage-final.out ./...)"
     ],
     "deny": [],
     "ask": []

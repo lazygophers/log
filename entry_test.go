@@ -368,3 +368,101 @@ func TestEntry_RaceCondition(t *testing.T) {
 	
 	wg.Wait()
 }
+
+// 测试FastGetEntry和FastPutEntry函数
+func TestFastGetEntry_PutEntry(t *testing.T) {
+	// 测试基本的获取和放回
+	entry := FastGetEntry()
+	if entry == nil {
+		t.Fatal("FastGetEntry returned nil")
+	}
+	
+	// 验证获取的 entry 是重置状态
+	if entry.Message != "" {
+		t.Error("Entry from FastGetEntry should have empty message")
+	}
+	
+	// 设置一些值
+	entry.Message = "fast test message"
+	entry.TraceId = "fast-trace-456"
+	
+	// 放回池中
+	FastPutEntry(entry)
+	
+	// 再次获取，应该得到重置后的 entry
+	entry2 := FastGetEntry()
+	if entry2.Message != "" {
+		t.Error("Entry from FastGetEntry should be reset")
+	}
+	
+	if entry2.TraceId != "" {
+		t.Error("Entry from FastGetEntry should be reset")
+	}
+	
+	// 清理
+	FastPutEntry(entry2)
+}
+
+func TestFastPutEntry_NilEntry(t *testing.T) {
+	// 测试传入 nil 不会 panic
+	FastPutEntry(nil)
+	// 如果没有 panic，测试通过
+}
+
+func TestFastEntry_Concurrent(t *testing.T) {
+	// 并发测试Fast函数的线程安全性
+	var wg sync.WaitGroup
+	numGoroutines := 100
+	entriesPerGoroutine := 100
+	
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			
+			entries := make([]*Entry, entriesPerGoroutine)
+			
+			// 获取大量 entries
+			for j := 0; j < entriesPerGoroutine; j++ {
+				entries[j] = FastGetEntry()
+				if entries[j] == nil {
+					t.Errorf("Goroutine %d: FastGetEntry returned nil", id)
+					return
+				}
+				// 设置一些值来验证隔离性
+				entries[j].Message = "fast test"
+				entries[j].Gid = int64(id*1000 + j)
+			}
+			
+			// 放回所有 entries
+			for j := 0; j < entriesPerGoroutine; j++ {
+				FastPutEntry(entries[j])
+			}
+		}(i)
+	}
+	
+	wg.Wait()
+}
+
+// 测试getEntry的分支覆盖
+func TestGetEntry_EmptyPool(t *testing.T) {
+	// 清空对象池来测试创建新Entry的分支
+	// 通过大量获取Entry但不归还来耗尽池
+	var entries []*Entry
+	for i := 0; i < 100; i++ {
+		entry := getEntry()
+		if entry == nil {
+			t.Fatal("getEntry returned nil")
+		}
+		// 验证新创建的Entry有正确的Pid
+		if entry.Pid != pid {
+			t.Errorf("Expected Pid %d, got %d", pid, entry.Pid)
+		}
+		entries = append(entries, entry)
+	}
+	
+	// 清理：归还所有entries
+	for _, entry := range entries {
+		putEntry(entry)
+	}
+}
