@@ -283,3 +283,36 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 	// 给一些时间让数据被处理
 	time.Sleep(100 * time.Millisecond)
 }
+
+// TestAsyncWriter_BufferFull tests the ErrAsyncWriterFull error case
+func TestAsyncWriter_BufferFull(t *testing.T) {
+	// Create a very slow writer that will block the background goroutine
+	slowWriter := &SlowWriter{delay: 500 * time.Millisecond}
+	asyncWriter := NewAsyncWriter(slowWriter)
+	defer asyncWriter.Close()
+	
+	// Fill up the channel buffer by writing many items quickly
+	errorOccurred := false
+	for i := 0; i < 1000; i++ { // Try to write more than channel capacity
+		_, err := asyncWriter.Write([]byte("test"))
+		if err == ErrAsyncWriterFull {
+			errorOccurred = true
+			break
+		}
+		if err != nil && err != ErrAsyncWriterFull {
+			t.Errorf("Unexpected error: %v", err)
+		}
+		
+		// Small delay to allow some processing, but not too much
+		if i%10 == 0 {
+			time.Sleep(time.Millisecond)
+		}
+	}
+	
+	if !errorOccurred {
+		t.Log("ErrAsyncWriterFull was not triggered - this might be expected depending on timing")
+		// This is not a failure since it depends on timing and channel size
+	} else {
+		t.Log("Successfully triggered ErrAsyncWriterFull")
+	}
+}

@@ -465,3 +465,105 @@ func TestFormatter_format_ComplexScenarios(t *testing.T) {
 		}
 	}
 }
+
+// TestFormatter_format_EmptyPrefixSuffix tests empty prefix and suffix handling
+func TestFormatter_format_EmptyPrefixSuffix(t *testing.T) {
+	formatter := &Formatter{
+		DisableParsingAndEscaping: true,
+		DisableCaller:             false,
+	}
+	
+	entry := &Entry{
+		Time:       time.Now(),
+		Level:      InfoLevel,
+		Message:    "test message",
+		PrefixMsg:  []byte{}, // Empty prefix
+		SuffixMsg:  []byte{}, // Empty suffix
+		Pid:        12345,
+		Gid:        67890,
+		File:       "test.go",
+		CallerLine: 42,
+		CallerDir:  "testdir",
+		CallerFunc: "TestFunc",
+	}
+	
+	result := formatter.format(entry)
+	output := string(result)
+	
+	// Verify basic components are present without prefix/suffix
+	if !strings.Contains(output, "test message") {
+		t.Errorf("Output should contain message, got: %s", output)
+	}
+	if !strings.Contains(output, "info") {
+		t.Errorf("Output should contain level, got: %s", output)
+	}
+}
+
+// TestFormatter_format_DisableCallerWithTrace tests the branch where caller is disabled but trace exists
+func TestFormatter_format_DisableCallerWithTrace(t *testing.T) {
+	formatter := &Formatter{
+		DisableParsingAndEscaping: true,
+		DisableCaller:             true, // Disable caller
+	}
+	
+	entry := &Entry{
+		Time:       time.Now(),
+		Level:      InfoLevel,
+		Message:    "test message",
+		Pid:        12345,
+		Gid:        67890,
+		TraceId:    "trace-only-123", // Only trace, no caller
+		File:       "test.go",
+		CallerLine: 42,
+		CallerDir:  "testdir",
+		CallerFunc: "TestFunc",
+	}
+	
+	result := formatter.format(entry)
+	output := string(result)
+	
+	// Should contain trace but not caller info
+	if !strings.Contains(output, "trace-only-123") {
+		t.Errorf("Output should contain trace ID, got: %s", output)
+	}
+	// Should not contain caller info since it's disabled
+	if strings.Contains(output, "testdir/test.go:42") {
+		t.Errorf("Output should not contain caller info when disabled, got: %s", output)
+	}
+}
+
+// TestFormatter_format_BothCallerAndTraceDisabled tests when both caller and trace are disabled/empty
+func TestFormatter_format_BothCallerAndTraceDisabled(t *testing.T) {
+	formatter := &Formatter{
+		DisableParsingAndEscaping: true,
+		DisableCaller:             true, // Disable caller
+	}
+	
+	entry := &Entry{
+		Time:       time.Now(),
+		Level:      InfoLevel,
+		Message:    "test message",
+		Pid:        12345,
+		Gid:        67890,
+		TraceId:    "", // Empty trace
+		File:       "test.go",
+		CallerLine: 42,
+		CallerDir:  "testdir",
+		CallerFunc: "TestFunc",
+	}
+	
+	result := formatter.format(entry)
+	output := string(result)
+	
+	// Should contain basic info only
+	if !strings.Contains(output, "test message") {
+		t.Errorf("Output should contain message, got: %s", output)
+	}
+	if !strings.Contains(output, "info") {
+		t.Errorf("Output should contain level, got: %s", output)
+	}
+	// Should not contain extra brackets or caller info
+	if strings.Contains(output, "testdir/test.go:42") {
+		t.Errorf("Output should not contain caller info when disabled, got: %s", output)
+	}
+}

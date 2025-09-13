@@ -359,3 +359,19 @@ func TestLogger_LevelCheck(t *testing.T) {
 		t.Error("Output should contain warn message")
 	}
 }
+
+// TestLogger_ErrorfLevelDisabled tests Errorf when Error level is disabled
+func TestLogger_ErrorfLevelDisabled(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+	logger.SetLevel(FatalLevel) // Only fatal messages, error is disabled
+	
+	// Errorf should be filtered out
+	logger.Errorf("error message: %s", "test")
+	
+	// Should not have any output
+	if buf.Len() > 0 {
+		t.Error("Errorf should be filtered when Error level is disabled")
+	}
+}
