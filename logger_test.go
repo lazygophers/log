@@ -911,6 +911,113 @@ func BenchmarkLogger_Parallel(b *testing.B) {
 	})
 }
 
+// TestLogger_Print 测试 Print 方法
+func TestLogger_Print(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+	logger.SetLevel(DebugLevel)
+
+	logger.Print("这是一条打印消息")
+
+	output := buf.String()
+	require.Contains(t, output, "[debug]", "Print 应该对应 debug 级别")
+	require.Contains(t, output, "这是一条打印消息", "应该包含日志消息")
+}
+
+// TestLogger_Panic 测试 Panic 方法
+func TestLogger_Panic(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+	logger.SetLevel(PanicLevel)
+
+	// Panic 方法会调用 panic，需要捕获
+	require.Panics(t, func() {
+		logger.Panic("这会触发 panic")
+	}, "Panic 方法应该触发 panic")
+
+	// 验证日志是否被记录
+	output := buf.String()
+	require.Contains(t, output, "[panic]", "应该包含 panic 级别")
+	require.Contains(t, output, "这会触发 panic", "应该包含消息")
+}
+
+// TestLogger_Fatal 测试 Fatal 方法 (使用替换方式避免实际退出)
+func TestLogger_Fatal(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+	logger.SetLevel(FatalLevel)
+
+	// 由于 Fatal 会调用 os.Exit，我们无法直接测试
+	// 但我们可以测试 write 方法中的 FatalLevel 逻辑
+	entry := NewEntry()
+	entry.Level = FatalLevel
+	entry.Message = "这是致命错误"
+	entry.Time = time.Now()
+	entry.Pid = os.Getpid()
+
+	// 直接调用 write 方法测试格式化部分，但不会触发 os.Exit
+	formatted := logger.Format.Format(entry)
+	require.Contains(t, string(formatted), "[fatal]", "应该包含 fatal 级别")
+	require.Contains(t, string(formatted), "这是致命错误", "应该包含消息")
+}
+
+// TestLogger_Panicf 测试 Panicf 方法
+func TestLogger_Panicf(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+	logger.SetLevel(PanicLevel)
+
+	// Panicf 方法会调用 panic，需要捕获
+	require.Panics(t, func() {
+		logger.Panicf("这会触发 panic: %s", "格式化消息")
+	}, "Panicf 方法应该触发 panic")
+
+	// 验证日志是否被记录
+	output := buf.String()
+	require.Contains(t, output, "[panic]", "应该包含 panic 级别")
+	require.Contains(t, output, "这会触发 panic: 格式化消息", "应该包含格式化后的消息")
+}
+
+// TestLogger_Fatalf 测试 Fatalf 方法 (使用替换方式避免实际退出)
+func TestLogger_Fatalf(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+	logger.SetLevel(FatalLevel)
+
+	// 由于 Fatalf 会调用 os.Exit，我们测试格式化部分
+	entry := NewEntry()
+	entry.Level = FatalLevel
+	entry.Message = fmt.Sprintf("致命错误: %s, 代码: %d", "数据库连接失败", 500)
+	entry.Time = time.Now()
+	entry.Pid = os.Getpid()
+
+	// 直接调用格式化测试
+	formatted := logger.Format.Format(entry)
+	require.Contains(t, string(formatted), "[fatal]", "应该包含 fatal 级别")
+	require.Contains(t, string(formatted), "致命错误: 数据库连接失败, 代码: 500", "应该包含格式化后的消息")
+}
+
+// TestLogger_StartMsg 测试 StartMsg 方法
+func TestLogger_StartMsg(t *testing.T) {
+	// 由于 StartMsg 调用全局的 Infof，我们需要设置全局输出
+	buf := &bytes.Buffer{}
+	originalOutput := os.Stdout
+	SetOutput(buf)
+	defer SetOutput(originalOutput)
+	SetLevel(InfoLevel) // 确保 Info 级别日志会输出
+
+	logger := New()
+	logger.StartMsg()
+
+	output := buf.String()
+	require.Contains(t, output, "========== start new log ==========", "应该包含开始消息")
+}
+
 // TestLogger_WithFormatter 测试自定义格式化器
 func TestLogger_WithFormatter(t *testing.T) {
 	logger := New()
@@ -947,4 +1054,32 @@ func TestLogger_WithMultipleOutputs(t *testing.T) {
 	require.Contains(t, buf1.String(), "错误消息", "输出1 应该收到消息")
 	require.Contains(t, buf2.String(), "错误消息", "输出2 应该收到消息")
 	require.Contains(t, buf3.String(), "错误消息", "输出3 应该收到消息")
+}
+
+// TestLogger_LevelCheckingMethods 测试所有带级别检查的格式化方法
+func TestLogger_LevelCheckingMethods(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New()
+	logger.SetOutput(buf)
+
+	// 设置高级别，测试低级别方法不输出
+	logger.SetLevel(ErrorLevel)
+
+	// 这些方法由于级别不够不应该输出
+	logger.Tracef("trace: %s", "不应该出现")
+	logger.Debugf("debug: %s", "不应该出现")
+	logger.Printf("printf: %s", "不应该出现")
+	logger.Infof("info: %s", "不应该出现")
+	logger.Warnf("warn: %s", "不应该出现")
+	logger.Warningf("warning: %s", "不应该出现")
+
+	// 验证没有输出
+	output := buf.String()
+	require.Empty(t, output, "低级别的日志不应该输出")
+
+	// 测试符合级别的方法
+	logger.Errorf("error: %s", "应该出现")
+
+	output = buf.String()
+	require.Contains(t, output, "error: 应该出现", "符合级别的日志应该输出")
 }

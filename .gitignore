@@ -5,3 +5,7 @@
 .roo/
 *.coverage
 coverage.html
+
+# Claude-related files
+CLAUDE.md
+.claude/

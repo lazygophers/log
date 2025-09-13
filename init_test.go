@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/net/context"
 )
 
 // TestPid 测试 Pid 函数是否返回正确的进程 ID
@@ -33,7 +34,7 @@ func TestNew(t *testing.T) {
 	assert.IsType(t, &Logger{}, logger, "New() 应该返回 *Logger 类型")
 	
 	// 验证新的 logger 有默认值
-	assert.Equal(t, DebugLevel, logger.level, "新 logger 的默认级别应该是 DebugLevel")
+	assert.Equal(t, DebugLevel, logger.level, "new logger default level should be DebugLevel")
 }
 
 // TestSetLevel 和 TestGetLevel 测试设置和获取日志级别
@@ -295,4 +296,59 @@ func TestConcurrentAccess(t *testing.T) {
 	}
 	
 	// 如果没有 panic，测试通过
+}
+
+// TestCloneToCtx 测试 CloneToCtx 函数
+func TestCloneToCtx(t *testing.T) {
+	// Import context for proper usage
+	ctx := context.Background()
+	
+	// 设置一些标准日志记录器的配置
+	originalLevel := GetLevel()
+	originalPrefix := std.PrefixMsg
+	originalSuffix := std.SuffixMsg
+	defer func() {
+		SetLevel(originalLevel)
+		std.PrefixMsg = originalPrefix
+		std.SuffixMsg = originalSuffix
+		SetOutput(os.Stdout)
+	}()
+
+	SetLevel(DebugLevel)
+	SetPrefixMsg("[TEST] ")
+	SetSuffixMsg(" [END]")
+
+	// 克隆到上下文日志记录器
+	ctxLogger := CloneToCtx()
+	require.NotNil(t, ctxLogger, "CloneToCtx 应该返回非空值")
+
+	// 验证上下文日志记录器继承了标准日志记录器的配置
+	buf := &bytes.Buffer{}
+	ctxLogger.SetOutput(buf)
+
+	ctxLogger.Info(ctx, "测试上下文日志记录器")
+
+	output := buf.String()
+	require.Contains(t, output, "[info]", "应该包含 info 级别")
+	require.Contains(t, output, "[TEST]", "应该包含前缀")
+	require.Contains(t, output, "[END]", "应该包含后缀")
+	require.Contains(t, output, "测试上下文日志记录器", "应该包含消息")
+
+	// 测试修改上下文日志记录器不会影响标准日志记录器
+	ctxLogger.SetPrefixMsg("[CTX] ")
+
+	buf1 := &bytes.Buffer{}
+	buf2 := &bytes.Buffer{}
+
+	SetOutput(buf1)
+	ctxLogger.SetOutput(buf2)
+
+	Info("标准日志")
+	ctxLogger.Info(ctx, "上下文日志")
+
+	output1 := buf1.String()
+	output2 := buf2.String()
+
+	require.Contains(t, output1, "[TEST]", "标准日志记录器的前缀应该保持不变")
+	require.Contains(t, output2, "[CTX]", "上下文日志记录器的前缀应该已修改")
 }
