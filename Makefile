@@ -38,7 +38,7 @@ test-verbose:
 
 # 清理覆盖率文件
 clean:
-	rm -f coverage-*.out coverage-*.html
+	rm -f coverage-*.out coverage-*.html coverage.html coverage.out *.prof
 
 # 帮助信息
 help:

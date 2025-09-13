@@ -16,18 +16,20 @@
 package log
 
 import (
-	"strings"
+	"crypto/rand"
+	"encoding/hex"
 	"sync"
-
-	"github.com/google/uuid"
 
 	"github.com/petermattis/goid"
 )
 
 // traceMap 用于存储 Goroutine ID 到追踪ID的映射。
-// 使用 sync.Map 是因为它在“写少读多”的场景下性能更优，且能避免手动管理锁的复杂性。
+// 使用 RWMutex + map 组合，在读写性能上优于 sync.Map。
 // 键为 int64 类型的 Goroutine ID，值为 string 类型的追踪ID。
-var traceMap sync.Map
+var (
+	traceMap   = make(map[int64]string, 64) // 预分配容量
+	traceMapMu sync.RWMutex
+)
 
 // DisableTrace 是一个全局开关，用于禁用或启用追踪功能。
 // 当设置为 true 时，所有与追踪ID相关的设置操作（如 SetTrace）将不会生效，
@@ -45,13 +47,13 @@ var DisableTrace bool
 // 返回:
 //
 //	如果找到了追踪ID，则返回该ID (string)；否则返回一个空字符串。
+// 高性能版本：使用内联函数和RLock
+//go:inline
 func getTrace(gid int64) string {
-	tid, ok := traceMap.Load(gid)
-	if !ok {
-		return ""
-	}
-	// 从 sync.Map 中取出的值是 any 类型，需要类型断言为 string。
-	return tid.(string)
+	traceMapMu.RLock()
+	tid := traceMap[gid]
+	traceMapMu.RUnlock()
+	return tid
 }
 
 // setTrace 是一个内部函数，用于为指定的 Goroutine 设置追踪ID。
@@ -63,20 +65,26 @@ func getTrace(gid int64) string {
 //
 //	gid     - Goroutine 的唯一标识符 (int64)。
 //	traceId - 要设置的追踪ID (string)。如果为空，将自动生成一个新的ID。
+//go:inline
 func setTrace(gid int64, traceId string) {
 	if DisableTrace {
 		return
 	}
 	if traceId == "" {
-		traceId = GenTraceId()
+		traceId = fastGenTraceId()
 	}
-	traceMap.Store(gid, traceId)
+	traceMapMu.Lock()
+	traceMap[gid] = traceId
+	traceMapMu.Unlock()
 }
 
 // delTrace 是一个内部函数，用于删除指定 Goroutine 的追踪ID。
 // 主要用于 Goroutine 生命期结束时清理资源，防止内存泄漏。
+//go:inline
 func delTrace(gid int64) {
-	traceMap.Delete(gid)
+	traceMapMu.Lock()
+	delete(traceMap, gid)
+	traceMapMu.Unlock()
 }
 
 // GetTrace 获取当前 Goroutine 的追踪ID。
@@ -161,18 +169,38 @@ func DelTraceWithGID(gid int64) {
 	delTrace(gid)
 }
 
+// fastGenTraceId 生成高性能的追踪ID。
+// 使用 crypto/rand 直接生成随机字节，避免 UUID 的额外开销。
+//go:inline
+func fastGenTraceId() string {
+	var buf [8]byte
+	rand.Read(buf[:])
+	return hex.EncodeToString(buf[:])
+}
+
 // GenTraceId 生成一个全局唯一的、16个字符长的追踪ID。
-//
-// 算法:
-//  1. 使用 google/uuid 生成一个 UUID v4 版本的字符串 (例如: "f47ac10b-58cc-4372-a567-0e02b2c3d479")。
-//  2. 移除其中的连字符 '-' (例如: "f47ac10b58cc4372a5670e02b2c3d479")。
-//  3. 截取最后16个字符作为最终的追踪ID (例如: "a5670e02b2c3d479")。
+// 保持向后兼容性，内部使用高性能实现。
 //
 // 返回:
 //
 //	一个16个字符长的、唯一的追踪ID字符串。
 func GenTraceId() string {
-	// uuid.NewString() 保证了生成的ID具有极高的唯一性。
-	// 截取后16位是为了缩短ID长度，同时保留足够的随机性。
-	return strings.ReplaceAll(uuid.NewString(), "-", "")[16:]
+	return fastGenTraceId()
 }
+
+// 为测试提供的辅助函数
+func clearTraceMapForTest() {
+	traceMapMu.Lock()
+	for k := range traceMap {
+		delete(traceMap, k)
+	}
+	traceMapMu.Unlock()
+}
+
+func loadTraceForTest(gid int64) (string, bool) {
+	traceMapMu.RLock()
+	trace, exists := traceMap[gid]
+	traceMapMu.RUnlock()
+	return trace, exists
+}
+
