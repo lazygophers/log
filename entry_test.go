@@ -9,25 +9,25 @@ import (
 
 func TestNewEntry(t *testing.T) {
 	entry := NewEntry()
-	
+
 	if entry == nil {
 		t.Fatal("NewEntry returned nil")
 	}
-	
+
 	// 验证 Pid 被正确设置
 	if entry.Pid != pid {
 		t.Errorf("Expected Pid %d, got %d", pid, entry.Pid)
 	}
-	
+
 	// 验证其他字段的初始状态
 	if entry.Gid != 0 {
 		t.Errorf("Expected Gid 0, got %d", entry.Gid)
 	}
-	
+
 	if entry.TraceId != "" {
 		t.Errorf("Expected empty TraceId, got %q", entry.TraceId)
 	}
-	
+
 	if entry.Message != "" {
 		t.Errorf("Expected empty Message, got %q", entry.Message)
 	}
@@ -35,7 +35,7 @@ func TestNewEntry(t *testing.T) {
 
 func TestEntry_Reset(t *testing.T) {
 	entry := NewEntry()
-	
+
 	// 设置一些值
 	entry.Gid = 12345
 	entry.TraceId = "trace-123"
@@ -49,47 +49,47 @@ func TestEntry_Reset(t *testing.T) {
 	entry.Time = time.Now()
 	entry.Level = InfoLevel
 	entry.CallerLine = 42
-	
+
 	// 调用 Reset
 	entry.Reset()
-	
+
 	// 验证所有字段都被重置
 	if entry.Gid != 0 {
 		t.Errorf("Expected Gid 0 after reset, got %d", entry.Gid)
 	}
-	
+
 	if entry.TraceId != "" {
 		t.Errorf("Expected empty TraceId after reset, got %q", entry.TraceId)
 	}
-	
+
 	if entry.File != "" {
 		t.Errorf("Expected empty File after reset, got %q", entry.File)
 	}
-	
+
 	if entry.Message != "" {
 		t.Errorf("Expected empty Message after reset, got %q", entry.Message)
 	}
-	
+
 	if entry.CallerName != "" {
 		t.Errorf("Expected empty CallerName after reset, got %q", entry.CallerName)
 	}
-	
+
 	if entry.CallerDir != "" {
 		t.Errorf("Expected empty CallerDir after reset, got %q", entry.CallerDir)
 	}
-	
+
 	if entry.CallerFunc != "" {
 		t.Errorf("Expected empty CallerFunc after reset, got %q", entry.CallerFunc)
 	}
-	
+
 	if len(entry.PrefixMsg) != 0 {
 		t.Errorf("Expected empty PrefixMsg after reset, got %v", entry.PrefixMsg)
 	}
-	
+
 	if len(entry.SuffixMsg) != 0 {
 		t.Errorf("Expected empty SuffixMsg after reset, got %v", entry.SuffixMsg)
 	}
-	
+
 	// 验证 Reset 不会改变 Pid、Time、Level、CallerLine
 	if entry.Pid != pid {
 		t.Errorf("Reset should not change Pid, expected %d, got %d", pid, entry.Pid)
@@ -98,31 +98,31 @@ func TestEntry_Reset(t *testing.T) {
 
 func TestEntry_Reset_SliceReuse(t *testing.T) {
 	entry := NewEntry()
-	
+
 	// 设置切片数据
 	entry.PrefixMsg = append(entry.PrefixMsg, []byte("test prefix")...)
 	entry.SuffixMsg = append(entry.SuffixMsg, []byte("test suffix")...)
-	
+
 	// 记录底层数组的容量和指针
 	prefixCap := cap(entry.PrefixMsg)
 	suffixCap := cap(entry.SuffixMsg)
-	
+
 	// Reset 后验证切片被清空但底层数组被保留
 	entry.Reset()
-	
+
 	if len(entry.PrefixMsg) != 0 {
 		t.Error("PrefixMsg should be empty after reset")
 	}
-	
+
 	if len(entry.SuffixMsg) != 0 {
 		t.Error("SuffixMsg should be empty after reset")
 	}
-	
+
 	// 验证容量被保留（高效复用）
 	if cap(entry.PrefixMsg) != prefixCap {
 		t.Errorf("PrefixMsg capacity should be preserved, expected %d, got %d", prefixCap, cap(entry.PrefixMsg))
 	}
-	
+
 	if cap(entry.SuffixMsg) != suffixCap {
 		t.Errorf("SuffixMsg capacity should be preserved, expected %d, got %d", suffixCap, cap(entry.SuffixMsg))
 	}
@@ -134,29 +134,29 @@ func TestGetEntry_PutEntry(t *testing.T) {
 	if entry == nil {
 		t.Fatal("getEntry returned nil")
 	}
-	
+
 	// 验证获取的 entry 是重置状态
 	if entry.Message != "" {
 		t.Error("Entry from pool should have empty message")
 	}
-	
+
 	// 设置一些值
 	entry.Message = "test message"
 	entry.TraceId = "trace-456"
-	
+
 	// 放回池中
 	putEntry(entry)
-	
+
 	// 再次获取，应该得到重置后的 entry
 	entry2 := getEntry()
 	if entry2.Message != "" {
 		t.Error("Entry from pool should be reset")
 	}
-	
+
 	if entry2.TraceId != "" {
 		t.Error("Entry from pool should be reset")
 	}
-	
+
 	// 清理
 	putEntry(entry2)
 }
@@ -172,14 +172,14 @@ func TestEntryPool_Concurrent(t *testing.T) {
 	var wg sync.WaitGroup
 	numGoroutines := 100
 	entriesPerGoroutine := 100
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			
+
 			entries := make([]*Entry, entriesPerGoroutine)
-			
+
 			// 获取大量 entries
 			for j := 0; j < entriesPerGoroutine; j++ {
 				entries[j] = getEntry()
@@ -191,14 +191,14 @@ func TestEntryPool_Concurrent(t *testing.T) {
 				entries[j].Message = "test"
 				entries[j].Gid = int64(id*1000 + j)
 			}
-			
+
 			// 放回所有 entries
 			for j := 0; j < entriesPerGoroutine; j++ {
 				putEntry(entries[j])
 			}
 		}(i)
 	}
-	
+
 	wg.Wait()
 }
 
@@ -231,10 +231,10 @@ func BenchmarkEntry_Reset(b *testing.B) {
 	entry.CallerName = "TestFunc"
 	entry.CallerDir = "/path/to/test"
 	entry.CallerFunc = "main.test"
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		entry.Reset()
 		// 重新设置数据以保持一致的测试条件
@@ -272,10 +272,10 @@ func BenchmarkEntryPool_Parallel(b *testing.B) {
 func BenchmarkEntry_SliceAppend(b *testing.B) {
 	entry := NewEntry()
 	testData := []byte("test data")
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		entry.PrefixMsg = append(entry.PrefixMsg[:0], testData...)
 		entry.SuffixMsg = append(entry.SuffixMsg[:0], testData...)
@@ -293,7 +293,7 @@ func BenchmarkEntry_vs_DirectAllocation(b *testing.B) {
 			putEntry(entry)
 		}
 	})
-	
+
 	b.Run("DirectAllocation", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -314,7 +314,7 @@ func TestEntry_MemoryUsage(t *testing.T) {
 	var m1, m2 runtime.MemStats
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
-	
+
 	// 执行大量操作
 	const iterations = 10000
 	for i := 0; i < iterations; i++ {
@@ -325,15 +325,15 @@ func TestEntry_MemoryUsage(t *testing.T) {
 		entry.SuffixMsg = append(entry.SuffixMsg, []byte("suffix")...)
 		putEntry(entry)
 	}
-	
+
 	// 获取最终内存统计
 	runtime.GC()
 	runtime.ReadMemStats(&m2)
-	
+
 	// 验证没有明显的内存泄漏
 	allocDiff := m2.TotalAlloc - m1.TotalAlloc
 	t.Logf("Memory allocated during %d operations: %d bytes", iterations, allocDiff)
-	
+
 	// 每次操作的平均内存分配应该很小（得益于对象池）
 	avgAllocPerOp := allocDiff / iterations
 	if avgAllocPerOp > 1000 { // 1KB per operation seems reasonable
@@ -346,16 +346,16 @@ func TestEntry_RaceCondition(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping race condition test in short mode")
 	}
-	
+
 	var wg sync.WaitGroup
 	numGoroutines := 50
 	operationsPerGoroutine := 1000
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			
+
 			for j := 0; j < operationsPerGoroutine; j++ {
 				entry := getEntry()
 				entry.Message = "race test"
@@ -365,7 +365,7 @@ func TestEntry_RaceCondition(t *testing.T) {
 			}
 		}()
 	}
-	
+
 	wg.Wait()
 }
 
@@ -376,29 +376,29 @@ func TestFastGetEntry_PutEntry(t *testing.T) {
 	if entry == nil {
 		t.Fatal("FastGetEntry returned nil")
 	}
-	
+
 	// 验证获取的 entry 是重置状态
 	if entry.Message != "" {
 		t.Error("Entry from FastGetEntry should have empty message")
 	}
-	
+
 	// 设置一些值
 	entry.Message = "fast test message"
 	entry.TraceId = "fast-trace-456"
-	
+
 	// 放回池中
 	FastPutEntry(entry)
-	
+
 	// 再次获取，应该得到重置后的 entry
 	entry2 := FastGetEntry()
 	if entry2.Message != "" {
 		t.Error("Entry from FastGetEntry should be reset")
 	}
-	
+
 	if entry2.TraceId != "" {
 		t.Error("Entry from FastGetEntry should be reset")
 	}
-	
+
 	// 清理
 	FastPutEntry(entry2)
 }
@@ -414,14 +414,14 @@ func TestFastEntry_Concurrent(t *testing.T) {
 	var wg sync.WaitGroup
 	numGoroutines := 100
 	entriesPerGoroutine := 100
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			
+
 			entries := make([]*Entry, entriesPerGoroutine)
-			
+
 			// 获取大量 entries
 			for j := 0; j < entriesPerGoroutine; j++ {
 				entries[j] = FastGetEntry()
@@ -433,14 +433,14 @@ func TestFastEntry_Concurrent(t *testing.T) {
 				entries[j].Message = "fast test"
 				entries[j].Gid = int64(id*1000 + j)
 			}
-			
+
 			// 放回所有 entries
 			for j := 0; j < entriesPerGoroutine; j++ {
 				FastPutEntry(entries[j])
 			}
 		}(i)
 	}
-	
+
 	wg.Wait()
 }
 
@@ -460,7 +460,7 @@ func TestGetEntry_EmptyPool(t *testing.T) {
 		}
 		entries = append(entries, entry)
 	}
-	
+
 	// 清理：归还所有entries
 	for _, entry := range entries {
 		putEntry(entry)

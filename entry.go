@@ -28,17 +28,18 @@ func NewEntry() *Entry {
 }
 
 // Reset resets Entry to initial values for safe pool reuse
+//
 //go:inline
 func (p *Entry) Reset() {
 	// Reset numeric fields
 	p.Gid = 0
 	p.CallerLine = 0
 	p.Level = 0
-	
+
 	// Reset string fields (compiler optimizes consecutive assignments)
 	p.TraceId, p.File, p.Message = "", "", ""
 	p.CallerName, p.CallerDir, p.CallerFunc = "", "", ""
-	
+
 	// Clear slices efficiently while retaining capacity
 	p.PrefixMsg = p.PrefixMsg[:0]
 	p.SuffixMsg = p.SuffixMsg[:0]
@@ -52,6 +53,7 @@ var entryPool = sync.Pool{
 }
 
 // getEntry gets Entry instance from object pool
+//
 //go:inline
 func getEntry() *Entry {
 	if entry := entryPool.Get(); entry != nil {
@@ -61,6 +63,7 @@ func getEntry() *Entry {
 }
 
 // putEntry returns Entry instance to object pool for reuse
+//
 //go:inline
 func putEntry(entry *Entry) {
 	if entry != nil {

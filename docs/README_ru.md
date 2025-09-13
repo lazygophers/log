@@ -1,8 +1,12 @@
 # 🚀 LazyGophers Log
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
+[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
+[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Высокопроизводительная, многофункциональная библиотека логирования для Go приложений с поддержкой мультитегов сборки, асинхронной записи и обширными возможностями настройки.
@@ -26,7 +30,7 @@
 - **🔍 Контекстное трассирование**: Отслеживание ID горутин и ID трассировки
 - **🔌 Интеграция с фреймворками**: Нативная интеграция с Zap логгером
 - **⚙️ Высокая настраиваемость**: Гибкие уровни, выводы и форматирование
-- **🧪 Хорошо протестировано**: 93.5% покрытие тестами во всех конфигурациях сборки
+- **🧪 Хорошо протестировано**: 93.0% покрытие тестами во всех конфигурациях сборки
 
 ## 🚀 Быстрый старт
 
@@ -318,7 +322,7 @@ make benchmark-discard
 
 ## 📋 Требования
 
-- **Go**: 1.21 или выше
+- **Go**: 1.19 или выше
 - **Зависимости**: 
   - `go.uber.org/zap` (для интеграции с Zap)
   - `github.com/petermattis/goid` (для ID горутин)

@@ -18,7 +18,7 @@ func BenchmarkEntry_Performance_Comparison(b *testing.B) {
 			putEntry(entry)
 		}
 	})
-	
+
 	b.Run("FastGetPut", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -45,10 +45,10 @@ func BenchmarkEntry_Reset_Performance(b *testing.B) {
 	entry.Gid = 12345
 	entry.CallerLine = 42
 	entry.Level = InfoLevel
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		entry.Reset()
 		// 重新设置数据以保持一致的测试条件
@@ -78,7 +78,7 @@ func BenchmarkEntry_Concurrent_Performance(b *testing.B) {
 			}
 		})
 	})
-	
+
 	b.Run("FastConcurrent", func(b *testing.B) {
 		b.ReportAllocs()
 		b.RunParallel(func(pb *testing.PB) {
@@ -99,10 +99,10 @@ func BenchmarkEntry_Memory_Allocation(b *testing.B) {
 		var m1, m2 runtime.MemStats
 		runtime.GC()
 		runtime.ReadMemStats(&m1)
-		
+
 		b.ResetTimer()
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			entry := getEntry()
 			entry.Message = "memory test"
@@ -110,22 +110,22 @@ func BenchmarkEntry_Memory_Allocation(b *testing.B) {
 			entry.File = "test.go"
 			putEntry(entry)
 		}
-		
+
 		runtime.GC()
 		runtime.ReadMemStats(&m2)
-		
+
 		allocDiff := m2.TotalAlloc - m1.TotalAlloc
 		b.ReportMetric(float64(allocDiff)/float64(b.N), "bytes/op")
 	})
-	
+
 	b.Run("FastPoolOperations", func(b *testing.B) {
 		var m1, m2 runtime.MemStats
 		runtime.GC()
 		runtime.ReadMemStats(&m1)
-		
+
 		b.ResetTimer()
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			entry := FastGetEntry()
 			entry.Message = "memory test"
@@ -133,10 +133,10 @@ func BenchmarkEntry_Memory_Allocation(b *testing.B) {
 			entry.File = "test.go"
 			FastPutEntry(entry)
 		}
-		
+
 		runtime.GC()
 		runtime.ReadMemStats(&m2)
-		
+
 		allocDiff := m2.TotalAlloc - m1.TotalAlloc
 		b.ReportMetric(float64(allocDiff)/float64(b.N), "bytes/op")
 	})
@@ -146,18 +146,18 @@ func BenchmarkEntry_Memory_Allocation(b *testing.B) {
 func BenchmarkEntry_HighLoad_Performance(b *testing.B) {
 	numGoroutines := runtime.NumCPU() * 2
 	entriesPerGoroutine := 1000
-	
+
 	b.Run("OriginalHighLoad", func(b *testing.B) {
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			var wg sync.WaitGroup
-			
+
 			for j := 0; j < numGoroutines; j++ {
 				wg.Add(1)
 				go func(id int) {
 					defer wg.Done()
-					
+
 					for k := 0; k < entriesPerGoroutine; k++ {
 						entry := getEntry()
 						entry.Message = "high load test"
@@ -168,22 +168,22 @@ func BenchmarkEntry_HighLoad_Performance(b *testing.B) {
 					}
 				}(j)
 			}
-			
+
 			wg.Wait()
 		}
 	})
-	
+
 	b.Run("FastHighLoad", func(b *testing.B) {
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			var wg sync.WaitGroup
-			
+
 			for j := 0; j < numGoroutines; j++ {
 				wg.Add(1)
 				go func(id int) {
 					defer wg.Done()
-					
+
 					for k := 0; k < entriesPerGoroutine; k++ {
 						entry := FastGetEntry()
 						entry.Message = "high load test"
@@ -194,7 +194,7 @@ func BenchmarkEntry_HighLoad_Performance(b *testing.B) {
 					}
 				}(j)
 			}
-			
+
 			wg.Wait()
 		}
 	})
@@ -204,19 +204,19 @@ func BenchmarkEntry_HighLoad_Performance(b *testing.B) {
 func BenchmarkEntry_SliceReuse_Performance(b *testing.B) {
 	entry := getEntry()
 	testData := []byte("test prefix data for slice reuse benchmark")
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		// 模拟切片使用
 		entry.PrefixMsg = append(entry.PrefixMsg, testData...)
 		entry.SuffixMsg = append(entry.SuffixMsg, testData...)
-		
+
 		// 重置（会保留切片容量）
 		entry.Reset()
 	}
-	
+
 	putEntry(entry)
 }
 
@@ -234,7 +234,7 @@ func BenchmarkEntry_RealWorld_Scenario(b *testing.B) {
 		{"MediumLog", "Processing request for user authentication", "trace-auth-12345", "auth.go", "AuthenticateUser", InfoLevel},
 		{"LongLog", "Failed to connect to database after 3 retries, connection timeout exceeded, fallback to read-only replica", "trace-db-error-78901", "/path/to/db/connection.go", "ConnectWithRetry", ErrorLevel},
 	}
-	
+
 	for _, scenario := range scenarios {
 		b.Run("Original_"+scenario.name, func(b *testing.B) {
 			b.ReportAllocs()
@@ -250,7 +250,7 @@ func BenchmarkEntry_RealWorld_Scenario(b *testing.B) {
 				putEntry(entry)
 			}
 		})
-		
+
 		b.Run("Fast_"+scenario.name, func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
@@ -272,12 +272,12 @@ func BenchmarkEntry_RealWorld_Scenario(b *testing.B) {
 func BenchmarkEntry_CPU_Efficiency(b *testing.B) {
 	b.Run("OriginalCPUEfficiency", func(b *testing.B) {
 		b.ReportAllocs()
-		
+
 		start := time.Now()
-		
+
 		for i := 0; i < b.N; i++ {
 			entry := getEntry()
-			
+
 			// 模拟常见的日志字段设置
 			entry.Message = "CPU efficiency test message"
 			entry.TraceId = "trace-cpu-test"
@@ -286,27 +286,27 @@ func BenchmarkEntry_CPU_Efficiency(b *testing.B) {
 			entry.CallerLine = 100
 			entry.Level = InfoLevel
 			entry.Gid = int64(i)
-			
+
 			// 模拟一些字符串操作
 			if i%2 == 0 {
 				entry.PrefixMsg = append(entry.PrefixMsg, []byte("CPU: ")...)
 			}
-			
+
 			putEntry(entry)
 		}
-		
+
 		duration := time.Since(start)
 		b.ReportMetric(float64(duration.Nanoseconds())/float64(b.N), "ns/op")
 	})
-	
+
 	b.Run("FastCPUEfficiency", func(b *testing.B) {
 		b.ReportAllocs()
-		
+
 		start := time.Now()
-		
+
 		for i := 0; i < b.N; i++ {
 			entry := FastGetEntry()
-			
+
 			// 模拟常见的日志字段设置
 			entry.Message = "CPU efficiency test message"
 			entry.TraceId = "trace-cpu-test"
@@ -315,15 +315,15 @@ func BenchmarkEntry_CPU_Efficiency(b *testing.B) {
 			entry.CallerLine = 100
 			entry.Level = InfoLevel
 			entry.Gid = int64(i)
-			
+
 			// 模拟一些字符串操作
 			if i%2 == 0 {
 				entry.PrefixMsg = append(entry.PrefixMsg, []byte("CPU: ")...)
 			}
-			
+
 			FastPutEntry(entry)
 		}
-		
+
 		duration := time.Since(start)
 		b.ReportMetric(float64(duration.Nanoseconds())/float64(b.N), "ns/op")
 	})

@@ -12,14 +12,14 @@ import (
 
 // HourlyRotator implements hourly log rotation
 type HourlyRotator struct {
-	mu           sync.Mutex
-	filename     string
-	linkName     string
-	currentFile  *os.File
-	currentHour  string
-	maxSize      int64 // Maximum file size in bytes
-	maxFiles     int   // Maximum number of files to keep
-	cleanupOnce  sync.Once
+	mu          sync.Mutex
+	filename    string
+	linkName    string
+	currentFile *os.File
+	currentHour string
+	maxSize     int64 // Maximum file size in bytes
+	maxFiles    int   // Maximum number of files to keep
+	cleanupOnce sync.Once
 }
 
 // NewHourlyRotator creates a new hourly rotating log writer
@@ -30,12 +30,12 @@ func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotat
 		maxSize:  maxSize,
 		maxFiles: maxFiles,
 	}
-	
+
 	// Start cleanup goroutine
 	r.cleanupOnce.Do(func() {
 		go r.cleanup()
 	})
-	
+
 	return r
 }
 
@@ -43,15 +43,15 @@ func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotat
 func (r *HourlyRotator) Write(p []byte) (n int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	if err := r.rotate(); err != nil {
 		return 0, err
 	}
-	
+
 	if r.currentFile == nil {
 		return 0, fmt.Errorf("no current file")
 	}
-	
+
 	return r.currentFile.Write(p)
 }
 
@@ -59,7 +59,7 @@ func (r *HourlyRotator) Write(p []byte) (n int, err error) {
 func (r *HourlyRotator) rotate() error {
 	now := time.Now()
 	hour := now.Format("2006010215")
-	
+
 	// Check if rotation needed (hour change or file size limit exceeded)
 	needRotate := r.currentHour != hour
 	if r.currentFile != nil && !needRotate {
@@ -68,11 +68,11 @@ func (r *HourlyRotator) rotate() error {
 			needRotate = true
 		}
 	}
-	
+
 	if needRotate || r.currentFile == nil {
 		return r.doRotate(hour)
 	}
-	
+
 	return nil
 }
 
@@ -82,25 +82,25 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	if r.currentFile != nil {
 		r.currentFile.Close()
 	}
-	
+
 	// Ensure directory exists
 	ensureDir(filepath.Dir(r.filename))
-	
+
 	// Generate new filename
 	newFilename := r.filename + hour + ".log"
-	
+
 	// Open new file
 	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
-	
+
 	r.currentFile = file
 	r.currentHour = hour
-	
+
 	// Update soft link
 	r.updateLink(newFilename)
-	
+
 	return nil
 }
 
@@ -108,7 +108,7 @@ func (r *HourlyRotator) doRotate(hour string) error {
 func (r *HourlyRotator) updateLink(target string) {
 	// Remove old link
 	os.Remove(r.linkName)
-	
+
 	// Create new link (ignore errors, soft link creation failure should not affect logging)
 	os.Symlink(filepath.Base(target), r.linkName)
 }
@@ -117,7 +117,7 @@ func (r *HourlyRotator) updateLink(target string) {
 func (r *HourlyRotator) cleanup() {
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
-	
+
 	for range ticker.C {
 		r.cleanupOldFiles()
 	}
@@ -127,14 +127,14 @@ func (r *HourlyRotator) cleanup() {
 func (r *HourlyRotator) cleanupOldFiles() {
 	dir := filepath.Dir(r.filename)
 	base := filepath.Base(r.filename)
-	
+
 	// Read all files in directory
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		fmt.Printf("Error reading log directory %s for cleanup: %v\n", dir, err)
 		return
 	}
-	
+
 	// Filter log files
 	var logFiles []string
 	for _, file := range files {
@@ -146,18 +146,18 @@ func (r *HourlyRotator) cleanupOldFiles() {
 			}
 		}
 	}
-	
+
 	// Sort files by name descending (newest first)
 	sort.Slice(logFiles, func(i, j int) bool {
 		return logFiles[i] > logFiles[j]
 	})
-	
+
 	// Delete old files exceeding retention count
 	for i, filename := range logFiles {
 		if i < r.maxFiles {
 			continue
 		}
-		
+
 		fullPath := filepath.Join(dir, filename)
 		fmt.Printf("Deleting old log file: %s\n", fullPath)
 		if err := os.Remove(fullPath); err != nil {
@@ -170,11 +170,11 @@ func (r *HourlyRotator) cleanupOldFiles() {
 func (r *HourlyRotator) Sync() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	if r.currentFile != nil {
 		return r.currentFile.Sync()
 	}
-	
+
 	return nil
 }
 
@@ -182,10 +182,10 @@ func (r *HourlyRotator) Sync() error {
 func (r *HourlyRotator) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	if r.currentFile != nil {
 		return r.currentFile.Close()
 	}
-	
+
 	return nil
 }

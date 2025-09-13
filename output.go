@@ -54,7 +54,7 @@ type Output interface {
 var (
 	// rotatorInstances stores created rotator instances to avoid duplicates
 	rotatorInstances = make(map[string]*HourlyRotator)
-	
+
 	// rotatorMutex protects concurrent access to rotatorInstances
 	rotatorMutex = &sync.Mutex{}
 )
@@ -63,21 +63,21 @@ var (
 func GetOutputWriterHourly(filename string) Writer {
 	rotatorMutex.Lock()
 	defer rotatorMutex.Unlock()
-	
+
 	// Check if rotator instance already exists for this file
 	if rotator, exists := rotatorInstances[filename]; exists {
 		return rotator
 	}
-	
+
 	// Create new rotator instance
 	rotator := NewHourlyRotator(
 		filename,
 		1024*1024*8*100, // 800MB size limit
-		12,               // Keep latest 12 files
+		12,              // Keep latest 12 files
 	)
-	
+
 	// Store instance for future use
 	rotatorInstances[filename] = rotator
-	
+
 	return rotator
 }

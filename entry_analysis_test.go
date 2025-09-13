@@ -9,10 +9,10 @@ import (
 // 深度分析Entry结构体的内存布局和性能瓶颈
 func TestEntry_MemoryLayout_Analysis(t *testing.T) {
 	entry := &Entry{}
-	
+
 	t.Logf("Entry struct size: %d bytes", unsafe.Sizeof(*entry))
 	t.Logf("Entry pointer size: %d bytes", unsafe.Sizeof(entry))
-	
+
 	// 分析各字段的内存偏移
 	t.Logf("Field offsets:")
 	t.Logf("  Pid: %d", unsafe.Offsetof(entry.Pid))
@@ -28,7 +28,7 @@ func TestEntry_MemoryLayout_Analysis(t *testing.T) {
 	t.Logf("  CallerFunc: %d", unsafe.Offsetof(entry.CallerFunc))
 	t.Logf("  PrefixMsg: %d", unsafe.Offsetof(entry.PrefixMsg))
 	t.Logf("  SuffixMsg: %d", unsafe.Offsetof(entry.SuffixMsg))
-	
+
 	// 计算内存对齐浪费
 	totalFieldSize := int(unsafe.Sizeof(entry.Pid)) +
 		int(unsafe.Sizeof(entry.Gid)) +
@@ -43,10 +43,10 @@ func TestEntry_MemoryLayout_Analysis(t *testing.T) {
 		int(unsafe.Sizeof(entry.CallerFunc)) +
 		int(unsafe.Sizeof(entry.PrefixMsg)) +
 		int(unsafe.Sizeof(entry.SuffixMsg))
-	
+
 	actualSize := int(unsafe.Sizeof(*entry))
 	padding := actualSize - totalFieldSize
-	
+
 	t.Logf("Total field sizes: %d bytes", totalFieldSize)
 	t.Logf("Actual struct size: %d bytes", actualSize)
 	t.Logf("Padding/alignment waste: %d bytes (%.1f%%)", padding, float64(padding)/float64(actualSize)*100)
@@ -56,7 +56,7 @@ func TestEntry_MemoryLayout_Analysis(t *testing.T) {
 func BenchmarkEntry_MemoryAccess_Patterns(b *testing.B) {
 	entry := getEntry()
 	defer putEntry(entry)
-	
+
 	b.Run("SequentialAccess", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -74,7 +74,7 @@ func BenchmarkEntry_MemoryAccess_Patterns(b *testing.B) {
 			entry.CallerFunc = "test"
 		}
 	})
-	
+
 	b.Run("RandomAccess", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -104,7 +104,7 @@ func BenchmarkEntry_SyncPool_Overhead(b *testing.B) {
 			_ = entry
 		}
 	})
-	
+
 	b.Run("SyncPoolGet", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -114,7 +114,7 @@ func BenchmarkEntry_SyncPool_Overhead(b *testing.B) {
 			entryPool.Put(entry)
 		}
 	})
-	
+
 	b.Run("OptimizedGetPut", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -130,7 +130,7 @@ func BenchmarkEntry_SyncPool_Overhead(b *testing.B) {
 func BenchmarkEntry_Reset_Strategies(b *testing.B) {
 	entry := getEntry()
 	defer putEntry(entry)
-	
+
 	// 设置测试数据
 	setupEntry := func() {
 		entry.Gid = 12345
@@ -145,7 +145,7 @@ func BenchmarkEntry_Reset_Strategies(b *testing.B) {
 		entry.PrefixMsg = []byte("prefix")
 		entry.SuffixMsg = []byte("suffix")
 	}
-	
+
 	b.Run("CurrentOptimized", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -153,7 +153,7 @@ func BenchmarkEntry_Reset_Strategies(b *testing.B) {
 			entry.Reset()
 		}
 	})
-	
+
 	b.Run("IndividualAssign", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -172,7 +172,7 @@ func BenchmarkEntry_Reset_Strategies(b *testing.B) {
 			entry.SuffixMsg = entry.SuffixMsg[:0]
 		}
 	})
-	
+
 	b.Run("StructReset", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -193,7 +193,7 @@ func BenchmarkEntry_Reset_Strategies(b *testing.B) {
 // 分析类型断言开销
 func BenchmarkEntry_TypeAssertion_Overhead(b *testing.B) {
 	pool := &entryPool
-	
+
 	b.Run("WithTypeAssertion", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -201,7 +201,7 @@ func BenchmarkEntry_TypeAssertion_Overhead(b *testing.B) {
 			pool.Put(entry)
 		}
 	})
-	
+
 	b.Run("DirectTyped", func(b *testing.B) {
 		// 无法避免类型断言，这里只是为了对比
 		b.ReportAllocs()
@@ -220,7 +220,7 @@ func BenchmarkEntry_TypeAssertion_Overhead(b *testing.B) {
 func BenchmarkEntry_StringReset_Strategies(b *testing.B) {
 	entry := getEntry()
 	defer putEntry(entry)
-	
+
 	b.Run("BatchAssignment", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -229,7 +229,7 @@ func BenchmarkEntry_StringReset_Strategies(b *testing.B) {
 			entry.CallerName, entry.CallerDir, entry.CallerFunc = "", "", ""
 		}
 	})
-	
+
 	b.Run("IndividualAssignment", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -247,14 +247,14 @@ func BenchmarkEntry_StringReset_Strategies(b *testing.B) {
 // CPU 缓存行分析
 func TestEntry_CacheLine_Analysis(t *testing.T) {
 	const cacheLineSize = 64 // 大多数现代CPU的缓存行大小
-	
+
 	entrySize := unsafe.Sizeof(Entry{})
 	entriesPerCacheLine := cacheLineSize / entrySize
-	
+
 	t.Logf("Entry size: %d bytes", entrySize)
 	t.Logf("Cache line size: %d bytes", cacheLineSize)
 	t.Logf("Entries per cache line: %d", entriesPerCacheLine)
-	
+
 	if entrySize > cacheLineSize {
 		t.Logf("WARNING: Entry size exceeds cache line size by %d bytes", entrySize-cacheLineSize)
 		t.Logf("This may cause cache misses during field access")
@@ -272,7 +272,7 @@ func BenchmarkEntry_AllocationPatterns(b *testing.B) {
 			_ = entry
 		}
 	})
-	
+
 	b.Run("HeapAllocation", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -282,7 +282,7 @@ func BenchmarkEntry_AllocationPatterns(b *testing.B) {
 			runtime.KeepAlive(entry)
 		}
 	})
-	
+
 	b.Run("PooledAllocation", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {

@@ -1,11 +1,11 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"go.uber.org/zap/zapcore"
-	"golang.org/x/net/context"
 )
 
 // CloneToCtx 将一个 Logger 克隆到一个新的 LoggerWithCtx 中。
