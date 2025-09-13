@@ -1,5 +1,3 @@
-// Package log 提供异步日志写入器实现
-// 通过通道缓冲和批量写入优化高并发场景下的日志写入性能。
 package log
 
 import (
@@ -8,22 +6,17 @@ import (
 	"sync"
 )
 
-// AsyncWriter 定义了一个异步日志写入器。
-// 它通过一个缓冲通道接收日志数据，并由一个后台 goroutine 批量写入底层 writer，
-// 从而实现非阻塞的日志写入操作，在高并发场景下可以显著提升性能。
+// AsyncWriter defines an asynchronous log writer
 type AsyncWriter struct {
-	writer Writer               // writer 是实际执行写入操作的底层写入器。
-	c      chan []byte          // c 是用于缓冲日志数据的通道。
-	close  chan *sync.WaitGroup // close 是用于接收关闭信号的通道，并使用 WaitGroup 实现同步关闭。
+	writer Writer               // writer performs actual write operations
+	c      chan []byte          // c is the channel for buffering log data
+	close  chan *sync.WaitGroup // close channel for shutdown signal with WaitGroup sync
 }
 
-// ErrAsyncWriterFull 异步写入器通道满错误。
-// 当缓冲通道满时写入会返回此错误。
+// ErrAsyncWriterFull is returned when the async writer buffer is full
 var ErrAsyncWriterFull = errors.New("async writer full")
 
-// Write 将字节数据 b 异步写入。
-// 它将数据发送到缓冲通道 c，如果通道已满，则立即返回 ErrAsyncWriterFull 错误，
-// 实现了非阻塞写入。实际的写入操作由后台的 goroutine 完成。
+// Write asynchronously writes byte data
 func (p *AsyncWriter) Write(b []byte) (n int, err error) {
 	select {
 	case p.c <- b:
@@ -33,10 +26,7 @@ func (p *AsyncWriter) Write(b []byte) (n int, err error) {
 	}
 }
 
-// Close 关闭异步写入器。
-// 这是一个优雅关闭的实现：它会向 close 通道发送一个关闭信号，
-// 并等待后台 goroutine 将缓冲通道 c 中的所有剩余数据都写入底层 writer 后再返回。
-// 此方法是线程安全的，可以被多次调用。
+// Close gracefully shuts down the async writer
 func (p *AsyncWriter) Close() error {
 	var w sync.WaitGroup
 	w.Add(1)
@@ -48,64 +38,55 @@ func (p *AsyncWriter) Close() error {
 	return nil
 }
 
-// NewAsyncWriter 创建并初始化一个 AsyncWriter 实例。
-// 它接收一个底层的 Writer 接口作为参数，并启动一个后台 goroutine 来处理日志的批量写入。
-//
-// 参数:
-//
-//	writer: 一个实现了 Writer 接口的实例，用于最终的日志输出。
-//
-// 返回:
-//
-//	一个初始化完成的 *AsyncWriter 指针。
+// NewAsyncWriter creates and initializes an AsyncWriter instance
 func NewAsyncWriter(writer Writer) *AsyncWriter {
 	p := &AsyncWriter{
 		writer: writer,
-		c:      make(chan []byte, 1024),       // 初始化容量为 1024 的缓冲通道
-		close:  make(chan *sync.WaitGroup, 1), // 初始化容量为 1 的关闭信号通道
+		c:      make(chan []byte, 1024),       // Initialize buffer channel with capacity 1024
+		close:  make(chan *sync.WaitGroup, 1), // Initialize close signal channel with capacity 1
 	}
 
-	// 启动一个后台 goroutine 负责消费通道中的数据并批量写入。
+	// Start background goroutine to consume channel data and batch write
 	go func() {
-		var cache bytes.Buffer // 创建一个字节缓冲区，用于汇集多条日志
+		var cache bytes.Buffer // Create byte buffer to collect multiple log entries
 		for {
-			cache.Reset() // 每次循环开始时重置缓冲区
+			cache.Reset() // Reset buffer at the beginning of each loop
 			select {
-			// case1: 正常接收日志数据
+			// case1: Normal log data reception
 			case c := <-p.c:
-				// 将第一条日志写入缓冲区
+				// Write first log entry to buffer
 				cache.Write(c)
-				// 通过内层循环，尽可能多地从通道中读取数据，实现批量处理
+				// Inner loop to read as much data as possible for batch processing
 				for {
 					select {
 					case c := <-p.c:
-						cache.Write(c) // 将后续日志追加到缓冲区
+						cache.Write(c) // Append subsequent log entries to buffer
 					default:
-						goto OUT // 如果通道为空，则跳出内层循环，执行写入
+						goto OUT // If channel is empty, exit inner loop and perform write
 					}
 				}
 			OUT:
-				// 将汇集的多条日志一次性写入底层 writer
+				// Write collected log entries to underlying writer in one batch
 				p.writer.Write(cache.Bytes())
 
-			// case2: 接收到关闭信号，准备优雅退出
+			// case2: Shutdown signal received, prepare graceful exit
 			case w := <-p.close:
-				// 在退出前，需要处理通道中所有剩余的日志
+				// Process all remaining log entries in channel before exit
 				for {
 					select {
 					case c := <-p.c:
-						cache.Write(c) // 将剩余日志追加到缓冲区
+						cache.Write(c) // Append remaining log entries to buffer
 					default:
-						goto END // 如果通道已空，则跳出循环
+						goto END // If channel is empty, exit loop
 					}
 				}
 			END:
-				// 将缓冲区中最后剩余的日志写入底层 writer
+				// Write any remaining log entries in buffer to underlying writer
 				if cache.Len() > 0 {
 					p.writer.Write(cache.Bytes())
 				}
-				w.Done() // 通知 Close() 方法，清理工作已完成
-				return   // 退出 goroutine
+				w.Done() // Notify Close() method that cleanup is complete
+				return   // Exit goroutine
 			}
 		}
 	}()

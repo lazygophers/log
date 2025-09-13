@@ -1,4 +1,3 @@
-// Package log 提供灵活可配置的日志记录功能，支持多级别日志输出、自定义格式和输出目标。
 package log
 
 import (
@@ -13,37 +12,37 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// WriteSyncerWrapper 实现 zapcore.WriteSyncer 接口
+// WriteSyncerWrapper implements zapcore.WriteSyncer interface
 type WriteSyncerWrapper struct {
 	writer io.Writer
 }
 
-// Write 实现 io.Writer 接口
+// Write implements io.Writer interface
 func (w *WriteSyncerWrapper) Write(p []byte) (n int, err error) {
 	return w.writer.Write(p)
 }
 
-// Sync 实现 zapcore.WriteSyncer 接口
+// Sync implements zapcore.WriteSyncer interface
 func (w *WriteSyncerWrapper) Sync() error {
-	// 如果 writer 实现了 Sync 方法，则调用它
+	// Call Sync if writer implements it
 	if syncer, ok := w.writer.(interface{ Sync() error }); ok {
 		return syncer.Sync()
 	}
-	// 否则返回 nil（大多数标准 writer 不需要 sync）
+	// Return nil for standard writers
 	return nil
 }
 
-// wrapWriter 将 io.Writer 包装为 zapcore.WriteSyncer
+// wrapWriter wraps io.Writer as zapcore.WriteSyncer
 func wrapWriter(w io.Writer) zapcore.WriteSyncer {
-	// 如果已经是 WriteSyncer，直接返回
+	// Return directly if already WriteSyncer
 	if ws, ok := w.(zapcore.WriteSyncer); ok {
 		return ws
 	}
-	// 否则包装它
+	// Otherwise wrap it
 	return &WriteSyncerWrapper{writer: w}
 }
 
-// Logger 是日志记录器核心结构，负责日志的输出控制和格式配置
+// Logger is the core logging structure
 type Logger struct {
 	level Level
 	out zapcore.WriteSyncer
@@ -52,21 +51,19 @@ type Logger struct {
 	PrefixMsg []byte
 	SuffixMsg []byte
 	
-	// 性能优化字段
+	// Performance optimization fields
 	enableCaller bool
 	enableTrace  bool
 	
-	// 缓存pool用于减少分配
+	// Entry cache pool
 	entryCache sync.Pool
 }
 
-// newLogger 创建一个新的 Logger 实例，并设置默认值。
-// 默认日志级别为 InfoLevel，输出到 os.Stdout。
-// 在 release 模式下，如果指定了 ReleaseLogPath，会使用按小时轮转的文件输出。
+// newLogger creates a new Logger instance with default values
 func newLogger() *Logger {
 	var out io.Writer = os.Stdout
 	
-	// 在 release 模式下，如果指定了文件路径，则使用按小时轮转的日志文件
+	// Use hourly rotating file in release mode if path specified
 	if ReleaseLogPath != "" {
 		out = GetOutputWriterHourly(ReleaseLogPath)
 	}
@@ -89,73 +86,62 @@ func newLogger() *Logger {
 	return logger
 }
 
-// SetCallerDepth 设置日志调用栈深度
-// callerDepth: 调用栈深度（从当前函数开始计算）
-// 返回: Logger指针用于链式调用
+// SetCallerDepth sets the caller stack depth
 func (p *Logger) SetCallerDepth(callerDepth int) *Logger {
 	p.callerDepth = callerDepth
 	return p
 }
 
-// SetPrefixMsg 设置日志消息前缀
-// prefixMsg: 要添加的前缀字符串
-// 返回: Logger指针用于链式调用
+// SetPrefixMsg sets the log message prefix
 func (p *Logger) SetPrefixMsg(prefixMsg string) *Logger {
 	p.PrefixMsg = []byte(prefixMsg)
 	return p
 }
 
-// AppendPrefixMsg 追加日志消息前缀
-// prefixMsg: 要追加的前缀字符串
-// 返回: Logger指针用于链式调用
+// AppendPrefixMsg appends to the log message prefix
 func (p *Logger) AppendPrefixMsg(prefixMsg string) *Logger {
 	p.PrefixMsg = []byte(string(p.PrefixMsg) + prefixMsg)
 	return p
 }
 
-// SetSuffixMsg 设置日志消息后缀
-// suffixMsg: 要添加的后缀字符串
-// 返回: Logger指针用于链式调用
+// SetSuffixMsg sets the log message suffix
 func (p *Logger) SetSuffixMsg(suffixMsg string) *Logger {
 	p.SuffixMsg = []byte(suffixMsg)
 	return p
 }
 
-// AppendSuffixMsg 追加日志消息后缀
-// suffixMsg: 要追加的后缀字符串
-// 返回: Logger指针用于链式调用
+// AppendSuffixMsg appends to the log message suffix
 func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
 	p.SuffixMsg = []byte(string(p.SuffixMsg) + suffixMsg)
 	return p
 }
 
-// fastGetEntry 高性能获取Entry
+// fastGetEntry gets Entry from pool
 //go:inline
 func (p *Logger) fastGetEntry() *Entry {
 	return p.entryCache.Get().(*Entry)
 }
 
-// fastPutEntry 高性能归还Entry  
+// fastPutEntry returns Entry to pool  
 //go:inline
 func (p *Logger) fastPutEntry(entry *Entry) {
 	entry.Reset()
 	p.entryCache.Put(entry)
 }
 
-// EnableCaller 控制是否启用调用者信息
+// EnableCaller controls caller information
 func (p *Logger) EnableCaller(enable bool) *Logger {
 	p.enableCaller = enable
 	return p
 }
 
-// EnableTrace 控制是否启用跟踪信息
+// EnableTrace controls trace information
 func (p *Logger) EnableTrace(enable bool) *Logger {
 	p.enableTrace = enable
 	return p
 }
 
-// Clone 创建当前Logger的深度拷贝
-// 返回: 新的Logger实例
+// Clone creates a deep copy of current Logger
 func (p *Logger) Clone() *Logger {
 	l := Logger{
 		level:        p.level,
@@ -181,23 +167,18 @@ func (p *Logger) Clone() *Logger {
 	return &l
 }
 
-// SetLevel 设置日志级别
-// level: 日志级别（TraceLevel/DebugLevel/InfoLevel等）
-// 返回: Logger指针用于链式调用
+// SetLevel sets the logging level
 func (p *Logger) SetLevel(level Level) *Logger {
 	p.level = level
 	return p
 }
 
-// Level 获取当前日志级别
-// 返回: 当前日志级别
+// Level returns the current logging level
 func (p *Logger) Level() Level {
 	return p.level
 }
 
-// SetOutput 设置日志输出目标
-// writes: 一个或多个io.Writer输出目标
-// 返回: Logger指针用于链式调用
+// SetOutput sets the log output targets
 func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	var ws []zapcore.WriteSyncer
 	for _, write := range writes {
@@ -218,9 +199,7 @@ func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	return p
 }
 
-// Log 记录指定级别的日志
-// level: 日志级别
-// args: 日志内容参数
+// Log records a log with specified level
 func (p *Logger) Log(level Level, args ...interface{}) {
 	if !p.levelEnabled(level) {
 		return
@@ -228,10 +207,7 @@ func (p *Logger) Log(level Level, args ...interface{}) {
 	p.log(level, fmt.Sprint(args...))
 }
 
-// Logf 记录格式化日志
-// level: 日志级别
-// format: 格式化字符串
-// args: 格式化参数
+// Logf records a formatted log
 func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	if !p.levelEnabled(level) {
 		return
@@ -239,26 +215,23 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	p.log(level, fmt.Sprintf(format, args...))
 }
 
-// log 是内部核心日志记录函数，优化版本。
-// 它首先检查指定的日志级别是否启用，如果未启用则直接返回。
-// 使用高性能的Entry缓存池，并条件性地获取昂贵的调用者信息和跟踪信息。
-// 批量设置字段以提高缓存友好性，最后格式化并写入输出。
+// log is the internal core logging function
 //go:noinline
 func (p *Logger) log(level Level, msg string) {
 	entry := p.fastGetEntry()
 	
-	// 批量设置基础字段
+	// Set basic fields
 	entry.Level = level
 	entry.Message = msg
 	entry.Time = time.Now()
 	
-	// 条件性设置开销较大的字段
+	// Set expensive fields conditionally
 	if p.enableTrace {
 		entry.Gid = goid.Get()
 		entry.TraceId = getTrace(entry.Gid)
 	}
 	
-	// 条件性获取调用者信息
+	// Get caller info conditionally
 	if p.enableCaller {
 		var pc uintptr
 		var ok bool
@@ -271,7 +244,7 @@ func (p *Logger) log(level Level, msg string) {
 		}
 	}
 	
-	// 设置前缀后缀（避免不必要的拷贝）
+	// Set prefix/suffix without unnecessary copies
 	if len(p.PrefixMsg) > 0 {
 		entry.PrefixMsg = p.PrefixMsg
 	}
@@ -279,16 +252,14 @@ func (p *Logger) log(level Level, msg string) {
 		entry.SuffixMsg = p.SuffixMsg
 	}
 	
-	// 格式化并写入
+	// Format and write
 	formatted := p.Format.Format(entry)
 	p.write(level, formatted)
 	
 	p.fastPutEntry(entry)
 }
 
-// write 将格式化后的日志字节流写入输出。
-// 如果日志级别是 PanicLevel，它会在写入后调用 Sync() 并触发 panic。
-// 如果日志级别是 FatalLevel，它会在写入后调用 Sync() 并以状态码 -1 退出程序。
+// write writes formatted log bytes to output
 func (p *Logger) write(level Level, buf []byte) {
 	_, _ = p.out.Write(buf)
 
@@ -301,68 +272,57 @@ func (p *Logger) write(level Level, buf []byte) {
 	}
 }
 
-// levelEnabled 检查当前日志级别是否允许输出指定级别的日志。
+// levelEnabled checks if the level should be logged
 func (p *Logger) levelEnabled(level Level) bool {
 	return p.level >= level
 }
 
-// Trace 记录TRACE级别日志
-// args: 日志内容参数
+// Trace logs at TRACE level
 func (p *Logger) Trace(args ...interface{}) {
 	p.Log(TraceLevel, args...)
 }
 
-// Debug 记录DEBUG级别日志
-// args: 日志内容参数
+// Debug logs at DEBUG level
 func (p *Logger) Debug(args ...interface{}) {
 	p.Log(DebugLevel, args...)
 }
 
-// Print 记录DEBUG级别日志（Print的别名）
-// args: 日志内容参数
+// Print logs at DEBUG level (alias for Debug)
 func (p *Logger) Print(args ...interface{}) {
 	p.Log(DebugLevel, args...)
 }
 
-// Info 记录INFO级别日志
-// args: 日志内容参数
+// Info logs at INFO level
 func (p *Logger) Info(args ...interface{}) {
 	p.Log(InfoLevel, args...)
 }
 
-// Warn 记录WARN级别日志。
-// args: 日志内容参数
+// Warn logs at WARN level
 func (p *Logger) Warn(args ...interface{}) {
 	p.Log(WarnLevel, args...)
 }
 
-// Warning 是 Warn 的别名，记录WARN级别日志。
-// args: 日志内容参数
+// Warning is an alias for Warn
 func (p *Logger) Warning(args ...interface{}) {
 	p.Log(WarnLevel, args...)
 }
 
-// Error 记录ERROR级别日志。
-// args: 日志内容参数
+// Error logs at ERROR level
 func (p *Logger) Error(args ...interface{}) {
 	p.Log(ErrorLevel, args...)
 }
 
-// Panic 记录PANIC级别日志，并触发panic。
-// args: 日志内容参数
+// Panic logs at PANIC level and panics
 func (p *Logger) Panic(args ...interface{}) {
 	p.Log(PanicLevel, args...)
 }
 
-// Fatal 记录FATAL级别日志，并终止程序。
-// args: 日志内容参数
+// Fatal logs at FATAL level and exits
 func (p *Logger) Fatal(args ...interface{}) {
 	p.Log(FatalLevel, args...)
 }
 
-// Tracef 记录格式化的TRACE级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Tracef logs formatted TRACE level message
 func (p *Logger) Tracef(format string, args ...interface{}) {
 	if !p.levelEnabled(TraceLevel) {
 		return
@@ -370,9 +330,7 @@ func (p *Logger) Tracef(format string, args ...interface{}) {
 	p.Logf(TraceLevel, format, args...)
 }
 
-// Printf 记录格式化的DEBUG级别日志（Printf是Debugf的别名）。
-// format: 格式化字符串
-// args: 格式化参数
+// Printf logs formatted DEBUG level message (alias for Debugf)
 func (p *Logger) Printf(format string, args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
@@ -380,9 +338,7 @@ func (p *Logger) Printf(format string, args ...interface{}) {
 	p.Logf(DebugLevel, format, args...)
 }
 
-// Debugf 记录格式化的DEBUG级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Debugf logs formatted DEBUG level message
 func (p *Logger) Debugf(format string, args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
@@ -390,9 +346,7 @@ func (p *Logger) Debugf(format string, args ...interface{}) {
 	p.Logf(DebugLevel, format, args...)
 }
 
-// Infof 记录格式化的INFO级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Infof logs formatted INFO level message
 func (p *Logger) Infof(format string, args ...interface{}) {
 	if !p.levelEnabled(InfoLevel) {
 		return
@@ -400,9 +354,7 @@ func (p *Logger) Infof(format string, args ...interface{}) {
 	p.Logf(InfoLevel, format, args...)
 }
 
-// Warnf 记录格式化的WARN级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Warnf logs formatted WARN level message
 func (p *Logger) Warnf(format string, args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
@@ -410,9 +362,7 @@ func (p *Logger) Warnf(format string, args ...interface{}) {
 	p.Logf(WarnLevel, format, args...)
 }
 
-// Warningf 是 Warnf 的别名，记录格式化的WARN级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Warningf is an alias for Warnf
 func (p *Logger) Warningf(format string, args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
@@ -420,9 +370,7 @@ func (p *Logger) Warningf(format string, args ...interface{}) {
 	p.Logf(WarnLevel, format, args...)
 }
 
-// Errorf 记录格式化的ERROR级别日志。
-// format: 格式化字符串
-// args: 格式化参数
+// Errorf logs formatted ERROR level message
 func (p *Logger) Errorf(format string, args ...interface{}) {
 	if !p.levelEnabled(ErrorLevel) {
 		return
@@ -430,9 +378,7 @@ func (p *Logger) Errorf(format string, args ...interface{}) {
 	p.Logf(ErrorLevel, format, args...)
 }
 
-// Fatalf 记录格式化的FATAL级别日志，并终止程序。
-// format: 格式化字符串
-// args: 格式化参数
+// Fatalf logs formatted FATAL level message and exits
 func (p *Logger) Fatalf(format string, args ...interface{}) {
 	if !p.levelEnabled(FatalLevel) {
 		return
@@ -440,9 +386,7 @@ func (p *Logger) Fatalf(format string, args ...interface{}) {
 	p.Logf(FatalLevel, format, args...)
 }
 
-// Panicf 记录格式化的PANIC级别日志，并触发panic。
-// format: 格式化字符串
-// args: 格式化参数
+// Panicf logs formatted PANIC level message and panics
 func (p *Logger) Panicf(format string, args ...interface{}) {
 	if !p.levelEnabled(PanicLevel) {
 		return
@@ -450,15 +394,12 @@ func (p *Logger) Panicf(format string, args ...interface{}) {
 	p.Logf(PanicLevel, format, args...)
 }
 
-// Sync 将缓冲区的日志刷新到磁盘。
+// Sync flushes buffered logs to disk
 func (p *Logger) Sync() {
 	_ = p.out.Sync()
 }
 
-// ParsingAndEscaping 控制是否禁用日志内容的解析和转义。
-// 这只对实现了 FormatFull 接口的格式化器有效。
-// disable: true表示禁用，false表示启用
-// 返回: Logger指针用于链式调用
+// ParsingAndEscaping controls log content parsing and escaping
 func (p *Logger) ParsingAndEscaping(disable bool) *Logger {
 	switch f := p.Format.(type) {
 	case FormatFull:
@@ -469,10 +410,7 @@ func (p *Logger) ParsingAndEscaping(disable bool) *Logger {
 	return p
 }
 
-// Caller 控制是否在日志中禁用调用者信息（文件名、行号、函数名）。
-// 这只对实现了 FormatFull 接口的格式化器有效。
-// disable: true表示禁用，false表示启用
-// 返回: Logger指针用于链式调用
+// Caller controls caller information in logs
 func (p *Logger) Caller(disable bool) *Logger {
 	switch f := p.Format.(type) {
 	case FormatFull:
@@ -483,7 +421,7 @@ func (p *Logger) Caller(disable bool) *Logger {
 	return p
 }
 
-// StartMsg 记录一条表示新日志开始的INFO级别消息。
+// StartMsg logs a new log start message
 func (p *Logger) StartMsg() {
 	p.Infof("========== start new log ==========")
 }

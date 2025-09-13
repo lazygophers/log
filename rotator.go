@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-// HourlyRotator 实现按小时轮转的日志写入器
+// HourlyRotator implements hourly log rotation
 type HourlyRotator struct {
 	mu           sync.Mutex
 	filename     string
 	linkName     string
 	currentFile  *os.File
 	currentHour  string
-	maxSize      int64 // 最大文件大小（字节）
-	maxFiles     int   // 最大保留文件数
+	maxSize      int64 // Maximum file size in bytes
+	maxFiles     int   // Maximum number of files to keep
 	cleanupOnce  sync.Once
 }
 
-// NewHourlyRotator 创建一个新的按小时轮转的日志写入器
+// NewHourlyRotator creates a new hourly rotating log writer
 func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotator {
 	r := &HourlyRotator{
 		filename: filename,
@@ -31,7 +31,7 @@ func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotat
 		maxFiles: maxFiles,
 	}
 	
-	// 启动清理协程
+	// Start cleanup goroutine
 	r.cleanupOnce.Do(func() {
 		go r.cleanup()
 	})
@@ -39,7 +39,7 @@ func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotat
 	return r
 }
 
-// Write 实现 io.Writer 接口
+// Write implements io.Writer interface
 func (r *HourlyRotator) Write(p []byte) (n int, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -55,15 +55,15 @@ func (r *HourlyRotator) Write(p []byte) (n int, err error) {
 	return r.currentFile.Write(p)
 }
 
-// rotate 检查是否需要轮转并执行轮转
+// rotate checks if rotation is needed and performs it
 func (r *HourlyRotator) rotate() error {
 	now := time.Now()
 	hour := now.Format("2006010215")
 	
-	// 检查是否需要轮转（小时变化或文件大小超限）
+	// Check if rotation needed (hour change or file size limit exceeded)
 	needRotate := r.currentHour != hour
 	if r.currentFile != nil && !needRotate {
-		// 检查文件大小
+		// Check file size
 		if stat, err := r.currentFile.Stat(); err == nil && stat.Size() >= r.maxSize {
 			needRotate = true
 		}
@@ -76,20 +76,20 @@ func (r *HourlyRotator) rotate() error {
 	return nil
 }
 
-// doRotate 执行实际的轮转操作
+// doRotate performs actual rotation operation
 func (r *HourlyRotator) doRotate(hour string) error {
-	// 关闭当前文件
+	// Close current file
 	if r.currentFile != nil {
 		r.currentFile.Close()
 	}
 	
-	// 确保目录存在
+	// Ensure directory exists
 	ensureDir(filepath.Dir(r.filename))
 	
-	// 生成新的文件名
+	// Generate new filename
 	newFilename := r.filename + hour + ".log"
 	
-	// 打开新文件
+	// Open new file
 	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
@@ -98,22 +98,22 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	r.currentFile = file
 	r.currentHour = hour
 	
-	// 更新软链接
+	// Update soft link
 	r.updateLink(newFilename)
 	
 	return nil
 }
 
-// updateLink 更新指向最新日志文件的软链接
+// updateLink updates soft link pointing to the latest log file
 func (r *HourlyRotator) updateLink(target string) {
-	// 删除旧链接
+	// Remove old link
 	os.Remove(r.linkName)
 	
-	// 创建新链接（忽略错误，软链接创建失败不应影响日志写入）
+	// Create new link (ignore errors, soft link creation failure should not affect logging)
 	os.Symlink(filepath.Base(target), r.linkName)
 }
 
-// cleanup 定期清理旧的日志文件
+// cleanup periodically cleans up old log files
 func (r *HourlyRotator) cleanup() {
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
@@ -123,50 +123,50 @@ func (r *HourlyRotator) cleanup() {
 	}
 }
 
-// cleanupOldFiles 清理过期的日志文件
+// cleanupOldFiles cleans up expired log files
 func (r *HourlyRotator) cleanupOldFiles() {
 	dir := filepath.Dir(r.filename)
 	base := filepath.Base(r.filename)
 	
-	// 读取目录中的所有文件
+	// Read all files in directory
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		fmt.Printf("读取日志目录 %s 用于清理时出错: %v\n", dir, err)
+		fmt.Printf("Error reading log directory %s for cleanup: %v\n", dir, err)
 		return
 	}
 	
-	// 筛选出日志文件
+	// Filter log files
 	var logFiles []string
 	for _, file := range files {
 		if !file.IsDir() {
 			name := file.Name()
-			// 匹配格式：base + YYYYMMDDHH + .log
+			// Match format: base + YYYYMMDDHH + .log
 			if strings.HasPrefix(name, base) && strings.HasSuffix(name, ".log") && len(name) == len(base)+14 {
 				logFiles = append(logFiles, name)
 			}
 		}
 	}
 	
-	// 按文件名降序排序（最新的在前）
+	// Sort files by name descending (newest first)
 	sort.Slice(logFiles, func(i, j int) bool {
 		return logFiles[i] > logFiles[j]
 	})
 	
-	// 删除超过保留数量的旧文件
+	// Delete old files exceeding retention count
 	for i, filename := range logFiles {
 		if i < r.maxFiles {
 			continue
 		}
 		
 		fullPath := filepath.Join(dir, filename)
-		fmt.Printf("正在删除旧的日志文件: %s\n", fullPath)
+		fmt.Printf("Deleting old log file: %s\n", fullPath)
 		if err := os.Remove(fullPath); err != nil {
-			fmt.Printf("删除旧日志文件 %s 失败: %v\n", fullPath, err)
+			fmt.Printf("Failed to delete old log file %s: %v\n", fullPath, err)
 		}
 	}
 }
 
-// Sync 同步当前文件的内容到磁盘
+// Sync syncs current file content to disk
 func (r *HourlyRotator) Sync() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -178,7 +178,7 @@ func (r *HourlyRotator) Sync() error {
 	return nil
 }
 
-// Close 关闭轮转器并清理资源
+// Close closes the rotator and cleans up resources
 func (r *HourlyRotator) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
