@@ -28,10 +28,18 @@ type Logger struct {
 
 // newLogger 创建一个新的 Logger 实例，并设置默认值。
 // 默认日志级别为 InfoLevel，输出到 os.Stdout。
+// 在 release 模式下，如果指定了 ReleaseLogPath，会使用按小时轮转的文件输出。
 func newLogger() *Logger {
+	var out io.Writer = os.Stdout
+	
+	// 在 release 模式下，如果指定了文件路径，则使用按小时轮转的日志文件
+	if ReleaseLogPath != "" {
+		out = GetOutputWriterHourly(ReleaseLogPath)
+	}
+	
 	return &Logger{
 		level:     DebugLevel,
-		out:   os.Stdout,
+		out:       out,
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},

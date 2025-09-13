@@ -15,6 +15,12 @@ import (
 	"path/filepath"
 )
 
+// ReleaseLogPath specifies the file path for logs in release mode.
+// Default uses hourly rotation in system temp directory like GetOutputWriterHourly.
+// This can be overridden at compile time using build flags:
+// go build -ldflags "-X github.com/lazygophers/log.ReleaseLogPath=/path/to/log/file" -tags release
+var ReleaseLogPath string = filepath.Join(os.TempDir(), "lazygophers", "log")
+
 // init 初始化发布模式下的日志输出。
 //
 // 功能：
@@ -23,7 +29,7 @@ import (
 //   - 示例路径: /tmp/lazygophers/log/2023071015.log，
 //     每小时生成新文件。
 func init() {
-	SetOutput(GetOutputWriterHourly(filepath.Join(os.TempDir(), "lazygophers", "log")))
+	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
 }
 
 // Debug 空实现函数（发布模式）
