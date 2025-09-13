@@ -7,19 +7,17 @@ import (
 	"strings"
 )
 
-// Format 定义了日志格式化接口。
+// Format defines log formatting interface
 type Format interface {
-	// Format 将日志条目格式化为字节数组
-	// entry: 需要格式化的日志条目
+	// Format formats log entry to byte array
 	Format(entry *Entry) []byte
 }
 
-// FormatFull 扩展了基础格式化接口，提供更多控制功能。
+// FormatFull extends Format with additional controls
 type FormatFull interface {
-	Format // 继承基础格式化接口
+	Format // Inherits basic formatting interface
 
-	// ParsingAndEscaping 控制是否禁用消息解析和转义
-	// disable: true 表示禁用，false 表示启用
+	// ParsingAndEscaping controls message parsing and escaping
 	ParsingAndEscaping(disable bool)
 
 	Caller(disable bool)
@@ -27,49 +25,47 @@ type FormatFull interface {
 	Clone() Format
 }
 
-// Formatter 实现了 FormatFull 接口，提供默认日志格式化功能。
+// Formatter implements FormatFull interface with default formatting
 type Formatter struct {
-	Module                    string // 日志所属模块名
-	DisableParsingAndEscaping bool   // 是否禁用消息解析和转义
-	DisableCaller             bool   // 是否禁用调用者信息
+	Module                    string // Log module name
+	DisableParsingAndEscaping bool   // Disable message parsing and escaping
+	DisableCaller             bool   // Disable caller information
 }
 
-// format 是内部格式化方法，处理单行日志格式。
-// entry: 需要格式化的日志条目
-// 返回: 格式化后的字节数组
+// format handles single-line log formatting
 func (p *Formatter) format(entry *Entry) []byte {
-	// 从缓冲池获取一个字节缓冲，用完后放回
+	// Get byte buffer from pool, return after use
 	b := GetBuffer()
 	defer PutBuffer(b)
 
-	// 写入前缀消息
+	// Write prefix message
 	if len(entry.PrefixMsg) > 0 {
 		b.Write(entry.PrefixMsg)
 		b.Write([]byte(" "))
 	}
 
-	// 写入进程ID和协程ID
+	// Write process and goroutine IDs
 	b.WriteString(fmt.Sprintf("(%d.%d) ", entry.Pid, entry.Gid))
-	// 写入格式化的时间戳
+	// Write formatted timestamp
 	b.WriteString(entry.Time.Format("2006-01-02 15:04:05.999Z07:00"))
-	// 根据日志级别获取颜色
+	// Get color by log level
 	color := getColorByLevel(entry.Level)
-	// 写入颜色代码
+	// Write color code
 	b.Write(color)
-	// 写入日志级别
+	// Write log level
 	b.Write([]byte(" ["))
 	b.WriteString(entry.Level.String())
 	b.Write([]byte("] "))
-	// 写入颜色结束代码
+	// Write color end code
 	b.Write(colorEnd)
-	// 写入日志正文
+	// Write log message
 	b.WriteString(strings.TrimSpace(entry.Message))
 
-	// 如果未禁用调用者信息或存在TraceID，则写入额外信息
+	// Write additional info if caller info enabled or TraceID exists
 	if !p.DisableCaller || entry.TraceId != "" {
 		b.Write(colorCyan)
 		b.WriteString(" [ ")
-		// 如果未禁用调用者信息，则写入文件名、行号和函数名
+		// Write caller info if not disabled
 		if !p.DisableCaller {
 			b.WriteString(path.Join(entry.CallerDir, path.Base(entry.File)))
 			b.Write([]byte(":"))
@@ -78,7 +74,7 @@ func (p *Formatter) format(entry *Entry) []byte {
 			b.WriteString(entry.CallerFunc)
 			b.Write([]byte(" "))
 		}
-		// 如果存在TraceID，则写入
+		// Write TraceID if exists
 		if entry.TraceId != "" {
 			b.WriteString(entry.TraceId)
 			b.Write([]byte(" "))
@@ -95,18 +91,16 @@ func (p *Formatter) format(entry *Entry) []byte {
 		b.Write([]byte(" "))
 	}
 
-	// 写入后缀消息
+	// Write suffix message
 	if len(entry.SuffixMsg) > 0 {
 		b.Write(entry.SuffixMsg)
 	}
-	// 写入换行符
+	// Write newline
 	b.WriteByte('\n')
 	return b.Bytes()
 }
 
-// Format 实现 Format 接口，处理多行日志消息。
-// entry: 需要格式化的日志条目
-// 返回: 格式化后的字节数组
+// Format implements Format interface, handles multi-line messages
 func (p *Formatter) Format(entry *Entry) []byte {
 	if p.DisableParsingAndEscaping {
 		return p.format(entry)
@@ -120,19 +114,17 @@ func (p *Formatter) Format(entry *Entry) []byte {
 	return b.Bytes()
 }
 
-// ParsingAndEscaping 设置是否禁用消息解析和转义。
-// disable: true 表示禁用，false 表示启用
+// ParsingAndEscaping sets message parsing and escaping
 func (p *Formatter) ParsingAndEscaping(disable bool) {
 	p.DisableParsingAndEscaping = disable
 }
 
-// Caller 设置是否禁用调用者信息显示。
+// Caller sets caller information display
 func (p *Formatter) Caller(disable bool) {
 	p.DisableCaller = disable
 }
 
-// Clone 创建 Formatter 的深拷贝。
-// 返回: 新的 Formatter 实例
+// Clone creates a deep copy of Formatter
 func (p *Formatter) Clone() Format {
 	return &Formatter{
 		Module:                    p.Module,
@@ -154,9 +146,7 @@ var (
 	colorEnd     = []byte("\u001B[0m")
 )
 
-// getColorByLevel 根据日志级别获取对应的终端颜色代码。
-// level: 日志级别
-// 返回: 终端颜色代码字节数组
+// getColorByLevel gets terminal color code by log level
 func getColorByLevel(level Level) []byte {
 	switch level {
 	case DebugLevel, TraceLevel:
@@ -170,12 +160,7 @@ func getColorByLevel(level Level) []byte {
 	}
 }
 
-// SplitPackageName 分割完整的包路径为目录路径和函数名。
-// f: 完整的包路径字符串 (如 "github.com/user/pkg.Function")
-// 返回:
-//
-//	callDir - 包目录路径
-//	callFunc - 函数名
+// SplitPackageName splits full package path into directory and function name
 func SplitPackageName(f string) (callDir string, callFunc string) {
 	slashIndex := strings.LastIndex(f, "/")
 	if slashIndex > 0 {
