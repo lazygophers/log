@@ -1,8 +1,12 @@
 # 🚀 LazyGophers Log
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
+[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
+[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 مكتبة تسجيل عالية الأداء وغنية بالميزات لتطبيقات Go مع دعم العلامات المتعددة للبناء والكتابة غير المتزامنة وخيارات التخصيص الواسعة.
@@ -26,7 +30,7 @@
 - **🔍 التتبع السياقي**: تتبع معرف Goroutine ومعرف التتبع
 - **🔌 تكامل الإطارات**: تكامل أصلي مع مسجل Zap
 - **⚙️ قابل للتكوين بدرجة عالية**: مستويات وإخراجات وتنسيقات مرنة
-- **🧪 مُختبر جيداً**: تغطية اختبار 93.5% عبر جميع تكوينات البناء
+- **🧪 مُختبر جيداً**: تغطية اختبار 93.0% عبر جميع تكوينات البناء
 
 ## 🚀 البداية السريعة
 
@@ -318,7 +322,7 @@ make benchmark-discard
 
 ## 📋 المتطلبات
 
-- **Go**: 1.21 أو أعلى
+- **Go**: 1.19 أو أعلى
 - **التبعيات**: 
   - `go.uber.org/zap` (لتكامل Zap)
   - `github.com/petermattis/goid` (لمعرف goroutine)

@@ -1,8 +1,12 @@
 # 🚀 LazyGophers Log
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.9%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
+[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
+[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A high-performance, feature-rich logging library for Go applications with multi-build tag support, async writing, and extensive customization options.
@@ -26,7 +30,7 @@ A high-performance, feature-rich logging library for Go applications with multi-
 - **🔍 Context Tracing**: Goroutine ID and trace ID tracking
 - **🔌 Framework Integration**: Native Zap logger integration
 - **⚙️ Highly Configurable**: Flexible levels, outputs, and formatting
-- **🧪 Well Tested**: 93.9% test coverage with 284+ test cases across all build configurations
+- **🧪 Well Tested**: 93.0% test coverage with 284+ test cases across all build configurations
 
 ## 🚀 Quick Start
 
@@ -204,7 +208,7 @@ make coverage-html
 |-----------|----------|-------------|
 | **Default** | 93.3% | Standard build with full debugging |
 | **Debug** | 93.5% | Enhanced debug information |
-| **Release** | **93.9%** | Production-optimized build |
+| **Release** | **93.0%** | Production-optimized build |
 | **Discard** | 93.5% | Maximum performance, no-op logging |
 | **Debug+Discard** | 93.5% | Debug with discard optimization |
 | **Release+Discard** | 93.7% | Release with discard optimization |

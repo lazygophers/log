@@ -1,8 +1,12 @@
 # 🚀 LazyGophers Log
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
+[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
+[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Una biblioteca de logging de alto rendimiento y rica en características para aplicaciones Go con soporte multi-etiquetas de construcción, escritura asíncrona y amplias opciones de personalización.
@@ -26,7 +30,7 @@ Una biblioteca de logging de alto rendimiento y rica en características para ap
 - **🔍 Trazado contextual**: Seguimiento de ID de Goroutine e ID de traza
 - **🔌 Integración de frameworks**: Integración nativa con logger Zap
 - **⚙️ Altamente configurable**: Niveles flexibles, salidas y formateo
-- **🧪 Bien probado**: 93.5% de cobertura de pruebas en todas las configuraciones de construcción
+- **🧪 Bien probado**: 93.0% de cobertura de pruebas en todas las configuraciones de construcción
 
 ## 🚀 Inicio rápido
 
@@ -318,7 +322,7 @@ make benchmark-discard
 
 ## 📋 Requisitos
 
-- **Go**: 1.21 o superior
+- **Go**: 1.19 o superior
 - **Dependencias**: 
   - `go.uber.org/zap` (para integración con Zap)
   - `github.com/petermattis/goid` (para ID de goroutine)

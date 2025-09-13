@@ -17,7 +17,7 @@ func BenchmarkLogger_BasicLogging(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(buf)
 	logger.SetLevel(InfoLevel)
-	
+
 	b.Run("Info", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -25,7 +25,7 @@ func BenchmarkLogger_BasicLogging(b *testing.B) {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("Infof", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -33,7 +33,7 @@ func BenchmarkLogger_BasicLogging(b *testing.B) {
 			logger.Infof("test message %d", i)
 		}
 	})
-	
+
 	b.Run("Debug_Filtered", func(b *testing.B) {
 		logger.SetLevel(InfoLevel) // Debug会被过滤
 		b.ReportAllocs()
@@ -51,31 +51,31 @@ func BenchmarkLogger_OutputTargets(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(buf)
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("DevNull", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(io.Discard)
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("NilWriter", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -87,12 +87,12 @@ func BenchmarkLogger_OutputTargets(b *testing.B) {
 // 测试不同格式化器的性能
 func BenchmarkLogger_Formatters(b *testing.B) {
 	buf := &bytes.Buffer{}
-	
+
 	b.Run("DefaultFormatter", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(buf)
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -100,13 +100,13 @@ func BenchmarkLogger_Formatters(b *testing.B) {
 			buf.Reset()
 		}
 	})
-	
+
 	b.Run("DisabledCallerFormatter", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(buf)
 		logger.SetLevel(InfoLevel)
 		logger.Caller(false) // 禁用调用者信息
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -114,13 +114,13 @@ func BenchmarkLogger_Formatters(b *testing.B) {
 			buf.Reset()
 		}
 	})
-	
+
 	b.Run("DisabledParsingFormatter", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(buf)
 		logger.SetLevel(InfoLevel)
 		logger.ParsingAndEscaping(false)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -134,7 +134,7 @@ func BenchmarkLogger_Formatters(b *testing.B) {
 func BenchmarkLogger_LevelChecking(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(io.Discard)
-	
+
 	b.Run("EnabledLevel", func(b *testing.B) {
 		logger.SetLevel(InfoLevel)
 		b.ReportAllocs()
@@ -145,7 +145,7 @@ func BenchmarkLogger_LevelChecking(b *testing.B) {
 			}
 		}
 	})
-	
+
 	b.Run("DisabledLevel", func(b *testing.B) {
 		logger.SetLevel(ErrorLevel)
 		b.ReportAllocs()
@@ -163,7 +163,7 @@ func BenchmarkLogger_Concurrent(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(&NilWriter{})
 	logger.SetLevel(InfoLevel)
-	
+
 	b.Run("SingleGoroutine", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -171,7 +171,7 @@ func BenchmarkLogger_Concurrent(b *testing.B) {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("MultipleGoroutines", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -189,32 +189,32 @@ func BenchmarkLogger_MemoryPatterns(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			logger.Info("OK")
 		}
 	})
-	
+
 	b.Run("MediumMessages", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			logger.Info("Processing user request with authentication token validation")
 		}
 	})
-	
+
 	b.Run("LongMessages", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
 		longMsg := "This is a very long log message that contains detailed information about the operation being performed, including multiple parameters, execution context, and diagnostic data that might be useful for debugging and monitoring purposes."
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -228,7 +228,7 @@ func BenchmarkLogger_PrefixSuffix(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(&NilWriter{})
 	logger.SetLevel(InfoLevel)
-	
+
 	b.Run("NoPrefixSuffix", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -236,7 +236,7 @@ func BenchmarkLogger_PrefixSuffix(b *testing.B) {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("WithPrefix", func(b *testing.B) {
 		logger.SetPrefixMsg("PREFIX: ")
 		b.ReportAllocs()
@@ -245,7 +245,7 @@ func BenchmarkLogger_PrefixSuffix(b *testing.B) {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("WithSuffix", func(b *testing.B) {
 		logger.SetPrefixMsg("")
 		logger.SetSuffixMsg(" :SUFFIX")
@@ -255,7 +255,7 @@ func BenchmarkLogger_PrefixSuffix(b *testing.B) {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("WithBoth", func(b *testing.B) {
 		logger.SetPrefixMsg("PREFIX: ")
 		logger.SetSuffixMsg(" :SUFFIX")
@@ -273,13 +273,13 @@ func BenchmarkLogger_ComplexScenarios(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
-		
+
 		var wg sync.WaitGroup
 		numGoroutines := runtime.NumCPU()
-		
+
 		for i := 0; i < b.N; i++ {
 			for j := 0; j < numGoroutines; j++ {
 				wg.Add(1)
@@ -293,12 +293,12 @@ func BenchmarkLogger_ComplexScenarios(b *testing.B) {
 			wg.Wait()
 		}
 	})
-	
+
 	b.Run("MixedLevels", func(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(DebugLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -315,7 +315,7 @@ func BenchmarkLogger_RealWorldScenarios(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(&NilWriter{})
 	logger.SetLevel(InfoLevel)
-	
+
 	b.Run("WebRequestLogging", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -323,7 +323,7 @@ func BenchmarkLogger_RealWorldScenarios(b *testing.B) {
 			logger.Infof("HTTP %s %s %d %dms", "GET", "/api/users", 200, 25)
 		}
 	})
-	
+
 	b.Run("DatabaseOperations", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -331,7 +331,7 @@ func BenchmarkLogger_RealWorldScenarios(b *testing.B) {
 			logger.Infof("DB Query: %s, Duration: %dms, Rows: %d", "SELECT * FROM users WHERE id = ?", 15, 1)
 		}
 	})
-	
+
 	b.Run("ErrorReporting", func(b *testing.B) {
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -346,21 +346,21 @@ func BenchmarkLogger_MemoryUsage(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(&NilWriter{})
 	logger.SetLevel(InfoLevel)
-	
+
 	var m1, m2 runtime.MemStats
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		logger.Info("memory usage test")
 	}
-	
+
 	runtime.GC()
 	runtime.ReadMemStats(&m2)
-	
+
 	allocDiff := m2.TotalAlloc - m1.TotalAlloc
 	b.ReportMetric(float64(allocDiff)/float64(b.N), "bytes/op")
 }
@@ -370,15 +370,15 @@ func BenchmarkLogger_CPUEfficiency(b *testing.B) {
 	logger := newLogger()
 	logger.SetOutput(&NilWriter{})
 	logger.SetLevel(InfoLevel)
-	
+
 	b.ReportAllocs()
-	
+
 	start := time.Now()
 	for i := 0; i < b.N; i++ {
 		logger.Infof("CPU efficiency test %d", i)
 	}
 	duration := time.Since(start)
-	
+
 	b.ReportMetric(float64(duration.Nanoseconds())/float64(b.N), "ns/op")
 }
 
@@ -417,20 +417,20 @@ func BenchmarkLogger_WriterImplementations(b *testing.B) {
 		logger := newLogger()
 		logger.SetOutput(&NilWriter{})
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			logger.Info("test message")
 		}
 	})
-	
+
 	b.Run("BufferedWriter", func(b *testing.B) {
 		logger := newLogger()
 		writer := &BufferedWriter{}
 		logger.SetOutput(writer)
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -440,13 +440,13 @@ func BenchmarkLogger_WriterImplementations(b *testing.B) {
 			}
 		}
 	})
-	
+
 	b.Run("BytesBuffer", func(b *testing.B) {
 		logger := newLogger()
 		buf := &bytes.Buffer{}
 		logger.SetOutput(buf)
 		logger.SetLevel(InfoLevel)
-		
+
 		b.ReportAllocs()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {

@@ -19,29 +19,29 @@ func (w *WriterWrapper) Close() error {
 func TestNewAsyncWriter(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
-	
+
 	if asyncWriter == nil {
 		t.Fatal("NewAsyncWriter returned nil")
 	}
-	
+
 	// 测试写入
 	testData := []byte("test async write")
 	n, err := asyncWriter.Write(testData)
-	
+
 	if err != nil {
 		t.Errorf("Write failed: %v", err)
 	}
-	
+
 	if n != len(testData) {
 		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
 	}
-	
+
 	// 关闭并等待数据写入
 	err = asyncWriter.Close()
 	if err != nil {
 		t.Errorf("Close failed: %v", err)
 	}
-	
+
 	// 验证数据是否写入到底层 writer
 	if buf.String() != string(testData) {
 		t.Errorf("Expected %q, got %q", string(testData), buf.String())
@@ -51,10 +51,10 @@ func TestNewAsyncWriter(t *testing.T) {
 func TestAsyncWriter_MultipleWrites(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
-	
+
 	// 进行多次写入
 	writes := []string{"first ", "second ", "third"}
-	
+
 	for _, data := range writes {
 		n, err := asyncWriter.Write([]byte(data))
 		if err != nil {
@@ -64,13 +64,13 @@ func TestAsyncWriter_MultipleWrites(t *testing.T) {
 			t.Errorf("Expected to write %d bytes, wrote %d", len(data), n)
 		}
 	}
-	
+
 	// 关闭并验证
 	err := asyncWriter.Close()
 	if err != nil {
 		t.Errorf("Close failed: %v", err)
 	}
-	
+
 	expected := "first second third"
 	if buf.String() != expected {
 		t.Errorf("Expected %q, got %q", expected, buf.String())
@@ -80,12 +80,12 @@ func TestAsyncWriter_MultipleWrites(t *testing.T) {
 func TestAsyncWriter_ConcurrentWrites(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
-	
+
 	// 并发写入测试
 	var wg sync.WaitGroup
 	numGoroutines := 10
 	writesPerGoroutine := 10
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(id int) {
@@ -99,15 +99,15 @@ func TestAsyncWriter_ConcurrentWrites(t *testing.T) {
 			}
 		}(i)
 	}
-	
+
 	wg.Wait()
-	
+
 	// 关闭并验证总字节数
 	err := asyncWriter.Close()
 	if err != nil {
 		t.Errorf("Close failed: %v", err)
 	}
-	
+
 	expectedLength := numGoroutines * writesPerGoroutine
 	if buf.Len() != expectedLength {
 		t.Errorf("Expected %d bytes, got %d", expectedLength, buf.Len())
@@ -117,13 +117,13 @@ func TestAsyncWriter_ConcurrentWrites(t *testing.T) {
 func TestAsyncWriter_WriteAfterClose(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
-	
+
 	// 先关闭
 	err := asyncWriter.Close()
 	if err != nil {
 		t.Errorf("Close failed: %v", err)
 	}
-	
+
 	// 尝试在关闭后写入 - 根据实现，通道还是打开的，所以可能不会返回错误
 	// 只要没有panic就算正常
 	_, err = asyncWriter.Write([]byte("write after close"))
@@ -137,20 +137,20 @@ func TestAsyncWriter_WriteAfterClose(t *testing.T) {
 func TestAsyncWriter_DoubleClose(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
-	
+
 	// 第一次关闭
 	err := asyncWriter.Close()
 	if err != nil {
 		t.Errorf("First close failed: %v", err)
 	}
-	
+
 	// 第二次关闭 - 异步操作存在竞态，但至少应该不panic
 	// 使用goroutine避免潜在的阻塞
 	done := make(chan error, 1)
 	go func() {
 		done <- asyncWriter.Close()
 	}()
-	
+
 	select {
 	case err = <-done:
 		if err != nil {
@@ -165,19 +165,19 @@ func TestAsyncWriter_BufferOverflow(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
 	defer asyncWriter.Close()
-	
+
 	// 写入大量数据
 	largeData := make([]byte, 2048) // 使用固定大小
 	for i := range largeData {
 		largeData[i] = 'A'
 	}
-	
+
 	// 这应该会阻塞或者丢弃数据，具体取决于实现
 	_, err := asyncWriter.Write(largeData)
 	if err != nil {
 		t.Errorf("Write failed: %v", err)
 	}
-	
+
 	// 给一些时间让数据被处理
 	time.Sleep(100 * time.Millisecond)
 }
@@ -187,9 +187,9 @@ func TestAsyncWriter_SlowWriter(t *testing.T) {
 	slowWriter := &SlowWriter{delay: 50 * time.Millisecond}
 	asyncWriter := NewAsyncWriter(slowWriter)
 	defer asyncWriter.Close()
-	
+
 	start := time.Now()
-	
+
 	// 进行多次快速写入
 	for i := 0; i < 5; i++ {
 		_, err := asyncWriter.Write([]byte("fast write "))
@@ -197,9 +197,9 @@ func TestAsyncWriter_SlowWriter(t *testing.T) {
 			t.Errorf("Write %d failed: %v", i, err)
 		}
 	}
-	
+
 	elapsed := time.Since(start)
-	
+
 	// 写入应该很快完成（异步），不应该等待慢速 writer
 	if elapsed > 100*time.Millisecond {
 		t.Errorf("Async writes took too long: %v", elapsed)
@@ -230,13 +230,13 @@ func TestAsyncWriter_ErrorHandling(t *testing.T) {
 	errorWriter := &ErrorWriter{shouldError: true}
 	asyncWriter := NewAsyncWriter(errorWriter)
 	defer asyncWriter.Close()
-	
+
 	// 写入数据
 	_, err := asyncWriter.Write([]byte("test data"))
 	if err != nil {
 		t.Errorf("Write should not return error immediately: %v", err)
 	}
-	
+
 	// 关闭时应该能处理底层 writer 的错误
 	// 注意：具体的错误处理行为取决于实现
 }
@@ -270,7 +270,7 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 	buf := &WriterWrapper{&bytes.Buffer{}}
 	asyncWriter := NewAsyncWriter(buf)
 	defer asyncWriter.Close()
-	
+
 	// 快速写入多个项目，测试通道容量
 	for i := 0; i < 5; i++ {
 		data := []byte("item ")
@@ -279,7 +279,7 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 			t.Errorf("Write %d failed: %v", i, err)
 		}
 	}
-	
+
 	// 给一些时间让数据被处理
 	time.Sleep(100 * time.Millisecond)
 }
@@ -287,16 +287,16 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 // TestAsyncWriter_BufferFull tests the ErrAsyncWriterFull error case
 func TestAsyncWriter_BufferFull(t *testing.T) {
 	// Create a writer that writes very slowly
-	slowWriter := &VerySlowWriter{delay: 1 * time.Second} 
+	slowWriter := &VerySlowWriter{delay: 1 * time.Second}
 	asyncWriter := NewAsyncWriter(slowWriter)
-	
+
 	// Use a timeout to prevent hanging
 	done := make(chan bool, 1)
 	var errorOccurred bool
-	
+
 	go func() {
 		defer func() { done <- true }()
-		
+
 		// Fill up the channel buffer very quickly
 		for i := 0; i < 1000; i++ { // Write many items to fill the buffer
 			_, err := asyncWriter.Write([]byte("test data"))
@@ -311,7 +311,7 @@ func TestAsyncWriter_BufferFull(t *testing.T) {
 			}
 		}
 	}()
-	
+
 	// Wait for either completion or timeout
 	select {
 	case <-done:
@@ -319,9 +319,9 @@ func TestAsyncWriter_BufferFull(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		t.Log("Test timed out - this might be expected if buffer doesn't fill")
 	}
-	
+
 	asyncWriter.Close()
-	
+
 	if !errorOccurred {
 		t.Log("ErrAsyncWriterFull was not triggered - buffer might be larger than expected")
 	}

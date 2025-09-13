@@ -13,12 +13,12 @@ func TestDebugRelease(t *testing.T) {
 	Debug("test debug message")
 	Debug("another message", "with", "multiple", "args")
 	Debug(123, true, nil)
-	
+
 	// Call it multiple times to ensure coverage
 	for i := 0; i < 3; i++ {
 		Debug("iteration", i)
 	}
-	
+
 	// Since it's a no-op, we just ensure no panic occurs
 	// and the function completes successfully
 }
@@ -30,12 +30,12 @@ func TestDebugfRelease(t *testing.T) {
 	Debugf("test debug message with format: %s", "value")
 	Debugf("number: %d, bool: %v", 42, true)
 	Debugf("empty format")
-	
+
 	// Call it multiple times to ensure coverage
 	for i := 0; i < 3; i++ {
 		Debugf("iteration %d", i)
 	}
-	
+
 	// Since it's a no-op, we just ensure no panic occurs
 	// and the function completes successfully
 }
@@ -46,7 +46,7 @@ func TestReleaseLogPath(t *testing.T) {
 	if ReleaseLogPath == "" {
 		t.Error("ReleaseLogPath should not be empty")
 	}
-	
+
 	// Verify it contains expected path components
 	if !contains(ReleaseLogPath, "lazygophers") {
 		t.Error("ReleaseLogPath should contain 'lazygophers'")
@@ -58,10 +58,10 @@ func TestReleaseLogPath(t *testing.T) {
 
 // Helper function to check if string contains substring
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && 
-		(s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || 
-		s[len(s)-len(substr):] == substr || 
-		containsSubstring(s, substr)))
+	return len(s) >= len(substr) &&
+		(s == substr || len(s) > len(substr) && (s[:len(substr)] == substr ||
+			s[len(s)-len(substr):] == substr ||
+			containsSubstring(s, substr)))
 }
 
 func containsSubstring(s, substr string) bool {

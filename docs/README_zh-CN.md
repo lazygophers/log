@@ -1,8 +1,12 @@
 # 🚀 LazyGophers Log
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
+[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
+[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 一个高性能、功能丰富的 Go 日志库，支持多构建标签、异步写入和广泛的自定义选项。
@@ -26,7 +30,7 @@
 - **🔍 上下文追踪**: Goroutine ID 和追踪 ID 跟踪
 - **🔌 框架集成**: 原生 Zap 日志框架集成
 - **⚙️ 高度可配置**: 灵活的级别、输出和格式化配置
-- **🧪 充分测试**: 在所有构建配置下达到 93.5% 测试覆盖率
+- **🧪 充分测试**: 在所有构建配置下达到 93.0% 测试覆盖率
 
 ## 🚀 快速开始
 
@@ -318,7 +322,7 @@ make benchmark-discard
 
 ## 📋 要求
 
-- **Go**: 1.21 或更高版本
+- **Go**: 1.19 或更高版本
 - **依赖项**: 
   - `go.uber.org/zap` (用于 Zap 集成)
   - `github.com/petermattis/goid` (用于 goroutine ID)

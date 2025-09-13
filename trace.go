@@ -18,6 +18,7 @@ var (
 var DisableTrace bool
 
 // 获取指定 goroutine 的追踪ID
+//
 //go:inline
 func getTrace(gid int64) string {
 	traceMapMu.RLock()
@@ -27,6 +28,7 @@ func getTrace(gid int64) string {
 }
 
 // 为指定 goroutine 设置追踪ID，空字符串自动生成
+//
 //go:inline
 func setTrace(gid int64, traceId string) {
 	if DisableTrace {
@@ -41,6 +43,7 @@ func setTrace(gid int64, traceId string) {
 }
 
 // 删除指定 goroutine 的追踪ID
+//
 //go:inline
 func delTrace(gid int64) {
 	traceMapMu.Lock()
@@ -90,6 +93,7 @@ func DelTraceWithGID(gid int64) {
 }
 
 // 高性能 TraceID 生成
+//
 //go:inline
 func fastGenTraceId() string {
 	var buf [8]byte
@@ -117,4 +121,3 @@ func loadTraceForTest(gid int64) (string, bool) {
 	traceMapMu.RUnlock()
 	return trace, exists
 }
-

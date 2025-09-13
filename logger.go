@@ -44,17 +44,17 @@ func wrapWriter(w io.Writer) zapcore.WriteSyncer {
 
 // Logger is the core logging structure
 type Logger struct {
-	level Level
-	out zapcore.WriteSyncer
-	Format Format
+	level       Level
+	out         zapcore.WriteSyncer
+	Format      Format
 	callerDepth int
-	PrefixMsg []byte
-	SuffixMsg []byte
-	
+	PrefixMsg   []byte
+	SuffixMsg   []byte
+
 	// Performance optimization fields
 	enableCaller bool
 	enableTrace  bool
-	
+
 	// Entry cache pool
 	entryCache sync.Pool
 }
@@ -62,15 +62,15 @@ type Logger struct {
 // newLogger creates a new Logger instance with default values
 func newLogger() *Logger {
 	var out io.Writer = os.Stdout
-	
+
 	// Use hourly rotating file in release mode if path specified
 	if ReleaseLogPath != "" {
 		out = GetOutputWriterHourly(ReleaseLogPath)
 	}
-	
+
 	logger := &Logger{
-		level:        DebugLevel,
-		out:          wrapWriter(out),
+		level: DebugLevel,
+		out:   wrapWriter(out),
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},
@@ -78,11 +78,11 @@ func newLogger() *Logger {
 		enableCaller: true,
 		enableTrace:  true,
 	}
-	
+
 	logger.entryCache.New = func() interface{} {
 		return &Entry{Pid: pid}
 	}
-	
+
 	return logger
 }
 
@@ -117,12 +117,14 @@ func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
 }
 
 // fastGetEntry gets Entry from pool
+//
 //go:inline
 func (p *Logger) fastGetEntry() *Entry {
 	return p.entryCache.Get().(*Entry)
 }
 
-// fastPutEntry returns Entry to pool  
+// fastPutEntry returns Entry to pool
+//
 //go:inline
 func (p *Logger) fastPutEntry(entry *Entry) {
 	entry.Reset()
@@ -152,7 +154,7 @@ func (p *Logger) Clone() *Logger {
 		enableCaller: p.enableCaller,
 		enableTrace:  p.enableTrace,
 	}
-	
+
 	l.entryCache.New = func() interface{} {
 		return &Entry{Pid: pid}
 	}
@@ -216,21 +218,22 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 }
 
 // log is the internal core logging function
+//
 //go:noinline
 func (p *Logger) log(level Level, msg string) {
 	entry := p.fastGetEntry()
-	
+
 	// Set basic fields
 	entry.Level = level
 	entry.Message = msg
 	entry.Time = time.Now()
-	
+
 	// Set expensive fields conditionally
 	if p.enableTrace {
 		entry.Gid = goid.Get()
 		entry.TraceId = getTrace(entry.Gid)
 	}
-	
+
 	// Get caller info conditionally
 	if p.enableCaller {
 		var pc uintptr
@@ -243,7 +246,7 @@ func (p *Logger) log(level Level, msg string) {
 			}
 		}
 	}
-	
+
 	// Set prefix/suffix without unnecessary copies
 	if len(p.PrefixMsg) > 0 {
 		entry.PrefixMsg = p.PrefixMsg
@@ -251,11 +254,11 @@ func (p *Logger) log(level Level, msg string) {
 	if len(p.SuffixMsg) > 0 {
 		entry.SuffixMsg = p.SuffixMsg
 	}
-	
+
 	// Format and write
 	formatted := p.Format.Format(entry)
 	p.write(level, formatted)
-	
+
 	p.fastPutEntry(entry)
 }
 
