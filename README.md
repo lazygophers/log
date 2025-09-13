@@ -1,12 +1,350 @@
-# 🐰 lazygophers/log
+# 🚀 LazyGophers Log
 
-<p align="center">
-  <strong>一个为追求极致简洁与扩展性而生的 Go 日志库。</strong>
-</p>
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
+[![Test Coverage](https://img.shields.io/badge/coverage-93.5%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  <a href="https://github.com/lazygophers/log/actions/workflows/go.yml"><img src="https://github.com/lazygophers/log/actions/workflows/go.yml/badge.svg" alt="Build Status"></a>
-  <a href="https://codecov.io/gh/lazygophers/log"><img src="https://codecov.io/gh/lazygophers/log/branch/main/graph/badge.svg" alt="codecov"></a>
+A high-performance, feature-rich logging library for Go applications with multi-build tag support, async writing, and extensive customization options.
+
+## 📖 Documentation Languages
+
+- [🇺🇸 English](README.md) (Current)
+- [🇨🇳 简体中文](docs/README_zh-CN.md)
+- [🇹🇼 繁體中文](docs/README_zh-TW.md)
+- [🇫🇷 Français](docs/README_fr.md)
+- [🇷🇺 Русский](docs/README_ru.md)
+- [🇪🇸 Español](docs/README_es.md)
+- [🇸🇦 العربية](docs/README_ar.md)
+
+## ✨ Features
+
+- **🚀 High Performance**: Object pooling and async writing support
+- **🏗️ Build Tag Support**: Different behaviors for debug, release, and discard modes
+- **🔄 Log Rotation**: Automatic hourly log file rotation
+- **🎨 Rich Formatting**: Customizable log formats with color support
+- **🔍 Context Tracing**: Goroutine ID and trace ID tracking
+- **🔌 Framework Integration**: Native Zap logger integration
+- **⚙️ Highly Configurable**: Flexible levels, outputs, and formatting
+- **🧪 Well Tested**: 93.5% test coverage across all build configurations
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+go get github.com/lazygophers/log
+```
+
+### Basic Usage
+
+```go
+package main
+
+import (
+    "github.com/lazygophers/log"
+)
+
+func main() {
+    // Simple logging
+    log.Info("Hello, World!")
+    log.Debug("This is a debug message")
+    log.Warn("This is a warning")
+    log.Error("This is an error")
+
+    // Formatted logging
+    log.Infof("User %s logged in with ID %d", "john", 123)
+    
+    // With custom logger
+    logger := log.New()
+    logger.SetLevel(log.InfoLevel)
+    logger.Info("Custom logger message")
+}
+```
+
+### Advanced Usage
+
+```go
+package main
+
+import (
+    "context"
+    "os"
+    "github.com/lazygophers/log"
+)
+
+func main() {
+    // Create logger with file output
+    logger := log.New()
+    
+    // Set output to file with hourly rotation
+    writer := log.GetOutputWriterHourly("./logs/app.log")
+    logger.SetOutput(writer)
+    
+    // Configure formatting
+    logger.SetLevel(log.DebugLevel)
+    logger.SetPrefixMsg("[APP] ")
+    logger.Caller(true) // Enable caller info
+    
+    // Context logging
+    ctxLogger := logger.CloneToCtx()
+    ctxLogger.Info(context.Background(), "Context-aware logging")
+    
+    // Async logging for high-throughput scenarios
+    asyncWriter := log.NewAsyncWriter(writer, 1000)
+    logger.SetOutput(asyncWriter)
+    defer asyncWriter.Close()
+    
+    logger.Info("High-performance async logging")
+}
+```
+
+## 🏗️ Build Tags
+
+The library supports different build modes through Go build tags:
+
+### Default Mode (No Tags)
+```bash
+go build
+```
+- Full logging functionality
+- Debug messages enabled
+- Standard performance
+
+### Debug Mode
+```bash
+go build -tags debug
+```
+- Enhanced debug information
+- Detailed caller information
+- Performance profiling support
+
+### Release Mode
+```bash
+go build -tags release
+```
+- Optimized for production
+- Debug messages disabled
+- Automatic log file rotation
+
+### Discard Mode
+```bash
+go build -tags discard
+```
+- Maximum performance
+- All logs discarded
+- Zero logging overhead
+
+### Combined Modes
+```bash
+go build -tags "debug,discard"    # Debug with discard
+go build -tags "release,discard"  # Release with discard
+```
+
+## 📊 Log Levels
+
+The library supports 7 log levels (from highest to lowest priority):
+
+| Level | Value | Description |
+|-------|-------|-------------|
+| `PanicLevel` | 0 | Logs and then calls panic |
+| `FatalLevel` | 1 | Logs and then calls os.Exit(1) |
+| `ErrorLevel` | 2 | Error conditions |
+| `WarnLevel` | 3 | Warning conditions |
+| `InfoLevel` | 4 | Informational messages |
+| `DebugLevel` | 5 | Debug-level messages |
+| `TraceLevel` | 6 | Most verbose logging |
+
+## 🔌 Framework Integration
+
+### Zap Integration
+
+```go
+import (
+    "go.uber.org/zap"
+    "go.uber.org/zap/zapcore"
+    "github.com/lazygophers/log"
+)
+
+// Create a zap logger that writes to our log system
+logger := log.New()
+hook := log.NewZapHook(logger)
+
+core := zapcore.NewCore(
+    zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+    hook,
+    zapcore.InfoLevel,
+)
+zapLogger := zap.New(core)
+
+zapLogger.Info("Message from Zap", zap.String("key", "value"))
+```
+
+## 🧪 Testing
+
+The library comes with comprehensive testing support:
+
+```bash
+# Run all tests
+make test
+
+# Run tests with coverage for all build tags
+make coverage-all
+
+# Quick test across all build tags
+make test-quick
+
+# Generate HTML coverage reports
+make coverage-html
+```
+
+### Coverage Results by Build Tag
+
+| Build Tag | Coverage |
+|-----------|----------|
+| Default | 92.9% |
+| Debug | 93.1% |
+| Release | 93.5% |
+| Discard | 93.1% |
+| Debug+Discard | 93.1% |
+| Release+Discard | 93.3% |
+
+## ⚙️ Configuration Options
+
+### Logger Configuration
+
+```go
+logger := log.New()
+
+// Set minimum log level
+logger.SetLevel(log.InfoLevel)
+
+// Configure output
+logger.SetOutput(os.Stdout) // Single writer
+logger.SetOutput(writer1, writer2, writer3) // Multiple writers
+
+// Customize messages
+logger.SetPrefixMsg("[MyApp] ")
+logger.SetSuffixMsg(" [END]")
+logger.AppendPrefixMsg("Extra: ")
+
+// Configure formatting
+logger.ParsingAndEscaping(false) // Disable escape sequences
+logger.Caller(true) // Enable caller information
+logger.SetCallerDepth(4) // Adjust caller stack depth
+```
+
+## 📁 Log Rotation
+
+Automatic log rotation with configurable intervals:
+
+```go
+// Hourly rotation
+writer := log.GetOutputWriterHourly("./logs/app.log")
+
+// The library will create files like:
+// - app-2024010115.log (2024-01-01 15:00)
+// - app-2024010116.log (2024-01-01 16:00)
+// - app-2024010117.log (2024-01-01 17:00)
+```
+
+## 🔍 Context and Tracing
+
+Built-in support for context-aware logging and distributed tracing:
+
+```go
+// Set trace ID for current goroutine
+log.SetTrace("trace-123-456")
+
+// Get trace ID
+traceID := log.GetTrace()
+
+// Context-aware logging
+ctx := context.Background()
+ctxLogger := log.CloneToCtx()
+ctxLogger.Info(ctx, "Request processed", "user_id", 123)
+
+// Automatic goroutine ID tracking
+log.Info("This log includes goroutine ID automatically")
+```
+
+## 📈 Performance
+
+The library is designed for high-performance applications:
+
+- **Object Pooling**: Reuses log entry objects to reduce GC pressure
+- **Async Writing**: Non-blocking log writes for high-throughput scenarios
+- **Level Filtering**: Early filtering prevents expensive operations
+- **Build Tag Optimization**: Compile-time optimization for different environments
+
+### Benchmarks
+
+```bash
+# Run performance benchmarks
+make benchmark
+
+# Benchmark different build modes
+make benchmark-debug
+make benchmark-release  
+make benchmark-discard
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/your-username/log.git
+   cd log
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   go mod tidy
+   ```
+
+3. **Run Tests**
+   ```bash
+   make test-all
+   ```
+
+4. **Submit Pull Request**
+   - Follow our [PR Template](.github/pull_request_template.md)
+   - Ensure tests pass
+   - Update documentation if needed
+
+## 📋 Requirements
+
+- **Go**: 1.21 or higher
+- **Dependencies**: 
+  - `go.uber.org/zap` (for Zap integration)
+  - `github.com/petermattis/goid` (for goroutine ID)
+  - `github.com/lestrrat-go/file-rotatelogs` (for log rotation)
+  - `github.com/google/uuid` (for trace IDs)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Zap](https://github.com/uber-go/zap) for inspiration and integration support
+- [Logrus](https://github.com/sirupsen/logrus) for level design patterns
+- The Go community for continuous feedback and improvements
+
+## 📞 Support
+
+- 📖 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/lazygophers/log/issues)
+- 💬 [Discussions](https://github.com/lazygophers/log/discussions)
+- 📧 Email: support@lazygophers.com
+
+---
+
+**Made with ❤️ by the LazyGophers team**
   <a href="https://goreportcard.com/report/github.com/lazygophers/log"><img src="https://goreportcard.com/badge/github.com/lazygophers/log" alt="Go Report Card"></a>
   <a href="https://godoc.org/github.com/lazygophers/log"><img src="https://godoc.org/github.com/lazygophers/log?status.svg" alt="GoDoc"></a>
   <a href="https://github.com/lazygophers/log/releases"><img src="https://img.shields.io/github/release/lazygophers/log.svg" alt="GitHub release"></a>
