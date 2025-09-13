@@ -1,13 +1,36 @@
 # Makefile for testing log package coverage under different build tags
 # 用于测试不同构建标签条件下的日志包覆盖率
 
-.PHONY: test test-all coverage coverage-all coverage-debug coverage-release coverage-discard coverage-debug-discard coverage-release-discard coverage-other clean help
+.PHONY: test test-simple test-all coverage coverage-all coverage-debug coverage-release coverage-discard coverage-debug-discard coverage-release-discard coverage-other clean help
 
 # 默认目标：运行所有覆盖率测试
 all: coverage-all
 
-# 基本测试命令
+# 基本测试命令 - 测试所有支持的 build tag
 test:
+	@echo "=== Running tests across all supported build tags ==="
+	@echo "Testing default build (no tags)..."
+	@go test ./... -tags=""
+	@echo ""
+	@echo "Testing debug build tag..."
+	@go test ./... -tags="debug"
+	@echo ""
+	@echo "Testing release build tag..."
+	@go test ./... -tags="release"
+	@echo ""
+	@echo "Testing discard build tag..."
+	@go test ./... -tags="discard"
+	@echo ""
+	@echo "Testing debug+discard build tags..."
+	@go test ./... -tags="debug,discard"
+	@echo ""
+	@echo "Testing release+discard build tags..."
+	@go test ./... -tags="release,discard"
+	@echo ""
+	@echo "✅ All build tag tests completed successfully!"
+
+# 简单测试命令 - 仅测试默认构建
+test-simple:
 	go test ./...
 
 test-verbose:
@@ -20,7 +43,8 @@ clean:
 # 帮助信息
 help:
 	@echo "Available targets:"
-	@echo "  test                    - Run basic tests"
+	@echo "  test                    - Run tests across all supported build tags"
+	@echo "  test-simple            - Run basic tests (default build only)"
 	@echo "  test-verbose           - Run tests with verbose output" 
 	@echo "  coverage-all           - Run coverage tests for all build tag combinations"
 	@echo "  coverage-other         - Coverage for default (no build tags)"
