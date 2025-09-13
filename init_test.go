@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 	assert.IsType(t, &Logger{}, logger, "New() 应该返回 *Logger 类型")
 	
 	// 验证新的 logger 有默认值
-	assert.Equal(t, DebugLevel, logger.level, "新 logger 的默认级别应该是 DebugLevel")
+	assert.Equal(t, DebugLevel, logger.level, "new logger default level should be DebugLevel")
 }
 
 // TestSetLevel 和 TestGetLevel 测试设置和获取日志级别
