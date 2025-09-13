@@ -3,7 +3,6 @@ module github.com/lazygophers/log
 go 1.24.0
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/petermattis/goid v0.0.0-20250904145737-900bdf8bb490
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.44.0

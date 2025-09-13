@@ -9,10 +9,7 @@ import (
 
 func TestGetTrace(t *testing.T) {
 	// 清空现有的 trace
-	traceMap.Range(func(key, value interface{}) bool {
-		traceMap.Delete(key)
-		return true
-	})
+	clearTraceMapForTest()
 	
 	// 测试不存在的 trace
 	trace := GetTrace()
@@ -35,10 +32,7 @@ func TestGetTraceWithGID(t *testing.T) {
 	gid := goid.Get()
 	
 	// 清空现有的 trace
-	traceMap.Range(func(key, value interface{}) bool {
-		traceMap.Delete(key)
-		return true
-	})
+	clearTraceMapForTest()
 	
 	// 测试不存在的 trace
 	trace := GetTraceWithGID(gid)
@@ -183,15 +177,15 @@ func TestSetTrace_Internal(t *testing.T) {
 	setTrace(gid, expectedTrace)
 	
 	// 验证是否设置成功
-	if value, ok := traceMap.Load(gid); !ok || value.(string) != expectedTrace {
+	if value, ok := loadTraceForTest(gid); !ok || value != expectedTrace {
 		t.Errorf("Expected %q to be set for GID %d", expectedTrace, gid)
 	}
 	
 	// 测试设置空字符串（根据实现，会自动生成新的trace ID）
 	setTrace(gid, "")
-	if value, ok := traceMap.Load(gid); !ok {
+	if value, ok := loadTraceForTest(gid); !ok {
 		t.Error("Expected auto-generated trace when setting empty string, but found none")
-	} else if value.(string) == "" {
+	} else if value == "" {
 		t.Error("Expected auto-generated trace when setting empty string, got empty")
 	}
 }
@@ -202,7 +196,7 @@ func TestDelTrace_Internal(t *testing.T) {
 	
 	// 设置 trace
 	setTrace(gid, expectedTrace)
-	if value, ok := traceMap.Load(gid); !ok || value.(string) != expectedTrace {
+	if value, ok := loadTraceForTest(gid); !ok || value != expectedTrace {
 		t.Errorf("Expected %q to be set for GID %d", expectedTrace, gid)
 	}
 	
@@ -210,8 +204,8 @@ func TestDelTrace_Internal(t *testing.T) {
 	delTrace(gid)
 	
 	// 验证是否删除成功
-	if value, ok := traceMap.Load(gid); ok {
-		t.Errorf("Expected trace to be deleted, but found %q", value.(string))
+	if value, ok := loadTraceForTest(gid); ok {
+		t.Errorf("Expected trace to be deleted, but found %q", value)
 	}
 }
 
@@ -306,15 +300,15 @@ func TestSetTrace_DisableTrace_Coverage(t *testing.T) {
 	setTrace(testGid, testTrace)
 	
 	// 验证 trace 没有被设置
-	if value, ok := traceMap.Load(testGid); ok {
-		t.Errorf("Expected no trace when DisableTrace is true, but found %q", value.(string))
+	if value, ok := loadTraceForTest(testGid); ok {
+		t.Errorf("Expected no trace when DisableTrace is true, but found %q", value)
 	}
 	
 	// 恢复设置，验证正常工作
 	DisableTrace = false
 	setTrace(testGid, testTrace)
 	
-	if value, ok := traceMap.Load(testGid); !ok || value.(string) != testTrace {
+	if value, ok := loadTraceForTest(testGid); !ok || value != testTrace {
 		t.Errorf("Expected trace %q to be set after enabling trace", testTrace)
 	}
 	
@@ -365,8 +359,8 @@ func TestSetTraceWithGID_EmptyTraceId_Coverage(t *testing.T) {
 	SetTraceWithGID(testGid)
 	
 	// 获取生成的 trace ID
-	if value, ok := traceMap.Load(testGid); ok {
-		generatedTrace := value.(string)
+	if value, ok := loadTraceForTest(testGid); ok {
+		generatedTrace := value
 		
 		// 验证生成了 trace ID
 		if generatedTrace == "" {
