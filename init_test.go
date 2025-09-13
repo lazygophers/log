@@ -447,3 +447,26 @@ func TestPrintOther_DebugfLevelFiltering_Coverage(t *testing.T) {
 		t.Error("Debugf message should be filtered when level is higher than DebugLevel")
 	}
 }
+
+func TestPrintOther_DebugfLevelEnabled_Coverage(t *testing.T) {
+	// 测试print_other.go中Debugf的执行分支（print_other.go:24-26）
+	var buf bytes.Buffer
+	originalOut := std.out
+	originalLevel := std.level
+	std.SetOutput(&buf)
+	std.SetLevel(DebugLevel) // 设置级别等于Debug，使Debugf能够执行
+	defer func() {
+		std.out = originalOut
+		std.level = originalLevel
+	}()
+	
+	// 调用Debugf，应该被执行并输出
+	Debugf("debug %s %d", "message", 123)
+	
+	output := buf.String()
+	
+	// 验证有输出包含格式化内容
+	if !strings.Contains(output, "debug message 123") {
+		t.Error("Debugf message should be executed when level is DebugLevel or lower")
+	}
+}

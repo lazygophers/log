@@ -359,3 +359,58 @@ func TestLogger_LevelCheck(t *testing.T) {
 		t.Error("Output should contain warn message")
 	}
 }
+
+// TestLogger_ErrorfLevelDisabled tests Errorf when Error level is disabled
+func TestLogger_ErrorfLevelDisabled(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+	logger.SetLevel(FatalLevel) // Only fatal messages, error is disabled
+	
+	// Errorf should be filtered out
+	logger.Errorf("error message: %s", "test")
+	
+	// Should not have any output
+	if buf.Len() > 0 {
+		t.Error("Errorf should be filtered when Error level is disabled")
+	}
+}
+
+// TestNewLogger_ReleaseLogPath tests the newLogger function's ReleaseLogPath branch
+func TestNewLogger_ReleaseLogPath(t *testing.T) {
+	// Test newLogger with empty ReleaseLogPath (should use os.Stdout)
+	originalPath := ReleaseLogPath
+	ReleaseLogPath = ""
+	defer func() {
+		ReleaseLogPath = originalPath
+	}()
+	
+	logger := newLogger()
+	
+	if logger == nil {
+		t.Fatal("newLogger returned nil")
+	}
+	
+	if logger.level != DebugLevel {
+		t.Errorf("Expected DebugLevel, got %v", logger.level)
+	}
+	
+	if logger.callerDepth != 4 {
+		t.Errorf("Expected callerDepth 4, got %d", logger.callerDepth)
+	}
+	
+	// Test newLogger with non-empty ReleaseLogPath (should use hourly rotator)
+	tmpDir := t.TempDir()
+	ReleaseLogPath = tmpDir + "/test.log"
+	
+	logger2 := newLogger()
+	
+	if logger2 == nil {
+		t.Fatal("newLogger returned nil with ReleaseLogPath")
+	}
+	
+	// Verify it creates a logger (we can't easily test the exact output type without exposing internals)
+	if logger2.level != DebugLevel {
+		t.Errorf("Expected DebugLevel with ReleaseLogPath, got %v", logger2.level)
+	}
+}
