@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/petermattis/goid"
@@ -45,15 +46,18 @@ func wrapWriter(w io.Writer) zapcore.WriteSyncer {
 // Logger 是日志记录器核心结构，负责日志的输出控制和格式配置
 type Logger struct {
 	level Level
-
 	out zapcore.WriteSyncer
-
 	Format Format
-
 	callerDepth int
-
 	PrefixMsg []byte
 	SuffixMsg []byte
+	
+	// 性能优化字段
+	enableCaller bool
+	enableTrace  bool
+	
+	// 缓存pool用于减少分配
+	entryCache sync.Pool
 }
 
 // newLogger 创建一个新的 Logger 实例，并设置默认值。
@@ -67,14 +71,22 @@ func newLogger() *Logger {
 		out = GetOutputWriterHourly(ReleaseLogPath)
 	}
 	
-	return &Logger{
-		level:     DebugLevel,
-		out:       wrapWriter(out),
+	logger := &Logger{
+		level:        DebugLevel,
+		out:          wrapWriter(out),
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},
-		callerDepth: 4,
+		callerDepth:  4,
+		enableCaller: true,
+		enableTrace:  true,
 	}
+	
+	logger.entryCache.New = func() interface{} {
+		return &Entry{Pid: pid}
+	}
+	
+	return logger
 }
 
 // SetCallerDepth 设置日志调用栈深度
@@ -117,15 +129,46 @@ func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
 	return p
 }
 
+// fastGetEntry 高性能获取Entry
+//go:inline
+func (p *Logger) fastGetEntry() *Entry {
+	return p.entryCache.Get().(*Entry)
+}
+
+// fastPutEntry 高性能归还Entry  
+//go:inline
+func (p *Logger) fastPutEntry(entry *Entry) {
+	entry.Reset()
+	p.entryCache.Put(entry)
+}
+
+// EnableCaller 控制是否启用调用者信息
+func (p *Logger) EnableCaller(enable bool) *Logger {
+	p.enableCaller = enable
+	return p
+}
+
+// EnableTrace 控制是否启用跟踪信息
+func (p *Logger) EnableTrace(enable bool) *Logger {
+	p.enableTrace = enable
+	return p
+}
+
 // Clone 创建当前Logger的深度拷贝
 // 返回: 新的Logger实例
 func (p *Logger) Clone() *Logger {
 	l := Logger{
-		level:       p.level,
-		out:         p.out,
-		callerDepth: p.callerDepth,
-		PrefixMsg:   p.PrefixMsg,
-		SuffixMsg:   p.SuffixMsg,
+		level:        p.level,
+		out:          p.out,
+		callerDepth:  p.callerDepth,
+		PrefixMsg:    p.PrefixMsg,
+		SuffixMsg:    p.SuffixMsg,
+		enableCaller: p.enableCaller,
+		enableTrace:  p.enableTrace,
+	}
+	
+	l.entryCache.New = func() interface{} {
+		return &Entry{Pid: pid}
 	}
 
 	switch f := p.Format.(type) {
@@ -196,37 +239,51 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	p.log(level, fmt.Sprintf(format, args...))
 }
 
-// log 是内部核心日志记录函数。
+// log 是内部核心日志记录函数，优化版本。
 // 它首先检查指定的日志级别是否启用，如果未启用则直接返回。
-// 然后，它从对象池获取一个 Entry 对象，并填充日志信息，
-// 包括Gid、时间、级别、消息、前后缀、TraceId以及调用者信息。
-// 最后，它使用指定的格式化器格式化 Entry，并将结果写入输出。
-// 完成后，Entry 对象被重置并放回对象池。
+// 使用高性能的Entry缓存池，并条件性地获取昂贵的调用者信息和跟踪信息。
+// 批量设置字段以提高缓存友好性，最后格式化并写入输出。
+//go:noinline
 func (p *Logger) log(level Level, msg string) {
-	entry := entryPool.Get().(*Entry)
-	defer func() {
-		entry.Reset()
-		entryPool.Put(entry)
-	}()
-
-	entry.Gid = goid.Get()
-	entry.Time = time.Now()
+	entry := p.fastGetEntry()
+	
+	// 批量设置基础字段
 	entry.Level = level
 	entry.Message = msg
-	entry.SuffixMsg = p.SuffixMsg
-	entry.PrefixMsg = p.PrefixMsg
-	entry.TraceId = getTrace(entry.Gid)
-
-	var pc uintptr
-	var ok bool
-	pc, entry.File, entry.CallerLine, ok = runtime.Caller(p.callerDepth)
-	if ok {
-		entry.CallerName = runtime.FuncForPC(pc).Name()
+	entry.Time = time.Now()
+	
+	// 条件性设置开销较大的字段
+	if p.enableTrace {
+		entry.Gid = goid.Get()
+		entry.TraceId = getTrace(entry.Gid)
 	}
-
-	entry.CallerDir, entry.CallerFunc = SplitPackageName(entry.CallerName)
-
-	p.write(level, p.Format.Format(entry))
+	
+	// 条件性获取调用者信息
+	if p.enableCaller {
+		var pc uintptr
+		var ok bool
+		pc, entry.File, entry.CallerLine, ok = runtime.Caller(p.callerDepth)
+		if ok && pc != 0 {
+			if fn := runtime.FuncForPC(pc); fn != nil {
+				entry.CallerName = fn.Name()
+				entry.CallerDir, entry.CallerFunc = SplitPackageName(entry.CallerName)
+			}
+		}
+	}
+	
+	// 设置前缀后缀（避免不必要的拷贝）
+	if len(p.PrefixMsg) > 0 {
+		entry.PrefixMsg = p.PrefixMsg
+	}
+	if len(p.SuffixMsg) > 0 {
+		entry.SuffixMsg = p.SuffixMsg
+	}
+	
+	// 格式化并写入
+	formatted := p.Format.Format(entry)
+	p.write(level, formatted)
+	
+	p.fastPutEntry(entry)
 }
 
 // write 将格式化后的日志字节流写入输出。
