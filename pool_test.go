@@ -2,65 +2,84 @@ package log
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 )
 
-// TestGetBuffer 测试从池中获取缓冲区。
-func TestGetBuffer(t *testing.T) {
-	// 从池中获取一个缓冲区。
+func TestGetPutBuffer(t *testing.T) {
+	// 测试获取和返回缓冲区
 	buf := GetBuffer()
-	// 验证获取到的缓冲区不应为 nil。
+	
 	if buf == nil {
-		t.Fatal("期望获取一个缓冲区，但得到的是 nil")
+		t.Fatal("GetBuffer returned nil")
 	}
-	// 验证缓冲区的初始长度应为 0。
-	if buf.Len() != 0 {
-		t.Errorf("期望缓冲区长度为 0，但得到的是 %d", buf.Len())
-	}
-	// 注意：从 sync.Pool 获取的缓冲区的容量（Capacity）不保证为 0。
-	// 因为缓冲区是复用的，它会保留之前分配的内存。我们只需要确保其长度（Length）为 0 即可。
-}
-
-// TestPutBuffer 测试将缓冲区归还到池中。
-func TestPutBuffer(t *testing.T) {
-	// 1. 从池中获取一个缓冲区实例。
-	buf := GetBuffer()
-	// 2. 向缓冲区写入一些测试数据。
+	
+	// 写入一些数据
 	buf.WriteString("test data")
-
-	// 3. 将缓冲区归还到池中。
-	PutBuffer(buf)
-
-	// 4. 再次从池中获取一个缓冲区，并检查其内容是否已被重置。
-	buf2 := GetBuffer()
-	if buf2.Len() != 0 {
-		t.Errorf("期望缓冲区被重置，但其长度为 %d", buf2.Len())
+	
+	if buf.String() != "test data" {
+		t.Errorf("Expected 'test data', got %q", buf.String())
 	}
+	
+	// 返回到池中
+	PutBuffer(buf)
+	
+	// 再次获取，应该是重置后的缓冲区
+	buf2 := GetBuffer()
+	
+	if buf2.Len() != 0 {
+		t.Error("Buffer should be reset when returned from pool")
+	}
+	
+	// 清理
+	PutBuffer(buf2)
+}
 
-	// 5. 测试归还 nil 缓冲区的情况，确保程序不会因此引发 panic。
+func TestPutBuffer_Nil_Coverage(t *testing.T) {
+	// 测试PutBuffer处理nil的情况（pool.go:38-40）
+	
+	// 这应该不会panic或出现错误
 	PutBuffer(nil)
+	
+	// 测试通过说明nil检查工作正常
 }
 
-// BenchmarkPool 对使用 sync.Pool 的缓冲区分配进行基准测试。
-func BenchmarkPool(b *testing.B) {
-	b.ReportAllocs()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			// 从池中获取缓冲区，写入数据，然后归还。
-			buf := GetBuffer()
-			buf.WriteString("benchmark data")
-			PutBuffer(buf)
+func TestBufferPool_Reuse(t *testing.T) {
+	// 测试缓冲区池的重用功能
+	buffers := make([]*bytes.Buffer, 10)
+	
+	// 获取多个缓冲区
+	for i := 0; i < 10; i++ {
+		buffers[i] = GetBuffer()
+		if buffers[i] == nil {
+			t.Fatalf("GetBuffer returned nil at index %d", i)
 		}
-	})
-}
-
-// BenchmarkAlloc 对不使用池，直接通过 new(bytes.Buffer) 进行内存分配的方式进行基准测试。
-func BenchmarkAlloc(b *testing.B) {
-	b.ReportAllocs()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			// 每次迭代都创建一个新的缓冲区实例。
-			_ = new(bytes.Buffer)
+	}
+	
+	// 向每个缓冲区写入唯一数据
+	for i, buf := range buffers {
+		buf.WriteString(fmt.Sprintf("data_%d", i))
+	}
+	
+	// 验证数据
+	for i, buf := range buffers {
+		expected := fmt.Sprintf("data_%d", i)
+		if buf.String() != expected {
+			t.Errorf("Expected %q, got %q", expected, buf.String())
 		}
-	})
+	}
+	
+	// 将所有缓冲区返回池中
+	for _, buf := range buffers {
+		PutBuffer(buf)
+	}
+	
+	// 再次获取缓冲区，验证已被重置
+	for i := 0; i < 5; i++ {
+		buf := GetBuffer()
+		if buf.Len() != 0 {
+			t.Errorf("Buffer %d should be reset, but has length %d", i, buf.Len())
+		}
+		PutBuffer(buf)
+	}
 }

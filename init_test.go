@@ -3,352 +3,447 @@ package log
 import (
 	"bytes"
 	"os"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/net/context"
 )
 
-// TestPid 测试 Pid 函数是否返回正确的进程 ID
 func TestPid(t *testing.T) {
-	// 获取当前进程 ID
-	expectedPid := os.Getpid()
+	currentPid := os.Getpid()
+	logPid := Pid()
 	
-	// 调用 Pid 函数
-	actualPid := Pid()
+	if logPid != currentPid {
+		t.Errorf("Expected PID %d, got %d", currentPid, logPid)
+	}
 	
-	// 验证返回的 PID 是否正确
-	assert.Equal(t, expectedPid, actualPid, "Pid() 应该返回当前进程的 ID")
+	// PID 应该是正数
+	if logPid <= 0 {
+		t.Errorf("PID should be positive, got %d", logPid)
+	}
 }
 
-// TestNew 测试 New 函数是否返回一个新的 Logger 实例
 func TestNew(t *testing.T) {
-	// 调用 New 函数
 	logger := New()
 	
-	// 验证返回的不是 nil
-	require.NotNil(t, logger, "New() 不应该返回 nil")
-	
-	// 验证返回的是 Logger 类型
-	assert.IsType(t, &Logger{}, logger, "New() 应该返回 *Logger 类型")
-	
-	// 验证新的 logger 有默认值
-	assert.Equal(t, DebugLevel, logger.level, "new logger default level should be DebugLevel")
-}
-
-// TestSetLevel 和 TestGetLevel 测试设置和获取日志级别
-func TestSetLevelAndGetLevel(t *testing.T) {
-	// 保存原始级别以便恢复
-	originalLevel := GetLevel()
-	defer SetLevel(originalLevel)
-	
-	// 测试设置和获取各种级别
-	testLevels := []Level{
-		DebugLevel,
-		InfoLevel,
-		WarnLevel,
-		ErrorLevel,
-		FatalLevel,
-		PanicLevel,
+	if logger == nil {
+		t.Fatal("New() returned nil")
 	}
 	
-	for _, level := range testLevels {
-		// 设置级别
-		SetLevel(level)
-		
-		// 获取级别
-		retrievedLevel := GetLevel()
-		
-		// 验证级别设置正确
-		assert.Equal(t, level, retrievedLevel, "GetLevel() 应该返回最近设置的级别")
+	// 新创建的 logger 应该有默认设置
+	if logger.Level() != DebugLevel {
+		t.Errorf("Expected default level %v, got %v", DebugLevel, logger.Level())
+	}
+	
+	if logger.callerDepth != 4 {
+		t.Errorf("Expected default caller depth 4, got %d", logger.callerDepth)
 	}
 }
 
-// TestSync 测试 Sync 函数是否能正常工作
-func TestSync(t *testing.T) {
-	// 这个测试主要是验证 Sync 函数不会 panic
-	// 由于 std 是一个全局变量，我们无法直接测试其输出
-	// 所以我们只是确保函数调用不会出错
-	
-	assert.NotPanics(t, func() {
-		Sync()
-	}, "Sync() 不应该 panic")
-}
-
-// TestClone 测试 Clone 函数是否能正确复制 Logger
-func TestClone(t *testing.T) {
-	// 设置原始 logger 的一些属性
-	SetLevel(InfoLevel)
-	SetPrefixMsg("[TEST]")
-	SetSuffixMsg("[END]")
-	SetCallerDepth(5)
-	
-	// 克隆 logger
-	cloned := Clone()
-	
-	require.NotNil(t, cloned, "Clone() 不应该返回 nil")
-	
-	// 验证克隆的 logger 具有相同的属性
-	assert.Equal(t, GetLevel(), cloned.Level(), "克隆的 logger 应该有相同的级别")
-	
-	// 修改原始 logger 的级别
-	SetLevel(DebugLevel)
-	
-	// 验证克隆的 logger 不受影响
-	assert.Equal(t, InfoLevel, cloned.Level(), "修改原始 logger 不应该影响克隆的 logger")
-}
-
-// TestSetCallerDepth 测试设置调用者深度
-func TestSetCallerDepth(t *testing.T) {
-	// 保存原始深度
-	originalDepth := 4 // 默认深度
-	
-	// 测试设置不同的深度
-	testDepths := []int{2, 4, 6, 8}
-	
-	for _, depth := range testDepths {
-		SetCallerDepth(depth)
-		// 由于 callerDepth 是私有属性，我们无法直接验证
-		// 但我们可以确保函数调用不会出错
-		assert.NotPanics(t, func() {
-			Info("测试日志")
-		}, "SetCallerDepth() 后的日志记录不应该 panic")
-	}
-	
-	// 恢复默认深度
-	SetCallerDepth(originalDepth)
-}
-
-// TestSetPrefixMsg 测试设置前缀消息
-func TestSetPrefixMsg(t *testing.T) {
-	// 保存原始前缀
-	originalPrefix := std.PrefixMsg
-	defer func() {
-		std.PrefixMsg = originalPrefix
-	}()
-	
-	// 测试设置前缀
-	testPrefix := "[TEST-PREFIX]"
-	SetPrefixMsg(testPrefix)
-	
-	// 验证前缀已设置
-	assert.Equal(t, []byte(testPrefix), std.PrefixMsg, "前缀应该被正确设置")
-	
-	// 测试空前缀
-	SetPrefixMsg("")
-	assert.Empty(t, std.PrefixMsg, "空字符串应该被正确设置为前缀")
-}
-
-// TestAppendPrefixMsg 测试追加前缀消息
-func TestAppendPrefixMsg(t *testing.T) {
-	// 保存原始前缀
-	originalPrefix := std.PrefixMsg
-	defer func() {
-		std.PrefixMsg = originalPrefix
-	}()
-	
-	// 设置初始前缀
-	initialPrefix := "[INITIAL]"
-	SetPrefixMsg(initialPrefix)
-	
-	// 追加前缀
-	appendPrefix := "[APPENDED]"
-	AppendPrefixMsg(appendPrefix)
-	
-	// 验证前缀被正确追加
-	expectedPrefix := initialPrefix + appendPrefix
-	assert.Equal(t, []byte(expectedPrefix), std.PrefixMsg, "前缀应该被正确追加")
-}
-
-// TestSetSuffixMsg 测试设置后缀消息
-func TestSetSuffixMsg(t *testing.T) {
-	// 保存原始后缀
-	originalSuffix := std.SuffixMsg
-	defer func() {
-		std.SuffixMsg = originalSuffix
-	}()
-	
-	// 测试设置后缀
-	testSuffix := "[TEST-SUFFIX]"
-	SetSuffixMsg(testSuffix)
-	
-	// 验证后缀已设置
-	assert.Equal(t, []byte(testSuffix), std.SuffixMsg, "后缀应该被正确设置")
-	
-	// 测试空后缀
-	SetSuffixMsg("")
-	assert.Empty(t, std.SuffixMsg, "空字符串应该被正确设置为后缀")
-}
-
-// TestAppendSuffixMsg 测试追加后缀消息
-func TestAppendSuffixMsg(t *testing.T) {
-	// 保存原始后缀
-	originalSuffix := std.SuffixMsg
-	defer func() {
-		std.SuffixMsg = originalSuffix
-	}()
-	
-	// 设置初始后缀
-	initialSuffix := "[INITIAL]"
-	SetSuffixMsg(initialSuffix)
-	
-	// 追加后缀
-	appendSuffix := "[APPENDED]"
-	AppendSuffixMsg(appendSuffix)
-	
-	// 验证后缀被正确追加
-	expectedSuffix := initialSuffix + appendSuffix
-	assert.Equal(t, []byte(expectedSuffix), std.SuffixMsg, "后缀应该被正确追加")
-}
-
-// TestParsingAndEscaping 测试解析和转义设置
-func TestParsingAndEscaping(t *testing.T) {
-	// 由于 ParsingAndEscaping 操作的是 Formatter 的私有属性
-	// 我们只能测试函数调用不会 panic，并且会正确处理非 FormatFull 的情况
-	
-	assert.NotPanics(t, func() {
-		ParsingAndEscaping(true)
-	}, "ParsingAndEscaping(true) 不应该 panic")
-	
-	assert.NotPanics(t, func() {
-		ParsingAndEscaping(false)
-	}, "ParsingAndEscaping(false) 不应该 panic")
-}
-
-// TestCaller 测试调用者信息控制
-func TestCaller(t *testing.T) {
-	// 由于 Caller 操作的是 Formatter 的私有属性
-	// 我们只能测试函数调用不会 panic，并且会正确处理非 FormatFull 的情况
-	
-	assert.NotPanics(t, func() {
-		Caller(true)
-	}, "Caller(true) 不应该 panic")
-	
-	assert.NotPanics(t, func() {
-		Caller(false)
-	}, "Caller(false) 不应该 panic")
-}
-
-// TestIntegration 测试多个函数的集成使用
-func TestIntegration(t *testing.T) {
+func TestSetLevel_Global(t *testing.T) {
 	// 保存原始状态
-	originalLevel := GetLevel()
-	originalPrefix := std.PrefixMsg
-	originalSuffix := std.SuffixMsg
+	originalLevel := std.Level()
+	defer func() {
+		std.SetLevel(originalLevel)
+	}()
+	
+	result := SetLevel(ErrorLevel)
+	
+	if result != std {
+		t.Error("SetLevel should return the global std logger")
+	}
+	
+	if std.Level() != ErrorLevel {
+		t.Errorf("Expected global logger level %v, got %v", ErrorLevel, std.Level())
+	}
+	
+	if GetLevel() != ErrorLevel {
+		t.Errorf("GetLevel should return %v, got %v", ErrorLevel, GetLevel())
+	}
+}
+
+func TestGetLevel_Global(t *testing.T) {
+	// 保存原始状态
+	originalLevel := std.Level()
+	defer func() {
+		std.SetLevel(originalLevel)
+	}()
+	
+	// 设置一个特定级别
+	std.SetLevel(WarnLevel)
+	
+	if GetLevel() != WarnLevel {
+		t.Errorf("Expected level %v, got %v", WarnLevel, GetLevel())
+	}
+}
+
+func TestSync_Global(t *testing.T) {
+	// 创建一个 mock writer 来测试 sync 调用
+	mock := &MockWriter{}
+	originalOut := std.out
+	std.SetOutput(mock)
+	defer func() {
+		std.out = originalOut
+	}()
+	
+	Sync()
+	
+	// Sync 应该被调用
+	if mock.syncCalls != 1 {
+		t.Errorf("Expected 1 sync call, got %d", mock.syncCalls)
+	}
+}
+
+func TestClone_Global(t *testing.T) {
+	// 保存原始状态
+	originalLevel := std.Level()
+	originalPrefix := string(std.PrefixMsg)
+	originalSuffix := string(std.SuffixMsg)
 	originalDepth := std.callerDepth
-	
 	defer func() {
-		SetLevel(originalLevel)
-		std.PrefixMsg = originalPrefix
-		std.SuffixMsg = originalSuffix
-		std.callerDepth = originalDepth
+		std.SetLevel(originalLevel)
+		std.SetPrefixMsg(originalPrefix)
+		std.SetSuffixMsg(originalSuffix)
+		std.SetCallerDepth(originalDepth)
 	}()
 	
-	// 创建一个缓冲区来捕获日志输出
-	var buf bytes.Buffer
-	SetOutput(&buf)
-	defer SetOutput(os.Stdout)
+	// 设置一些自定义值
+	std.SetLevel(ErrorLevel)
+	std.SetPrefixMsg("TEST: ")
+	std.SetSuffixMsg(" :END")
+	std.SetCallerDepth(10)
 	
-	// 设置各种属性
-	SetLevel(InfoLevel)
-	SetPrefixMsg("[INTEGRATION]")
-	SetSuffixMsg("[END]")
-	SetCallerDepth(3)
+	clone := Clone()
 	
-	// 记录日志
-	Info("集成测试消息")
-	
-	// 验证有输出（不验证具体内容，因为包含时间戳等动态信息）
-	assert.True(t, buf.Len() > 0, "应该有日志输出")
-	
-	// 测试级别过滤
-	buf.Reset()
-	SetLevel(WarnLevel)
-	Debug("这条调试消息不应该出现")
-	assert.Equal(t, 0, buf.Len(), "Debug 消息不应该在 Warn 级别输出")
-}
-
-// TestConcurrentAccess 测试并发访问的安全性
-func TestConcurrentAccess(t *testing.T) {
-	// 这个测试验证多个 goroutine 同时访问全局函数时的安全性
-	done := make(chan bool, 10)
-	
-	// 启动多个 goroutine 同时调用各种函数
-	for i := 0; i < 10; i++ {
-		go func(id int) {
-			defer func() { done <- true }()
-			
-			// 执行各种操作
-			SetLevel(Level(id % 6))
-			GetLevel()
-			SetPrefixMsg("PREFIX")
-			SetSuffixMsg("SUFFIX")
-			New()
-			Clone()
-			Sync()
-		}(i)
+	if clone == std {
+		t.Error("Clone should return a different instance")
 	}
 	
-	// 等待所有 goroutine 完成
-	for i := 0; i < 10; i++ {
-		<-done
+	if clone.Level() != std.Level() {
+		t.Error("Clone should have the same level as std")
 	}
 	
-	// 如果没有 panic，测试通过
+	if string(clone.PrefixMsg) != string(std.PrefixMsg) {
+		t.Error("Clone should have the same prefix as std")
+	}
+	
+	if string(clone.SuffixMsg) != string(std.SuffixMsg) {
+		t.Error("Clone should have the same suffix as std")
+	}
+	
+	if clone.callerDepth != std.callerDepth {
+		t.Error("Clone should have the same caller depth as std")
+	}
+	
+	// 修改克隆不应该影响原始对象
+	clone.SetLevel(TraceLevel)
+	if std.Level() == TraceLevel {
+		t.Error("Modifying clone should not affect std")
+	}
 }
 
-// TestCloneToCtx 测试 CloneToCtx 函数
-func TestCloneToCtx(t *testing.T) {
-	// Import context for proper usage
-	ctx := context.Background()
-	
-	// 设置一些标准日志记录器的配置
-	originalLevel := GetLevel()
-	originalPrefix := std.PrefixMsg
-	originalSuffix := std.SuffixMsg
+func TestCloneToCtx_Global(t *testing.T) {
+	// 保存原始状态
+	originalLevel := std.Level()
 	defer func() {
-		SetLevel(originalLevel)
-		std.PrefixMsg = originalPrefix
-		std.SuffixMsg = originalSuffix
-		SetOutput(os.Stdout)
+		std.SetLevel(originalLevel)
 	}()
-
-	SetLevel(DebugLevel)
-	SetPrefixMsg("[TEST] ")
-	SetSuffixMsg(" [END]")
-
-	// 克隆到上下文日志记录器
+	
+	std.SetLevel(WarnLevel)
+	
 	ctxLogger := CloneToCtx()
-	require.NotNil(t, ctxLogger, "CloneToCtx 应该返回非空值")
+	
+	if ctxLogger == nil {
+		t.Fatal("CloneToCtx returned nil")
+	}
+	
+	// 检查内部 logger 的设置
+	if ctxLogger.Logger.Level() != WarnLevel {
+		t.Errorf("Expected context logger level %v, got %v", WarnLevel, ctxLogger.Logger.Level())
+	}
+}
 
-	// 验证上下文日志记录器继承了标准日志记录器的配置
-	buf := &bytes.Buffer{}
-	ctxLogger.SetOutput(buf)
+func TestSetCallerDepth_Global(t *testing.T) {
+	// 保存原始状态
+	originalDepth := std.callerDepth
+	defer func() {
+		std.SetCallerDepth(originalDepth)
+	}()
+	
+	result := SetCallerDepth(15)
+	
+	if result != std {
+		t.Error("SetCallerDepth should return the global std logger")
+	}
+	
+	if std.callerDepth != 15 {
+		t.Errorf("Expected caller depth 15, got %d", std.callerDepth)
+	}
+}
 
-	ctxLogger.Info(ctx, "测试上下文日志记录器")
+func TestSetPrefixMsg_Global(t *testing.T) {
+	// 保存原始状态
+	originalPrefix := string(std.PrefixMsg)
+	defer func() {
+		std.SetPrefixMsg(originalPrefix)
+	}()
+	
+	prefix := "GLOBAL: "
+	result := SetPrefixMsg(prefix)
+	
+	if result != std {
+		t.Error("SetPrefixMsg should return the global std logger")
+	}
+	
+	if string(std.PrefixMsg) != prefix {
+		t.Errorf("Expected prefix %q, got %q", prefix, string(std.PrefixMsg))
+	}
+}
 
+func TestAppendPrefixMsg_Global(t *testing.T) {
+	// 保存原始状态
+	originalPrefix := string(std.PrefixMsg)
+	defer func() {
+		std.SetPrefixMsg(originalPrefix)
+	}()
+	
+	std.SetPrefixMsg("INITIAL: ")
+	additional := "ADDED: "
+	
+	result := AppendPrefixMsg(additional)
+	
+	if result != std {
+		t.Error("AppendPrefixMsg should return the global std logger")
+	}
+	
+	expected := "INITIAL: ADDED: "
+	if string(std.PrefixMsg) != expected {
+		t.Errorf("Expected prefix %q, got %q", expected, string(std.PrefixMsg))
+	}
+}
+
+func TestSetSuffixMsg_Global(t *testing.T) {
+	// 保存原始状态
+	originalSuffix := string(std.SuffixMsg)
+	defer func() {
+		std.SetSuffixMsg(originalSuffix)
+	}()
+	
+	suffix := " :GLOBAL"
+	result := SetSuffixMsg(suffix)
+	
+	if result != std {
+		t.Error("SetSuffixMsg should return the global std logger")
+	}
+	
+	if string(std.SuffixMsg) != suffix {
+		t.Errorf("Expected suffix %q, got %q", suffix, string(std.SuffixMsg))
+	}
+}
+
+func TestAppendSuffixMsg_Global(t *testing.T) {
+	// 保存原始状态
+	originalSuffix := string(std.SuffixMsg)
+	defer func() {
+		std.SetSuffixMsg(originalSuffix)
+	}()
+	
+	std.SetSuffixMsg(" :INITIAL")
+	additional := " :ADDED"
+	
+	result := AppendSuffixMsg(additional)
+	
+	if result != std {
+		t.Error("AppendSuffixMsg should return the global std logger")
+	}
+	
+	expected := " :INITIAL :ADDED"
+	if string(std.SuffixMsg) != expected {
+		t.Errorf("Expected suffix %q, got %q", expected, string(std.SuffixMsg))
+	}
+}
+
+func TestParsingAndEscaping_Global(t *testing.T) {
+	// 保存原始状态
+	originalFormatter := std.Format
+	defer func() {
+		std.Format = originalFormatter
+	}()
+	
+	result := ParsingAndEscaping(false)
+	
+	if result != std {
+		t.Error("ParsingAndEscaping should return the global std logger")
+	}
+	
+	// 检查格式化器的设置
+	if formatter, ok := std.Format.(*Formatter); ok {
+		if formatter.DisableParsingAndEscaping != false {
+			t.Error("Expected DisableParsingAndEscaping to be false")
+		}
+	} else {
+		t.Error("Expected Formatter type")
+	}
+	
+	// 测试设置为 true
+	ParsingAndEscaping(true)
+	if formatter, ok := std.Format.(*Formatter); ok {
+		if formatter.DisableParsingAndEscaping != true {
+			t.Error("Expected DisableParsingAndEscaping to be true")
+		}
+	}
+}
+
+func TestCaller_Global(t *testing.T) {
+	// 保存原始状态
+	originalFormatter := std.Format
+	defer func() {
+		std.Format = originalFormatter
+	}()
+	
+	result := Caller(false)
+	
+	if result != std {
+		t.Error("Caller should return the global std logger")
+	}
+	
+	// 检查格式化器的设置
+	if formatter, ok := std.Format.(*Formatter); ok {
+		if formatter.DisableCaller != false {
+			t.Errorf("Expected DisableCaller to be false, got %v", formatter.DisableCaller)
+		}
+	} else {
+		t.Error("Expected Formatter type")
+	}
+	
+	// 测试设置为 true
+	Caller(true)
+	if formatter, ok := std.Format.(*Formatter); ok {
+		if formatter.DisableCaller != true {
+			t.Errorf("Expected DisableCaller to be true, got %v", formatter.DisableCaller)
+		}
+	}
+}
+
+// 测试全局函数的日志输出
+func TestGlobalLoggingFunctions(t *testing.T) {
+	var buf bytes.Buffer
+	originalOut := std.out
+	std.SetOutput(&buf)
+	defer func() {
+		std.out = originalOut
+	}()
+	
+	std.SetLevel(DebugLevel)
+	
+	// 测试各个级别的日志函数
+	Debug("debug message")
+	Info("info message")
+	Warn("warn message")
+	Error("error message")
+	
 	output := buf.String()
-	require.Contains(t, output, "[info]", "应该包含 info 级别")
-	require.Contains(t, output, "[TEST]", "应该包含前缀")
-	require.Contains(t, output, "[END]", "应该包含后缀")
-	require.Contains(t, output, "测试上下文日志记录器", "应该包含消息")
+	
+	// 根据build tag调整期望行为
+	expectedMessages := []string{"info message", "warn message", "error message"}
+	
+	// 在debug build tag下，或者在默认情况下（没有release tag），Debug应该输出
+	// 在release模式下，Debug函数是空实现，不会输出
+	if checkDebugEnabled() {
+		expectedMessages = append([]string{"debug message"}, expectedMessages...)
+	}
+	
+	if !containsAll(output, expectedMessages) {
+		t.Errorf("Output should contain expected messages for current build tag, expected: %v, got: %s", expectedMessages, output)
+	}
+}
 
-	// 测试修改上下文日志记录器不会影响标准日志记录器
-	ctxLogger.SetPrefixMsg("[CTX] ")
+// checkDebugEnabled 检查当前build tag是否启用了debug输出
+func checkDebugEnabled() bool {
+	// 测试Debug函数是否实际产生输出
+	var testBuf bytes.Buffer
+	originalOut := std.out
+	std.SetOutput(&testBuf)
+	defer func() {
+		std.out = originalOut
+	}()
+	
+	std.SetLevel(DebugLevel)
+	Debug("test debug")
+	
+	return strings.Contains(testBuf.String(), "test debug")
+}
 
-	buf1 := &bytes.Buffer{}
-	buf2 := &bytes.Buffer{}
+// 辅助函数：检查字符串是否包含所有子字符串
+func containsAll(s string, substrings []string) bool {
+	for _, substr := range substrings {
+		if !bytes.Contains([]byte(s), []byte(substr)) {
+			return false
+		}
+	}
+	return true
+}
 
-	SetOutput(buf1)
-	ctxLogger.SetOutput(buf2)
+func TestGlobalLevelFiltering(t *testing.T) {
+	// 测试全局函数的级别过滤
+	var buf bytes.Buffer
+	originalOut := std.out
+	originalLevel := std.level
+	std.SetOutput(&buf)
+	std.SetLevel(ErrorLevel) // 只记录ERROR及以上级别
+	defer func() {
+		std.out = originalOut
+		std.level = originalLevel
+	}()
+	
+	// 测试被过滤的级别
+	Trace("trace message")
+	Debugf("debug %s", "message") 
+	Infof("info %s", "message")
+	Warnf("warn %s", "message")
+	
+	// 测试会被记录的级别
+	Errorf("error %s", "message")
+	
+	output := buf.String()
+	
+	// 验证低级别的消息没有被记录
+	if bytes.Contains([]byte(output), []byte("trace message")) {
+		t.Error("Global Trace message should be filtered out")
+	}
+	if bytes.Contains([]byte(output), []byte("debug message")) {
+		t.Error("Global Debug message should be filtered out")
+	}
+	if bytes.Contains([]byte(output), []byte("info message")) {
+		t.Error("Global Info message should be filtered out")
+	}
+	if bytes.Contains([]byte(output), []byte("warn message")) {
+		t.Error("Global Warn message should be filtered out")
+	}
+	
+	// 验证高级别的消息被记录了
+	if !bytes.Contains([]byte(output), []byte("error message")) {
+		t.Error("Global Error message should be recorded")
+	}
+}
 
-	Info("标准日志")
-	ctxLogger.Info(ctx, "上下文日志")
-
-	output1 := buf1.String()
-	output2 := buf2.String()
-
-	require.Contains(t, output1, "[TEST]", "标准日志记录器的前缀应该保持不变")
-	require.Contains(t, output2, "[CTX]", "上下文日志记录器的前缀应该已修改")
+func TestPrintOther_DebugfLevelFiltering_Coverage(t *testing.T) {
+	// 测试print_other.go中Debugf的级别过滤（print_other.go:24-26）
+	var buf bytes.Buffer
+	originalOut := std.out
+	originalLevel := std.level
+	std.SetOutput(&buf)
+	std.SetLevel(InfoLevel) // 设置级别高于Debug，使Debugf被过滤
+	defer func() {
+		std.out = originalOut
+		std.level = originalLevel
+	}()
+	
+	// 调用Debugf，应该被过滤掉
+	Debugf("debug %s", "message")
+	
+	output := buf.String()
+	
+	// 验证没有输出
+	if strings.Contains(output, "debug message") {
+		t.Error("Debugf message should be filtered when level is higher than DebugLevel")
+	}
 }

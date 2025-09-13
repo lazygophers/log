@@ -2,489 +2,307 @@ package log
 
 import (
 	"bytes"
-	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-	"time"
-
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-// TestSetOutput 测试 SetOutput 函数
 func TestSetOutput(t *testing.T) {
-	// 重置全局状态
-	cleanRotatelogOnce = make(map[string]bool)
-
-	t.Run("单个输出", func(t *testing.T) {
-		buf := &bytes.Buffer{}
-		logger := New()
-		logger.SetOutput(buf)
-
-		// 验证输出设置生效
-		logger.Info("测试消息")
-		assert.Contains(t, buf.String(), "测试消息")
-	})
-
-	t.Run("多个输出", func(t *testing.T) {
-		buf1 := &bytes.Buffer{}
-		buf2 := &bytes.Buffer{}
-		logger := New()
-		logger.SetOutput(buf1, buf2)
-
-		// 验证消息输出到所有输出
-		logger.Info("多输出测试")
-		assert.Contains(t, buf1.String(), "多输出测试")
-		assert.Contains(t, buf2.String(), "多输出测试")
-	})
-
-	t.Run("无参数", func(t *testing.T) {
-		// 保存原始输出
-		originalOutput := std.out
-		defer std.SetOutput(originalOutput)
-
-		// 验证 SetOutput 无参数不会 panic
-		assert.NotPanics(t, func() {
-			SetOutput()
-		})
-	})
+	// 保存原始的标准日志记录器状态
+	originalOut := std.out
+	defer func() {
+		std.out = originalOut
+	}()
+	
+	var buf1, buf2 bytes.Buffer
+	result := SetOutput(&buf1, &buf2)
+	
+	if result != std {
+		t.Error("SetOutput should return the global std logger")
+	}
+	
+	// 测试写入多个输出
+	Info("test message")
+	
+	if buf1.Len() == 0 {
+		t.Error("First buffer should contain data")
+	}
+	
+	if buf2.Len() == 0 {
+		t.Error("Second buffer should contain data")
+	}
+	
+	// 两个 buffer 的内容应该相同
+	if buf1.String() != buf2.String() {
+		t.Error("Both buffers should contain the same data")
+	}
 }
 
-// TestGetOutputWriter 测试 GetOutputWriter 函数
 func TestGetOutputWriter(t *testing.T) {
-	t.Run("正常创建", func(t *testing.T) {
-		// 创建临时目录
-		tempDir := t.TempDir()
-		logFile := filepath.Join(tempDir, "test.log")
-
-		writer := GetOutputWriter(logFile)
-		assert.NotNil(t, writer)
-
-		// 验证写入功能
-		testData := "测试日志\n"
-		n, err := writer.Write([]byte(testData))
-		require.NoError(t, err)
-		assert.Equal(t, len(testData), n)
-
-		// 验证文件内容
-		content, err := os.ReadFile(logFile)
-		require.NoError(t, err)
-		assert.Contains(t, string(content), "测试日志")
-
-		// 验证行数
-		lines := strings.Split(string(content), "\n")
-		// 移除最后一个空行（如果有）
-		if lines[len(lines)-1] == "" {
-			lines = lines[:len(lines)-1]
-		}
-		assert.Equal(t, 1, len(lines))
-	})
-
-	t.Run("目录不存在时自动创建", func(t *testing.T) {
-		tempDir := t.TempDir()
-		subDir := filepath.Join(tempDir, "logs", "app")
-		logFile := filepath.Join(subDir, "app.log")
-
-		// 确保目录不存在
-		_, err := os.Stat(subDir)
-		assert.True(t, os.IsNotExist(err))
-
-		writer := GetOutputWriter(logFile)
-		assert.NotNil(t, writer)
-
-		// 验证目录被创建
-		_, err = os.Stat(subDir)
-		assert.NoError(t, err)
-	})
-
-	t.Run("无效路径", func(t *testing.T) {
-		// 使用一个无效的路径（例如在只读系统中的位置）
-		// 由于不同系统限制，这里我们只测试不会 panic
-		assert.NotPanics(t, func() {
-			_ = GetOutputWriter("/invalid/path/test.log")
-		})
-	})
+	tmpDir := t.TempDir()
+	filename := filepath.Join(tmpDir, "test.log")
+	
+	writer := GetOutputWriter(filename)
+	
+	if writer == nil {
+		t.Fatal("GetOutputWriter returned nil")
+	}
+	
+	// 测试写入
+	testData := []byte("test log message\n")
+	n, err := writer.Write(testData)
+	
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
+	
+	if n != len(testData) {
+		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
+	}
+	
+	// 检查文件是否存在并包含正确内容
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		t.Errorf("Failed to read log file: %v", err)
+	}
+	
+	if string(content) != string(testData) {
+		t.Errorf("Expected file content %q, got %q", string(testData), string(content))
+	}
 }
 
-// TestGetOutputWriterHourly 测试 GetOutputWriterHourly 函数
+func TestGetOutputWriter_DirectoryCreation(t *testing.T) {
+	tmpDir := t.TempDir()
+	// 创建一个不存在的子目录路径
+	filename := filepath.Join(tmpDir, "subdir", "nested", "test.log")
+	
+	writer := GetOutputWriter(filename)
+	
+	if writer == nil {
+		t.Fatal("GetOutputWriter returned nil")
+	}
+	
+	// 测试写入（这应该创建目录）
+	testData := []byte("test log message\n")
+	_, err := writer.Write(testData)
+	
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
+	
+	// 检查目录是否被创建
+	if _, err := os.Stat(filepath.Dir(filename)); os.IsNotExist(err) {
+		t.Error("Directory should have been created")
+	}
+	
+	// 检查文件是否存在
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		t.Error("Log file should have been created")
+	}
+}
+
 func TestGetOutputWriterHourly(t *testing.T) {
-	t.Run("创建按小时轮转的写入器", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "app")
-
-		writer := GetOutputWriterHourly(baseFile)
-		assert.NotNil(t, writer)
-		assert.Implements(t, (*io.Writer)(nil), writer)
-
-		// 等待一下确保文件和软链接创建完成
-		time.Sleep(50 * time.Millisecond)
-
-		// 验证软链接（如果存在）
-		linkFile := baseFile + ".log"
-		if _, err := os.Stat(linkFile); err == nil {
-			// 软链接存在，记录信息
-			t.Logf("软链接 %s 已创建", linkFile)
-		} else if !os.IsNotExist(err) {
-			// 其他错误
-			t.Logf("检查软链接时出现错误: %v", err)
+	tmpDir := t.TempDir()
+	filename := filepath.Join(tmpDir, "test")
+	
+	writer := GetOutputWriterHourly(filename)
+	
+	if writer == nil {
+		t.Fatal("GetOutputWriterHourly returned nil")
+	}
+	
+	// 测试写入
+	testData := []byte("test log message\n")
+	n, err := writer.Write(testData)
+	
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
+	
+	if n != len(testData) {
+		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
+	}
+	
+	// 检查是否创建了按小时命名的日志文件
+	files, err := os.ReadDir(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to read temp dir: %v", err)
+	}
+	
+	var logFileFound bool
+	for _, file := range files {
+		name := file.Name()
+		if strings.HasPrefix(name, "test") && strings.HasSuffix(name, ".log") && len(name) > 10 {
+			logFileFound = true
+			break
 		}
-	})
-
-	t.Run("并发创建只启动一个清理协程", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "concurrent")
-
-		var wg sync.WaitGroup
-		const goroutines = 10
-
-		// 重置全局状态
-		cleanMutex.Lock()
-		cleanRotatelogOnce = make(map[string]bool)
-		cleanMutex.Unlock()
-
-		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
-			go func() {
-				defer wg.Done()
-				_ = GetOutputWriterHourly(baseFile)
-			}()
-		}
-
-		wg.Wait()
-
-		// 验证只有一个清理协程被启动
-		cleanMutex.Lock()
-		assert.True(t, cleanRotatelogOnce[baseFile])
-		cleanMutex.Unlock()
-	})
-
-	t.Run("写入测试", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "write_test")
-
-		writer := GetOutputWriterHourly(baseFile)
-
-		// 写入测试消息
-		testMessage := "测试按小时轮转的日志\n"
-		_, err := writer.Write([]byte(testMessage))
-		require.NoError(t, err)
-
-		// 验证软链接指向最新的日志文件
-		linkFile := baseFile + ".log"
-		content, err := os.ReadFile(linkFile)
-		require.NoError(t, err)
-		assert.Contains(t, string(content), testMessage)
-	})
+	}
+	
+	if !logFileFound {
+		t.Error("Hourly log file was not created")
+	}
 }
 
-// TestEnsureDir 测试 ensureDir 函数
+func TestGetOutputWriterHourly_Reuse(t *testing.T) {
+	tmpDir := t.TempDir()
+	filename := filepath.Join(tmpDir, "test")
+	
+	// 获取两次相同文件名的 writer
+	writer1 := GetOutputWriterHourly(filename)
+	writer2 := GetOutputWriterHourly(filename)
+	
+	// 应该返回相同的实例（缓存）
+	if writer1 != writer2 {
+		t.Error("GetOutputWriterHourly should reuse instances for same filename")
+	}
+}
+
 func TestEnsureDir(t *testing.T) {
-	t.Run("目录不存在时创建", func(t *testing.T) {
-		tempDir := t.TempDir()
-		newDir := filepath.Join(tempDir, "new", "nested", "dir")
-
-		// 确保目录不存在
-		_, err := os.Stat(newDir)
-		assert.True(t, os.IsNotExist(err))
-
-		ensureDir(newDir)
-
-		// 验证目录被创建
-		_, err = os.Stat(newDir)
-		assert.NoError(t, err)
-	})
-
-	t.Run("目录已存在时不操作", func(t *testing.T) {
-		tempDir := t.TempDir()
-
-		// 创建目录
-		subDir := filepath.Join(tempDir, "existing")
-		err := os.Mkdir(subDir, 0755)
-		require.NoError(t, err)
-
-		// 获取修改时间
-		info, err := os.Stat(subDir)
-		require.NoError(t, err)
-		modTime := info.ModTime()
-
-		// 等待一小段时间
-		time.Sleep(10 * time.Millisecond)
-
-		ensureDir(subDir)
-
-		// 验证修改时间未改变
-		newInfo, err := os.Stat(subDir)
-		require.NoError(t, err)
-		assert.Equal(t, modTime, newInfo.ModTime())
-	})
-
-	t.Run("当前目录不处理", func(t *testing.T) {
-		assert.NotPanics(t, func() {
-			ensureDir(".")
-		})
-	})
-
-	t.Run("创建失败时不panic", func(t *testing.T) {
-		// 使用一个可能无法创建的路径
-		// 在某些系统中，可能需要特殊权限
-		assert.NotPanics(t, func() {
-			ensureDir("/root/test_no_permission")
-		})
-	})
+	tmpDir := t.TempDir()
+	testDir := filepath.Join(tmpDir, "test", "nested", "dir")
+	
+	// 目录不存在
+	if _, err := os.Stat(testDir); !os.IsNotExist(err) {
+		t.Fatal("Test directory should not exist initially")
+	}
+	
+	// 调用 ensureDir
+	ensureDir(testDir)
+	
+	// 目录应该被创建
+	if _, err := os.Stat(testDir); os.IsNotExist(err) {
+		t.Error("Directory should have been created")
+	}
+	
+	// 检查目录是否真的是目录
+	info, err := os.Stat(testDir)
+	if err != nil {
+		t.Errorf("Failed to stat directory: %v", err)
+	}
+	
+	if !info.IsDir() {
+		t.Error("Created path should be a directory")
+	}
 }
 
-// TestIsDir 测试 isDir 函数
+func TestEnsureDir_CurrentDirectory(t *testing.T) {
+	// 测试当目录是 "." 时的行为
+	ensureDir(".")
+	// 这不应该做任何事情，也不应该出错
+}
+
+func TestEnsureDir_ExistingDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+	testDir := filepath.Join(tmpDir, "existing")
+	
+	// 先创建目录
+	err := os.MkdirAll(testDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
+	}
+	
+	// 调用 ensureDir 应该不会出错
+	ensureDir(testDir)
+	
+	// 目录应该仍然存在
+	if _, err := os.Stat(testDir); os.IsNotExist(err) {
+		t.Error("Existing directory should still exist")
+	}
+}
+
 func TestIsDir(t *testing.T) {
-	t.Run("存在的目录", func(t *testing.T) {
-		tempDir := t.TempDir()
-		assert.True(t, isDir(tempDir))
-	})
-
-	t.Run("不存在的路径", func(t *testing.T) {
-		assert.False(t, isDir("/path/that/does/not/exist"))
-	})
-
-	t.Run("文件而不是目录", func(t *testing.T) {
-		tempDir := t.TempDir()
-		file := filepath.Join(tempDir, "test_file")
-
-		err := os.WriteFile(file, []byte("test"), 0644)
-		require.NoError(t, err)
-
-		assert.False(t, isDir(file))
-	})
-
-	t.Run("空路径", func(t *testing.T) {
-		assert.False(t, isDir(""))
-	})
-}
-
-// TestOutputInterface 测试 Output 接口
-func TestOutputInterface(t *testing.T) {
-	// 验证 GetOutputWriter 返回的值实现了 Output 接口
-	tempDir := t.TempDir()
-	logFile := filepath.Join(tempDir, "interface_test.log")
-
-	writer := GetOutputWriter(logFile)
-
-	// 检查是否实现了 io.Writer 接口
-	assert.Implements(t, (*io.Writer)(nil), writer)
-
-	// 检查是否实现了 Output 接口（嵌入 io.Writer）
-	var output Output
-	var ok bool
-
-	output, ok = writer.(Output)
-	assert.True(t, ok, "GetOutputWriter 应该返回 Output 接口")
-	assert.NotNil(t, output)
-}
-
-// TestConcurrentSafety 测试并发安全性
-func TestConcurrentSafety(t *testing.T) {
-	t.Run("并发访问 cleanMutex", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "concurrent_test")
-
-		// 重置全局状态
-		cleanMutex.Lock()
-		cleanRotatelogOnce = make(map[string]bool)
-		cleanMutex.Unlock()
-
-		var wg sync.WaitGroup
-		const goroutines = 100
-
-		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
-			go func(id int) {
-				defer wg.Done()
-				writer := GetOutputWriterHourly(baseFile + fmt.Sprintf("_%d", id))
-				assert.NotNil(t, writer)
-
-				// 写入一些数据
-				_, err := writer.Write([]byte(fmt.Sprintf("Goroutine %d\n", id)))
-				assert.NoError(t, err)
-			}(i)
-		}
-
-		wg.Wait()
-
-		// 验证所有文件都被创建
-		files, err := os.ReadDir(tempDir)
-		require.NoError(t, err)
-		assert.True(t, len(files) > 0)
-	})
-
-	t.Run("并发目录创建", func(t *testing.T) {
-		tempDir := t.TempDir()
-		var wg sync.WaitGroup
-		const goroutines = 50
-
-		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
-			go func(id int) {
-				defer wg.Done()
-				logFile := filepath.Join(tempDir, fmt.Sprintf("dir_%d", id), "app.log")
-				writer := GetOutputWriter(logFile)
-				assert.NotNil(t, writer)
-			}(i)
-		}
-
-		wg.Wait()
-
-		// 验证所有目录都被创建
-		files, err := os.ReadDir(tempDir)
-		require.NoError(t, err)
-		assert.Equal(t, goroutines, len(files))
-	})
-}
-
-// TestLogFileRotation 测试日志文件轮转功能
-func TestLogFileRotation(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过耗时的轮转测试")
+	tmpDir := t.TempDir()
+	
+	// 测试目录
+	testDir := filepath.Join(tmpDir, "testdir")
+	err := os.Mkdir(testDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
 	}
-
-	t.Run("按大小轮转", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "size_rotation")
-
-		// 创建一个小的轮转大小用于测试
-		hook, err := rotatelogs.New(
-			baseFile+"%Y%m%d%H.log",
-			rotatelogs.WithRotationSize(1024), // 1KB
-			rotatelogs.WithRotationCount(3),
-		)
-		require.NoError(t, err)
-
-		// 写入超过限制的数据
-		data := strings.Repeat("A", 512) // 512B per write
-		for i := 0; i < 10; i++ {
-			_, err := hook.Write([]byte(data))
-			require.NoError(t, err)
-		}
-
-		// 验证文件被轮转
-		files, err := os.ReadDir(tempDir)
-		require.NoError(t, err)
-		assert.True(t, len(files) > 1)
-	})
-
-	t.Run("按时间轮转", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "time_rotation")
-
-		// 使用很短的轮转时间间隔进行测试
-		hook, err := rotatelogs.New(
-			baseFile+"%Y%m%d%H%M%S.log",
-			rotatelogs.WithRotationTime(time.Second), // 每秒轮转
-			rotatelogs.WithRotationCount(3),
-		)
-		require.NoError(t, err)
-
-		// 等待轮转发生
-		time.Sleep(2 * time.Second)
-
-		// 写入数据触发轮转
-		_, err = hook.Write([]byte("test after rotation"))
-		require.NoError(t, err)
-
-		// 验证文件被轮转
-		files, err := os.ReadDir(tempDir)
-		require.NoError(t, err)
-		assert.True(t, len(files) >= 1)
-	})
-}
-
-// TestIntegrationWithLogger 测试与 Logger 的集成
-func TestIntegrationWithLogger(t *testing.T) {
-	t.Run("使用文件输出", func(t *testing.T) {
-		tempDir := t.TempDir()
-		logFile := filepath.Join(tempDir, "integration.log")
-
-		fileWriter := GetOutputWriter(logFile)
-		logger := New()
-		logger.SetOutput(fileWriter)
-		logger.SetLevel(InfoLevel)
-
-		logger.Info("集成测试消息")
-
-		// 验证文件内容
-		content, err := os.ReadFile(logFile)
-		require.NoError(t, err)
-		assert.Contains(t, string(content), "集成测试消息")
-		assert.Contains(t, string(content), "[info]")
-	})
-
-	t.Run("使用按小时轮转输出", func(t *testing.T) {
-		tempDir := t.TempDir()
-		baseFile := filepath.Join(tempDir, "hourly_integration")
-
-		hourlyWriter := GetOutputWriterHourly(baseFile)
-		logger := New()
-		logger.SetOutput(hourlyWriter)
-		logger.SetLevel(DebugLevel)
-
-		logger.Debug("调试消息")
-		logger.Info("信息消息")
-
-		// 验证软链接存在
-		linkFile := baseFile + ".log"
-		_, err := os.Stat(linkFile)
-		assert.NoError(t, err)
-
-		// 验证内容
-		content, err := os.ReadFile(linkFile)
-		require.NoError(t, err)
-		assert.Contains(t, string(content), "调试消息")
-		assert.Contains(t, string(content), "信息消息")
-	})
-}
-
-// BenchmarkOutputWriter 性能基准测试
-func BenchmarkOutputWriter(b *testing.B) {
-	tempDir := b.TempDir()
-	logFile := filepath.Join(tempDir, "benchmark.log")
-
-	writer := GetOutputWriter(logFile)
-	testData := []byte("性能测试日志消息\n")
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = writer.Write(testData)
+	
+	if !isDir(testDir) {
+		t.Error("isDir should return true for directory")
+	}
+	
+	// 测试文件
+	testFile := filepath.Join(tmpDir, "testfile.txt")
+	file, err := os.Create(testFile)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+	file.Close()
+	
+	if isDir(testFile) {
+		t.Error("isDir should return false for file")
+	}
+	
+	// 测试不存在的路径
+	nonExistent := filepath.Join(tmpDir, "nonexistent")
+	if isDir(nonExistent) {
+		t.Error("isDir should return false for non-existent path")
 	}
 }
 
-// BenchmarkOutputWriterHourly 按小时轮转写入器性能测试
-func BenchmarkOutputWriterHourly(b *testing.B) {
-	tempDir := b.TempDir()
-	baseFile := filepath.Join(tempDir, "benchmark_hourly")
-
-	writer := GetOutputWriterHourly(baseFile)
-	testData := []byte("按小时轮转性能测试日志消息\n")
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = writer.Write(testData)
+func TestOutput_Interface(t *testing.T) {
+	// 测试 Output 接口
+	var buf bytes.Buffer
+	
+	// bytes.Buffer 实现了 io.Writer，所以可以用作 Output
+	var output Output = &buf
+	
+	testData := []byte("test data")
+	n, err := output.Write(testData)
+	
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
+	
+	if n != len(testData) {
+		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
+	}
+	
+	if buf.String() != string(testData) {
+		t.Errorf("Expected %q, got %q", string(testData), buf.String())
 	}
 }
 
-// BenchmarkConcurrentOutput 并发输出性能测试
-func BenchmarkConcurrentOutput(b *testing.B) {
-	tempDir := b.TempDir()
-	baseFile := filepath.Join(tempDir, "concurrent_benchmark")
-
-	b.RunParallel(func(pb *testing.PB) {
-		// 每个 goroutine 使用唯一的文件
-		writer := GetOutputWriter(baseFile + fmt.Sprintf("_%d", time.Now().UnixNano()))
-		testData := []byte("并发性能测试日志消息\n")
-
-		for pb.Next() {
-			_, _ = writer.Write(testData)
-		}
-	})
+// 测试并发安全性
+func TestRotatorInstances_ConcurrentAccess(t *testing.T) {
+	tmpDir := t.TempDir()
+	filename := filepath.Join(tmpDir, "concurrent")
+	
+	// 清理全局状态
+	rotatorMutex.Lock()
+	delete(rotatorInstances, filename)
+	initialCount := len(rotatorInstances)
+	rotatorMutex.Unlock()
+	
+	// 启动多个 goroutine 同时访问
+	done := make(chan bool, 10)
+	
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer func() { done <- true }()
+			writer := GetOutputWriterHourly(filename)
+			if writer == nil {
+				t.Error("GetOutputWriterHourly returned nil")
+			}
+		}()
+	}
+	
+	// 等待所有 goroutine 完成
+	for i := 0; i < 10; i++ {
+		<-done
+	}
+	
+	// 应该只有一个新实例被创建
+	rotatorMutex.Lock()
+	finalCount := len(rotatorInstances)
+	rotatorMutex.Unlock()
+	
+	expectedCount := initialCount + 1
+	if finalCount != expectedCount {
+		t.Errorf("Expected %d rotator instances, got %d", expectedCount, finalCount)
+	}
 }

@@ -5,9 +5,31 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// NewZapHook 创建一个 zap core hook，用于将 zap 的日志条目适配到当前日志系统中。
+// ZapHook 实现 zapcore.WriteSyncer 接口，用于将 zap 日志重定向到我们的日志系统
+type ZapHook struct {
+	logger *Logger
+}
+
+// NewZapHook 创建一个新的 ZapHook 实例
+func NewZapHook(log *Logger) *ZapHook {
+	return &ZapHook{logger: log}
+}
+
+// Write 实现 io.Writer 接口
+func (zh *ZapHook) Write(p []byte) (n int, err error) {
+	// 直接写入到底层 logger
+	return zh.logger.out.Write(p)
+}
+
+// Sync 实现 zapcore.WriteSyncer 接口
+func (zh *ZapHook) Sync() error {
+	zh.logger.Sync()
+	return nil
+}
+
+// createZapHook 创建一个 zap core hook，用于将 zap 的日志条目适配到当前日志系统中。
 // 这个钩子函数会从池中获取一个 Entry 实例，填充必要信息，然后写入目标日志。
-func NewZapHook(log *Logger) func(entry zapcore.Entry) error {
+func createZapHook(log *Logger) func(entry zapcore.Entry) error {
 	return func(entry zapcore.Entry) error {
 		// 从对象池中获取一个 Entry 对象，以减少内存分配
 		logEntry := entryPool.Get().(*Entry)

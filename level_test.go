@@ -2,12 +2,9 @@ package log
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
-// TestLevel_MarshalText 测试 Level 的 MarshalText 方法
-func TestLevel_MarshalText(t *testing.T) {
+func TestLevel_String(t *testing.T) {
 	tests := []struct {
 		level    Level
 		expected string
@@ -15,46 +12,110 @@ func TestLevel_MarshalText(t *testing.T) {
 		{TraceLevel, "trace"},
 		{DebugLevel, "debug"},
 		{InfoLevel, "info"},
-		{WarnLevel, "warning"}, // 注意：MarshalText 中 WarnLevel 使用 "warning"
+		{WarnLevel, "warn"},
 		{ErrorLevel, "error"},
 		{FatalLevel, "fatal"},
 		{PanicLevel, "panic"},
+		{Level(999), "trace"}, // 未知级别返回 "trace"
 	}
-
+	
 	for _, tt := range tests {
-		t.Run(tt.level.String(), func(t *testing.T) {
-			result, err := tt.level.MarshalText()
-			require.NoError(t, err, "MarshalText 不应该返回错误")
-			require.Equal(t, tt.expected, string(result), "应该返回正确的文本表示")
+		t.Run(tt.expected, func(t *testing.T) {
+			result := tt.level.String()
+			if result != tt.expected {
+				t.Errorf("Expected %q, got %q", tt.expected, result)
+			}
 		})
 	}
 }
 
-// TestLevel_MarshalTextInvalidLevel 测试 MarshalText 处理无效级别
-func TestLevel_MarshalTextInvalidLevel(t *testing.T) {
-	// 创建一个无效的级别
-	invalidLevel := Level(999)
+func TestLevel_MarshalText(t *testing.T) {
+	tests := []struct {
+		level       Level
+		expected    string
+		shouldError bool
+	}{
+		{TraceLevel, "trace", false},
+		{DebugLevel, "debug", false},
+		{InfoLevel, "info", false},
+		{WarnLevel, "warning", false}, // MarshalText 返回 "warning"
+		{ErrorLevel, "error", false},
+		{FatalLevel, "fatal", false},
+		{PanicLevel, "panic", false},
+		{Level(999), "", true}, // 未知级别返回错误
+	}
 	
-	result, err := invalidLevel.MarshalText()
-	require.Error(t, err, "无效级别应该返回错误")
-	require.Nil(t, result, "错误时应该返回 nil")
-	require.Contains(t, err.Error(), "not a valid logrus level", "错误消息应该包含预期文本")
+	for _, tt := range tests {
+		name := tt.expected
+		if name == "" {
+			name = "UNKNOWN"
+		}
+		t.Run(name, func(t *testing.T) {
+			result, err := tt.level.MarshalText()
+			
+			if tt.shouldError {
+				if err == nil {
+					t.Error("Expected MarshalText to return error for unknown level")
+				}
+				return
+			}
+			
+			if err != nil {
+				t.Errorf("MarshalText returned error: %v", err)
+			}
+			
+			if string(result) != tt.expected {
+				t.Errorf("Expected %q, got %q", tt.expected, string(result))
+			}
+		})
+	}
 }
 
-// TestLevel_String_DefaultCase 测试 String 方法的默认情况
-func TestLevel_String_DefaultCase(t *testing.T) {
-	// 测试所有已知级别
-	knownLevels := []Level{
-		TraceLevel, DebugLevel, InfoLevel, WarnLevel, ErrorLevel, FatalLevel, PanicLevel,
+func TestLevel_Values(t *testing.T) {
+	// 测试所有级别的数值（基于实际定义的顺序）
+	expectedValues := map[Level]int{
+		PanicLevel: 0,
+		FatalLevel: 1,
+		ErrorLevel: 2,
+		WarnLevel:  3,
+		InfoLevel:  4,
+		DebugLevel: 5,
+		TraceLevel: 6,
 	}
-
-	for _, level := range knownLevels {
-		result := level.String()
-		require.NotEmpty(t, result, "已知级别应该返回非空字符串")
+	
+	for level, expectedValue := range expectedValues {
+		if int(level) != expectedValue {
+			t.Errorf("Expected level %s to have value %d, got %d", level.String(), expectedValue, int(level))
+		}
 	}
+}
 
-	// 测试未知级别，应该返回默认值 "trace"
-	unknownLevel := Level(999)
-	result := unknownLevel.String()
-	require.Equal(t, "trace", result, "未知级别应该返回默认值 'trace'")
+func TestLevel_Ordering(t *testing.T) {
+	// 测试级别的顺序关系（按实际顺序：PanicLevel < FatalLevel < ... < TraceLevel）
+	levels := []Level{PanicLevel, FatalLevel, ErrorLevel, WarnLevel, InfoLevel, DebugLevel, TraceLevel}
+	
+	for i := 0; i < len(levels)-1; i++ {
+		if levels[i] >= levels[i+1] {
+			t.Errorf("Level %s should be less than %s", levels[i].String(), levels[i+1].String())
+		}
+	}
+}
+
+func TestLevel_Comparison(t *testing.T) {
+	// 测试级别比较（基于实际值：数值越小优先级越高）
+	if !(ErrorLevel < WarnLevel) {
+		t.Error("ErrorLevel should be less than WarnLevel (higher priority)")
+	}
+	
+	if !(PanicLevel < FatalLevel) {
+		t.Error("PanicLevel should be less than FatalLevel (higher priority)")
+	}
+	
+	if !(InfoLevel < DebugLevel) {
+		t.Error("InfoLevel should be less than DebugLevel (higher priority)")
+	}
+	
+	if !(DebugLevel < TraceLevel) {
+		t.Error("DebugLevel should be less than TraceLevel (higher priority)")
+	}
 }

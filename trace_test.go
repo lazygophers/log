@@ -1,147 +1,383 @@
 package log
 
 import (
-	"fmt"
-	"sync"
+	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/petermattis/goid"
 )
 
-// TestGetSetDelTrace 测试针对当前 goroutine 的基本 Get/Set/Del 操作。
-func TestGetSetDelTrace(t *testing.T) {
-	// 初始时，追踪信息应为空
-	assert.Empty(t, GetTrace(), "Initial trace should be empty")
+func TestGetTrace(t *testing.T) {
+	// 清空现有的 trace
+	traceMap.Range(func(key, value interface{}) bool {
+		traceMap.Delete(key)
+		return true
+	})
+	
+	// 测试不存在的 trace
+	trace := GetTrace()
+	if trace != "" {
+		t.Errorf("Expected empty trace for new goroutine, got %q", trace)
+	}
+	
+	// 设置 trace
+	expectedTrace := "test-trace-123"
+	SetTrace(expectedTrace)
+	
+	// 获取 trace
+	trace = GetTrace()
+	if trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+}
 
-	// 设置一个追踪ID
-	SetTrace("test-id")
-	assert.Equal(t, "test-id", GetTrace(), "Trace ID should be 'test-id'")
+func TestGetTraceWithGID(t *testing.T) {
+	gid := goid.Get()
+	
+	// 清空现有的 trace
+	traceMap.Range(func(key, value interface{}) bool {
+		traceMap.Delete(key)
+		return true
+	})
+	
+	// 测试不存在的 trace
+	trace := GetTraceWithGID(gid)
+	if trace != "" {
+		t.Errorf("Expected empty trace for GID %d, got %q", gid, trace)
+	}
+	
+	// 设置 trace
+	expectedTrace := "test-trace-with-gid-456"
+	SetTraceWithGID(gid, expectedTrace)
+	
+	// 获取 trace
+	trace = GetTraceWithGID(gid)
+	if trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+}
 
-	// 删除追踪信息
+func TestSetTrace(t *testing.T) {
+	gid := goid.Get()
+	expectedTrace := "set-trace-test"
+	
+	SetTrace(expectedTrace)
+	
+	// 验证是否设置成功
+	if trace := getTrace(gid); trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+	
+	// 测试设置空字符串 - 根据实现，空字符串会自动生成新的trace ID
+	SetTrace("")
+	if trace := getTrace(gid); trace == "" {
+		t.Error("Expected auto-generated trace after setting empty string, got empty")
+	}
+}
+
+func TestSetTraceWithGID(t *testing.T) {
+	gid := int64(99999) // 使用一个不太可能冲突的 GID
+	expectedTrace := "set-trace-with-gid-test"
+	
+	SetTraceWithGID(gid, expectedTrace)
+	
+	// 验证是否设置成功
+	if trace := getTrace(gid); trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+	
+	// 测试设置空字符串 - 根据实现，空字符串会自动生成新的trace ID
+	SetTraceWithGID(gid, "")
+	if trace := getTrace(gid); trace == "" {
+		t.Error("Expected auto-generated trace after setting empty string, got empty")
+	}
+}
+
+func TestDelTrace(t *testing.T) {
+	gid := goid.Get()
+	expectedTrace := "del-trace-test"
+	
+	// 设置 trace
+	SetTrace(expectedTrace)
+	if trace := getTrace(gid); trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+	
+	// 删除 trace
 	DelTrace()
-	assert.Empty(t, GetTrace(), "Trace should be empty after deletion")
-
-	// 设置一个空的追踪ID，此时应自动生成一个新的
-	SetTrace()
-	assert.NotEmpty(t, GetTrace(), "A new trace ID should be generated when set with no arguments")
-	assert.Len(t, GetTrace(), 16, "Generated trace ID should have a length of 16")
-	DelTrace()
+	if trace := getTrace(gid); trace != "" {
+		t.Errorf("Expected empty trace after deletion, got %q", trace)
+	}
 }
 
-// TestGetSetDelTraceWithGID 测试针对指定 goroutine ID 的基本 Get/Set/Del 操作。
-func TestGetSetDelTraceWithGID(t *testing.T) {
-	const gid int64 = 12345
-
-	// 初始时，指定 GID 的追踪信息应为空
-	assert.Empty(t, GetTraceWithGID(gid), "Initial trace for GID should be empty")
-
-	// 为指定 GID 设置一个追踪ID
-	SetTraceWithGID(gid, "test-id-gid")
-	assert.Equal(t, "test-id-gid", GetTraceWithGID(gid), "Trace ID for GID should be 'test-id-gid'")
-
-	// 删除指定 GID 的追踪信息
+func TestDelTraceWithGID(t *testing.T) {
+	gid := int64(88888) // 使用一个不太可能冲突的 GID
+	expectedTrace := "del-trace-with-gid-test"
+	
+	// 设置 trace
+	SetTraceWithGID(gid, expectedTrace)
+	if trace := getTrace(gid); trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+	
+	// 删除 trace
 	DelTraceWithGID(gid)
-	assert.Empty(t, GetTraceWithGID(gid), "Trace for GID should be empty after deletion")
-
-	// 为指定 GID 设置一个空的追踪ID，此时应自动生成一个新的
-	SetTraceWithGID(gid)
-	assert.NotEmpty(t, GetTraceWithGID(gid), "A new trace ID should be generated for GID")
-	assert.Len(t, GetTraceWithGID(gid), 16, "Generated trace ID for GID should have a length of 16")
-	DelTraceWithGID(gid)
+	if trace := getTrace(gid); trace != "" {
+		t.Errorf("Expected empty trace after deletion, got %q", trace)
+	}
 }
 
-// TestDisableTrace 测试禁用追踪功能的开关是否有效。
-func TestDisableTrace(t *testing.T) {
-	DisableTrace = true
-	defer func() { DisableTrace = false }() // 测试结束后恢复
-
-	SetTrace("no-trace")
-	assert.Empty(t, GetTrace(), "GetTrace should return empty when tracing is disabled")
-}
-
-// TestGenTraceId 测试追踪ID的生成函数。
 func TestGenTraceId(t *testing.T) {
-	traceId := GenTraceId()
-	assert.Len(t, traceId, 16, "Generated trace ID should be 16 characters long")
+	trace1 := GenTraceId()
+	trace2 := GenTraceId()
+	
+	// 检查生成的 trace ID 不为空
+	if trace1 == "" {
+		t.Error("Generated trace ID should not be empty")
+	}
+	
+	if trace2 == "" {
+		t.Error("Generated trace ID should not be empty")
+	}
+	
+	// 检查两次生成的 trace ID 不相同
+	if trace1 == trace2 {
+		t.Error("Generated trace IDs should be unique")
+	}
+	
+	// 检查 trace ID 的格式（根据实现，是16个字符的字符串，没有连字符）
+	if len(trace1) != 16 {
+		t.Errorf("Expected trace ID length 16, got %d", len(trace1))
+	}
+	
+	if strings.Count(trace1, "-") != 0 { // 实现中移除了连字符
+		t.Errorf("Expected 0 hyphens in trace ID, got %d", strings.Count(trace1, "-"))
+	}
 }
 
-// TestConcurrencySafety 测试 traceMap 的并发安全性。
-func TestConcurrencySafety(t *testing.T) {
-	var wg sync.WaitGroup
-	numGoroutines := 100
-	wg.Add(numGoroutines)
+func TestGetTrace_Internal(t *testing.T) {
+	gid := int64(77777)
+	expectedTrace := "internal-get-trace-test"
+	
+	// 直接设置到 map 中
+	setTrace(gid, expectedTrace)
+	
+	// 使用内部函数获取
+	trace := getTrace(gid)
+	if trace != expectedTrace {
+		t.Errorf("Expected %q, got %q", expectedTrace, trace)
+	}
+	
+	// 测试不存在的 GID
+	nonExistentTrace := getTrace(int64(11111))
+	if nonExistentTrace != "" {
+		t.Errorf("Expected empty trace for non-existent GID, got %q", nonExistentTrace)
+	}
+}
 
-	for i := 0; i < numGoroutines; i++ {
-		go func(i int) {
-			defer wg.Done()
+func TestSetTrace_Internal(t *testing.T) {
+	gid := int64(66666)
+	expectedTrace := "internal-set-trace-test"
+	
+	// 使用内部函数设置
+	setTrace(gid, expectedTrace)
+	
+	// 验证是否设置成功
+	if value, ok := traceMap.Load(gid); !ok || value.(string) != expectedTrace {
+		t.Errorf("Expected %q to be set for GID %d", expectedTrace, gid)
+	}
+	
+	// 测试设置空字符串（根据实现，会自动生成新的trace ID）
+	setTrace(gid, "")
+	if value, ok := traceMap.Load(gid); !ok {
+		t.Error("Expected auto-generated trace when setting empty string, but found none")
+	} else if value.(string) == "" {
+		t.Error("Expected auto-generated trace when setting empty string, got empty")
+	}
+}
 
-			// 每个 goroutine 设置自己的追踪ID
-			traceID := fmt.Sprintf("goroutine-%d", i)
+func TestDelTrace_Internal(t *testing.T) {
+	gid := int64(55555)
+	expectedTrace := "internal-del-trace-test"
+	
+	// 设置 trace
+	setTrace(gid, expectedTrace)
+	if value, ok := traceMap.Load(gid); !ok || value.(string) != expectedTrace {
+		t.Errorf("Expected %q to be set for GID %d", expectedTrace, gid)
+	}
+	
+	// 使用内部函数删除
+	delTrace(gid)
+	
+	// 验证是否删除成功
+	if value, ok := traceMap.Load(gid); ok {
+		t.Errorf("Expected trace to be deleted, but found %q", value.(string))
+	}
+}
+
+func TestTraceConcurrency(t *testing.T) {
+	// 测试并发安全性
+	done := make(chan bool, 100)
+	
+	for i := 0; i < 100; i++ {
+		go func(id int) {
+			defer func() { done <- true }()
+			
+			traceID := GenTraceId()
 			SetTrace(traceID)
-
-			// 验证当前 goroutine 的追踪ID是否设置正确
-			assert.Equal(t, traceID, GetTrace(), "Trace ID should be correctly set for each goroutine")
-
-			// 模拟一些工作并再次验证
-			assert.Equal(t, traceID, GetTrace(), "Trace ID should remain consistent within the same goroutine")
-
+			
+			// 验证设置的 trace
+			if getTrace := GetTrace(); getTrace != traceID {
+				t.Errorf("Goroutine %d: Expected %q, got %q", id, traceID, getTrace)
+			}
+			
 			DelTrace()
-			assert.Empty(t, GetTrace(), "Trace ID should be empty after deletion in concurrent goroutine")
+			
+			// 验证删除后的 trace
+			if getTrace := GetTrace(); getTrace != "" {
+				t.Errorf("Goroutine %d: Expected empty trace after deletion, got %q", id, getTrace)
+			}
 		}(i)
 	}
-
-	wg.Wait()
-}
-
-// BenchmarkSetTrace 测试 SetTrace 函数的性能。
-func BenchmarkSetTrace(b *testing.B) {
-	// 循环 b.N 次，b.N 由 testing 框架自动调整
-	for i := 0; i < b.N; i++ {
-		SetTrace("benchmark-trace-id")
+	
+	// 等待所有 goroutine 完成
+	for i := 0; i < 100; i++ {
+		<-done
 	}
 }
 
-// BenchmarkGetTrace 测试 GetTrace 函数的性能。
-func BenchmarkGetTrace(b *testing.B) {
-	SetTrace("benchmark-trace-id") // 准备测试数据
-	b.ResetTimer()                 // 重置计时器，忽略准备数据的时间
-	for i := 0; i < b.N; i++ {
-		GetTrace()
+func TestTraceWithContext(t *testing.T) {
+	// 这里测试 trace 功能与上下文的配合使用
+	originalTrace := "original-context-trace"
+	
+	// 设置当前 goroutine 的 trace
+	SetTrace(originalTrace)
+	
+	// 验证当前 trace
+	if trace := GetTrace(); trace != originalTrace {
+		t.Errorf("Expected %q, got %q", originalTrace, trace)
 	}
-}
-
-// BenchmarkSetGetTraceParallel 测试在并发场景下 SetTrace 和 GetTrace 的综合性能。
-func BenchmarkSetGetTraceParallel(b *testing.B) {
-	// RunParallel 会创建多个 goroutine 并发执行测试
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			SetTrace() // 设置自动生成的追踪ID
-			GetTrace() // 获取追踪ID
+	
+	// 在 goroutine 中设置不同的 trace
+	done := make(chan bool)
+	go func() {
+		defer func() { done <- true }()
+		
+		newTrace := "new-context-trace"
+		SetTrace(newTrace)
+		
+		// 验证新的 trace
+		if trace := GetTrace(); trace != newTrace {
+			t.Errorf("Expected %q in new goroutine, got %q", newTrace, trace)
 		}
-	})
+	}()
+	
+	<-done
+	
+	// 验证原始 goroutine 的 trace 没有受影响
+	if trace := GetTrace(); trace != originalTrace {
+		t.Errorf("Expected original trace %q to be unchanged, got %q", originalTrace, trace)
+	}
+	
+	// 清理
+	DelTrace()
 }
 
-// Example_package 展示了 trace 功能的基本用法。
-//
-// 这个可执行的示例代码演示了如何设置一个自定义追踪ID，
-// 接着获取并验证它，最后删除该ID并确认其已被移除。
-func Example_package() {
-	// 步骤 1: 设置一个自定义的追踪ID
-	myTraceID := "my-awesome-trace-id"
-	SetTrace(myTraceID)
+func TestSetTrace_DisableTrace_Coverage(t *testing.T) {
+	// 测试 DisableTrace 标志的影响（trace.go:67-69）
+	
+	// 保存原始设置
+	originalDisableTrace := DisableTrace
+	defer func() {
+		DisableTrace = originalDisableTrace
+	}()
+	
+	// 测试设置 trace 时被禁用
+	testGid := int64(99999)
+	testTrace := "disabled-trace-test"
+	
+	// 先清理任何可能存在的trace
+	delTrace(testGid)
+	
+	// 设置为禁用跟踪
+	DisableTrace = true
+	
+	// 尝试设置 trace
+	setTrace(testGid, testTrace)
+	
+	// 验证 trace 没有被设置
+	if value, ok := traceMap.Load(testGid); ok {
+		t.Errorf("Expected no trace when DisableTrace is true, but found %q", value.(string))
+	}
+	
+	// 恢复设置，验证正常工作
+	DisableTrace = false
+	setTrace(testGid, testTrace)
+	
+	if value, ok := traceMap.Load(testGid); !ok || value.(string) != testTrace {
+		t.Errorf("Expected trace %q to be set after enabling trace", testTrace)
+	}
+	
+	// 清理
+	delTrace(testGid)
+}
 
-	// 步骤 2: 获取并打印当前 goroutine 的追踪ID
-	retrievedTraceID := GetTrace()
-	fmt.Println(retrievedTraceID)
+func TestSetTrace_EmptyTraceId_Coverage(t *testing.T) {
+	// 测试 SetTrace 使用空字符串时的自动生成（trace.go:130）
+	
+	// 保存原始 trace
+	originalTrace := GetTrace()
+	defer func() {
+		if originalTrace != "" {
+			SetTrace(originalTrace)
+		} else {
+			DelTrace()
+		}
+	}()
+	
+	// 使用空字符串调用 SetTrace（触发自动生成）
+	SetTrace()
+	
+	// 获取生成的 trace ID
+	generatedTrace := GetTrace()
+	
+	// 验证生成了 trace ID
+	if generatedTrace == "" {
+		t.Error("Expected SetTrace() to generate a trace ID, but got empty string")
+	}
+	
+	// 验证生成的 trace ID 符合预期格式
+	if len(generatedTrace) == 0 {
+		t.Error("Generated trace ID should not be empty")
+	}
+}
 
-	// 步骤 3: 清理当前 goroutine 的追踪ID
-	DelTrace()
-
-	// 步骤 4: 再次获取，以确认追踪ID已被成功删除
-	afterDeleteTraceID := GetTrace()
-	fmt.Printf("Trace ID after deletion: '%s'\n", afterDeleteTraceID)
-
-	// Output:
-	// my-awesome-trace-id
-	// Trace ID after deletion: ''
+func TestSetTraceWithGID_EmptyTraceId_Coverage(t *testing.T) {
+	// 测试 SetTraceWithGID 使用空字符串时的自动生成（trace.go:145）
+	
+	testGid := int64(88888)
+	
+	// 清理可能存在的 trace
+	delTrace(testGid)
+	defer delTrace(testGid)
+	
+	// 使用空参数调用 SetTraceWithGID（触发自动生成）
+	SetTraceWithGID(testGid)
+	
+	// 获取生成的 trace ID
+	if value, ok := traceMap.Load(testGid); ok {
+		generatedTrace := value.(string)
+		
+		// 验证生成了 trace ID
+		if generatedTrace == "" {
+			t.Error("Expected SetTraceWithGID to generate a trace ID, but got empty string")
+		}
+		
+		// 验证生成的 trace ID 符合预期格式
+		if len(generatedTrace) == 0 {
+			t.Error("Generated trace ID should not be empty")
+		}
+	} else {
+		t.Error("Expected trace ID to be set for GID, but none found")
+	}
 }

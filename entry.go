@@ -52,3 +52,16 @@ var entryPool = sync.Pool{
 		return NewEntry()
 	},
 }
+
+// getEntry 从对象池中获取一个 Entry 实例
+func getEntry() *Entry {
+	return entryPool.Get().(*Entry)
+}
+
+// putEntry 将 Entry 实例放回对象池中以供复用
+func putEntry(entry *Entry) {
+	if entry != nil {
+		entry.Reset()
+		entryPool.Put(entry)
+	}
+}

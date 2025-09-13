@@ -127,8 +127,8 @@ func (p *Formatter) ParsingAndEscaping(disable bool) {
 }
 
 // Caller 设置是否禁用调用者信息显示。
-func (p *Formatter) Caller(enable bool) {
-	p.DisableCaller = !enable
+func (p *Formatter) Caller(disable bool) {
+	p.DisableCaller = disable
 }
 
 // Clone 创建 Formatter 的深拷贝。
