@@ -80,7 +80,7 @@ func (r *HourlyRotator) rotate() error {
 func (r *HourlyRotator) doRotate(hour string) error {
 	// Close current file
 	if r.currentFile != nil {
-		r.currentFile.Close()
+		_ = r.currentFile.Close()
 	}
 
 	// Ensure directory exists
@@ -90,7 +90,7 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	newFilename := r.filename + hour + ".log"
 
 	// Open new file
-	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func (r *HourlyRotator) doRotate(hour string) error {
 // updateLink updates soft link pointing to the latest log file
 func (r *HourlyRotator) updateLink(target string) {
 	// Remove old link
-	os.Remove(r.linkName)
+	_ = os.Remove(r.linkName)
 
 	// Create new link (ignore errors, soft link creation failure should not affect logging)
 	_ = os.Symlink(filepath.Base(target), r.linkName)
