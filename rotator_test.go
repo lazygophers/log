@@ -166,7 +166,7 @@ func TestHourlyRotator_CleanupOldFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create test file %s: %v", oldFilename, err)
 		}
-		file.WriteString("test content")
+		_, _ = file.WriteString("test content")
 		_ = file.Close()
 	}
 

@@ -110,7 +110,7 @@ func (r *HourlyRotator) updateLink(target string) {
 	os.Remove(r.linkName)
 
 	// Create new link (ignore errors, soft link creation failure should not affect logging)
-	os.Symlink(filepath.Base(target), r.linkName)
+	_ = os.Symlink(filepath.Base(target), r.linkName)
 }
 
 // cleanup periodically cleans up old log files

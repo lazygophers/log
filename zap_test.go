@@ -336,7 +336,7 @@ func TestCreateZapHook_PanicLevels(t *testing.T) {
 			},
 		}
 
-		hookFunc(zapEntry)
+		_ = hookFunc(zapEntry)
 	})
 
 	// 测试 PanicLevel
@@ -358,7 +358,7 @@ func TestCreateZapHook_PanicLevels(t *testing.T) {
 			},
 		}
 
-		hookFunc(zapEntry)
+		_ = hookFunc(zapEntry)
 	})
 }
 

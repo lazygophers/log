@@ -141,7 +141,8 @@ func BenchmarkLogger_LevelChecking(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			if logger.levelEnabled(InfoLevel) {
-				// 模拟日志处理
+				// 模拟日志处理 - 这里故意为空以测试级别检查性能
+				_ = i
 			}
 		}
 	})
@@ -152,7 +153,8 @@ func BenchmarkLogger_LevelChecking(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			if logger.levelEnabled(InfoLevel) {
-				// 模拟日志处理
+				// 模拟日志处理 - 这里故意为空以测试级别检查性能
+				_ = i
 			}
 		}
 	})
