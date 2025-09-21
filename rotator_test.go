@@ -36,7 +36,7 @@ func TestHourlyRotator_Write(t *testing.T) {
 	filename := filepath.Join(tmpDir, "test")
 
 	rotator := NewHourlyRotator(filename, 1024*1024, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	testData := []byte("test log message\n")
 	n, err := rotator.Write(testData)
@@ -74,7 +74,7 @@ func TestHourlyRotator_Rotation(t *testing.T) {
 
 	// 设置小的文件大小限制来触发轮转
 	rotator := NewHourlyRotator(filename, 10, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// 写入足够的数据触发大小轮转
 	testData := []byte("this is a long test message that should trigger rotation\n")
@@ -112,7 +112,7 @@ func TestHourlyRotator_Sync(t *testing.T) {
 	filename := filepath.Join(tmpDir, "test")
 
 	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// 写入数据
 	testData := []byte("test log message\n")
@@ -166,12 +166,12 @@ func TestHourlyRotator_CleanupOldFiles(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create test file %s: %v", oldFilename, err)
 		}
-		file.WriteString("test content")
-		file.Close()
+		_, _ = file.WriteString("test content")
+		_ = file.Close()
 	}
 
 	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// 手动触发清理
 	rotator.cleanupOldFiles()
@@ -200,7 +200,7 @@ func TestHourlyRotator_UpdateLink(t *testing.T) {
 	filename := filepath.Join(tmpDir, "test")
 
 	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// 创建目标文件
 	targetFile := filename + "2023071015.log"
@@ -208,7 +208,7 @@ func TestHourlyRotator_UpdateLink(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create target file: %v", err)
 	}
-	file.Close()
+	_ = file.Close()
 
 	// 测试更新链接
 	rotator.updateLink(targetFile)
@@ -232,7 +232,7 @@ func TestHourlyRotator_WriteError(t *testing.T) {
 	// Create a rotator that will fail to rotate (permission denied)
 	// Use /dev/null as base path which should cause issues
 	rotator := NewHourlyRotator("/dev/null", 1024, 5)
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// Try to write - this should fail during rotate() call
 	_, err := rotator.Write([]byte("test"))
@@ -247,7 +247,7 @@ func TestHourlyRotator_WriteError(t *testing.T) {
 func TestHourlyRotator_RotateError(t *testing.T) {
 	// Create a rotator with a path that will cause permission errors
 	rotator := NewHourlyRotator("/root/test", 1024, 5) // Path that likely doesn't have write permissions
-	defer rotator.Close()
+	defer func() { _ = rotator.Close() }()
 
 	// Try to write - this should trigger rotate error
 	_, err := rotator.Write([]byte("test"))

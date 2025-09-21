@@ -1,0 +1,156 @@
+name: 'Smart Cache'
+description: 'Conditional caching - uses local cache for self-hosted runners, GitHub cache for hosted runners'
+inputs:
+  path:
+    description: 'Path to cache'
+    required: true
+  key:
+    description: 'Cache key'
+    required: true
+  restore-keys:
+    description: 'Restore keys for fallback'
+    required: false
+    default: ''
+  cache-dir:
+    description: 'Local cache directory for self-hosted runners'
+    required: false
+    default: '/tmp/action'
+
+outputs:
+  cache-hit:
+    description: 'Whether cache was hit'
+    value: ${{ steps.check-cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Detect runner type
+      id: detect-runner
+      shell: bash
+      run: |
+        # 检测是否为自建 runner
+        # 方法1: 检查 RUNNER_NAME 是否包含 lazy
+        # 方法2: 检查是否存在特定的自建标识文件
+        # 方法3: 检查 GITHUB_ACTIONS_RUNNER_CONTEXT
+
+        IS_SELF_HOSTED="false"
+
+        # 检查 runner 名称
+        if [[ "${RUNNER_NAME:-}" == *"lazy"* ]]; then
+          IS_SELF_HOSTED="true"
+        fi
+
+        # 检查环境变量
+        if [[ "${RUNNER_ENVIRONMENT:-}" == "self-hosted" ]]; then
+          IS_SELF_HOSTED="true"
+        fi
+
+        # 检查特定标识文件（可选，在自建 runner 上创建此文件）
+        if [[ -f "/etc/github-runner/self-hosted" ]]; then
+          IS_SELF_HOSTED="true"
+        fi
+
+        echo "is-self-hosted=$IS_SELF_HOSTED" >> $GITHUB_OUTPUT
+        echo "Runner type: $([ "$IS_SELF_HOSTED" = "true" ] && echo "self-hosted" || echo "github-hosted")"
+
+    - name: Setup local cache directory
+      if: steps.detect-runner.outputs.is-self-hosted == 'true'
+      shell: bash
+      run: |
+        mkdir -p "${{ inputs.cache-dir }}"
+        echo "Local cache directory: ${{ inputs.cache-dir }}"
+
+    - name: Generate cache paths
+      id: cache-paths
+      shell: bash
+      run: |
+        # 为本地缓存生成路径
+        CACHE_KEY="${{ inputs.key }}"
+        CACHE_PATH="${{ inputs.cache-dir }}/${CACHE_KEY}"
+
+        echo "local-cache-path=${CACHE_PATH}" >> $GITHUB_OUTPUT
+        echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+
+    - name: Check local cache
+      if: steps.detect-runner.outputs.is-self-hosted == 'true'
+      id: local-cache-check
+      shell: bash
+      run: |
+        CACHE_PATH="${{ steps.cache-paths.outputs.local-cache-path }}"
+        CACHE_HIT="false"
+
+        if [[ -f "${CACHE_PATH}.tar.gz" ]]; then
+          echo "Local cache found: ${CACHE_PATH}.tar.gz"
+
+          # 检查目标目录是否已存在且有内容
+          if [[ -d "${{ inputs.path }}" ]] && [[ "$(ls -A "${{ inputs.path }}" 2>/dev/null)" ]]; then
+            echo "Cache directory already exists and has content, skipping extraction"
+            CACHE_HIT="true"
+          else
+            echo "Extracting cache..."
+            TARGET_DIR="$(dirname "${{ inputs.path }}")"
+            cd "$TARGET_DIR"
+
+            # 解压缓存
+            if tar -xzf "${CACHE_PATH}.tar.gz" -C . 2>/dev/null; then
+              echo "Cache extracted successfully"
+              CACHE_HIT="true"
+            else
+              echo "Cache extraction failed, but cache file exists"
+              # 即使解压失败，如果目标目录存在，也认为是缓存命中
+              if [[ -d "$(basename "${{ inputs.path }}")" ]]; then
+                echo "Target directory exists, treating as cache hit"
+                CACHE_HIT="true"
+              else
+                CACHE_HIT="false"
+              fi
+            fi
+          fi
+        else
+          echo "No local cache found: ${CACHE_PATH}.tar.gz"
+        fi
+
+        echo "cache-hit=${CACHE_HIT}" >> $GITHUB_OUTPUT
+
+    - name: GitHub Actions Cache (for hosted runners)
+      if: steps.detect-runner.outputs.is-self-hosted == 'false'
+      id: github-cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
+
+    - name: Set final cache result
+      id: check-cache
+      shell: bash
+      run: |
+        if [[ "${{ steps.detect-runner.outputs.is-self-hosted }}" == "true" ]]; then
+          CACHE_HIT="${{ steps.local-cache-check.outputs.cache-hit }}"
+        else
+          CACHE_HIT="${{ steps.github-cache.outputs.cache-hit }}"
+        fi
+
+        echo "cache-hit=${CACHE_HIT}" >> $GITHUB_OUTPUT
+        echo "Final cache result: ${CACHE_HIT}"
+
+    - name: Save local cache (post-job)
+      if: steps.detect-runner.outputs.is-self-hosted == 'true' && always()
+      shell: bash
+      run: |
+        # 这个步骤在 post-job 中运行，保存缓存
+        CACHE_PATH="${{ steps.cache-paths.outputs.local-cache-path }}"
+
+        if [[ -d "${{ inputs.path }}" ]] && [[ "${{ steps.local-cache-check.outputs.cache-hit }}" != "true" ]]; then
+          echo "Saving local cache..."
+          mkdir -p "$(dirname "${CACHE_PATH}")"
+
+          cd "$(dirname "${{ inputs.path }}")"
+          tar -czf "${CACHE_PATH}.tar.gz" "$(basename "${{ inputs.path }}")"
+
+          if [[ $? -eq 0 ]]; then
+            echo "Cache saved successfully: ${CACHE_PATH}.tar.gz"
+          else
+            echo "Failed to save cache"
+          fi
+        fi

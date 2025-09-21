@@ -134,16 +134,11 @@ func (p *Formatter) Clone() Format {
 }
 
 var (
-	colorBlack   = []byte("\u001B[30m")
-	colorRed     = []byte("\u001B[31m")
-	colorGreen   = []byte("\u001B[32m")
-	colorYellow  = []byte("\u001B[33m")
-	colorBlue    = []byte("\u001B[34m")
-	colorMagenta = []byte("\u001B[35m")
-	colorCyan    = []byte("\u001B[36m")
-	colorGray    = []byte("\u001B[37m")
-	colorWhite   = []byte("\u001B[38m")
-	colorEnd     = []byte("\u001B[0m")
+	colorRed    = []byte("\u001B[31m")
+	colorGreen  = []byte("\u001B[32m")
+	colorYellow = []byte("\u001B[33m")
+	colorCyan   = []byte("\u001B[36m")
+	colorEnd    = []byte("\u001B[0m")
 )
 
 // getColorByLevel gets terminal color code by log level

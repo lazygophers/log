@@ -55,19 +55,19 @@ func NewAsyncWriter(writer Writer) *AsyncWriter {
 			// case1: Normal log data reception
 			case c := <-p.c:
 				// Write first log entry to buffer
-				cache.Write(c)
+				_, _ = cache.Write(c)
 				// Inner loop to read as much data as possible for batch processing
 				for {
 					select {
 					case c := <-p.c:
-						cache.Write(c) // Append subsequent log entries to buffer
+						_, _ = cache.Write(c) // Append subsequent log entries to buffer
 					default:
 						goto OUT // If channel is empty, exit inner loop and perform write
 					}
 				}
 			OUT:
 				// Write collected log entries to underlying writer in one batch
-				p.writer.Write(cache.Bytes())
+				_, _ = p.writer.Write(cache.Bytes())
 
 			// case2: Shutdown signal received, prepare graceful exit
 			case w := <-p.close:
@@ -75,7 +75,7 @@ func NewAsyncWriter(writer Writer) *AsyncWriter {
 				for {
 					select {
 					case c := <-p.c:
-						cache.Write(c) // Append remaining log entries to buffer
+						_, _ = cache.Write(c) // Append remaining log entries to buffer
 					default:
 						goto END // If channel is empty, exit loop
 					}
@@ -83,7 +83,7 @@ func NewAsyncWriter(writer Writer) *AsyncWriter {
 			END:
 				// Write any remaining log entries in buffer to underlying writer
 				if cache.Len() > 0 {
-					p.writer.Write(cache.Bytes())
+					_, _ = p.writer.Write(cache.Bytes())
 				}
 				w.Done() // Notify Close() method that cleanup is complete
 				return   // Exit goroutine
