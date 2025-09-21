@@ -81,18 +81,30 @@ runs:
 
         if [[ -f "${CACHE_PATH}.tar.gz" ]]; then
           echo "Local cache found: ${CACHE_PATH}.tar.gz"
-          CACHE_HIT="true"
 
-          # 解压缓存
-          echo "Extracting cache..."
-          cd "$(dirname "${{ inputs.path }}")"
-          tar -xzf "${CACHE_PATH}.tar.gz" -C .
-
-          if [[ $? -eq 0 ]]; then
-            echo "Cache extracted successfully"
+          # 检查目标目录是否已存在且有内容
+          if [[ -d "${{ inputs.path }}" ]] && [[ "$(ls -A "${{ inputs.path }}" 2>/dev/null)" ]]; then
+            echo "Cache directory already exists and has content, skipping extraction"
+            CACHE_HIT="true"
           else
-            echo "Cache extraction failed"
-            CACHE_HIT="false"
+            echo "Extracting cache..."
+            TARGET_DIR="$(dirname "${{ inputs.path }}")"
+            cd "$TARGET_DIR"
+
+            # 解压缓存
+            if tar -xzf "${CACHE_PATH}.tar.gz" -C . 2>/dev/null; then
+              echo "Cache extracted successfully"
+              CACHE_HIT="true"
+            else
+              echo "Cache extraction failed, but cache file exists"
+              # 即使解压失败，如果目标目录存在，也认为是缓存命中
+              if [[ -d "$(basename "${{ inputs.path }}")" ]]; then
+                echo "Target directory exists, treating as cache hit"
+                CACHE_HIT="true"
+              else
+                CACHE_HIT="false"
+              fi
+            fi
           fi
         else
           echo "No local cache found: ${CACHE_PATH}.tar.gz"
