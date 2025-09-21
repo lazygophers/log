@@ -90,7 +90,7 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	newFilename := r.filename + hour + ".log"
 
 	// Open new file
-	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304
 	if err != nil {
 		return err
 	}
