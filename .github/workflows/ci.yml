@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: lazy
+    strategy:
+      matrix:
+        go-version: [1.19, 1.20, 1.21]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Cache Go modules and build cache
+      uses: ./.github/actions/go-cache
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Run go vet
+      run: go vet ./...
+
+    - name: Run go fmt check
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "The following files are not formatted:"
+          gofmt -s -l .
+          exit 1
+        fi
+
+    - name: Run tests
+      run: go test -v -race -coverprofile=coverage.out ./...
+
+    - name: Run benchmarks
+      run: go test -bench=. -benchmem ./...
+
+    - name: Check coverage
+      run: |
+        go tool cover -func=coverage.out
+        go tool cover -html=coverage.out -o coverage.html
+
+    - name: Upload coverage artifact
+      if: matrix.go-version == '1.21'
+      uses: ./.github/actions/cache
+      with:
+        path: coverage.html
+        key: coverage-${{ github.sha }}
+
+  build:
+    runs-on: lazy
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.21
+
+    - name: Cache Go modules and build cache
+      uses: ./.github/actions/go-cache
+      with:
+        go-version: 1.21
+
+    - name: Build
+      run: go build ./...
+
+    - name: Check mod tidy
+      run: |
+        go mod tidy
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "go mod tidy modified files:"
+          git status --porcelain
+          exit 1
+        fi
+
+  lint:
+    runs-on: lazy
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.21
+
+    - name: Cache Go modules
+      uses: ./.github/actions/go-cache
+      with:
+        go-version: 1.21
+
+    - name: Cache golangci-lint
+      uses: ./.github/actions/cache
+      with:
+        path: ~/.cache/golangci-lint
+        key: golangci-lint-${{ runner.os }}-${{ hashFiles('.golangci.yml') }}
+
+    - name: Install golangci-lint
+      run: |
+        if ! command -v golangci-lint &> /dev/null; then
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
+        fi
+
+    - name: Run golangci-lint
+      run: golangci-lint run
+
+  security:
+    runs-on: lazy
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.21
+
+    - name: Cache Go modules
+      uses: ./.github/actions/go-cache
+      with:
+        go-version: 1.21
+
+    - name: Cache gosec
+      uses: ./.github/actions/cache
+      with:
+        path: ~/.cache/gosec
+        key: gosec-${{ runner.os }}-${{ github.sha }}
+
+    - name: Install gosec
+      run: |
+        if ! command -v gosec &> /dev/null; then
+          go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+        fi
+
+    - name: Run gosec
+      run: gosec ./...

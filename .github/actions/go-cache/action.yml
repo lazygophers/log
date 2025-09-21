@@ -1,0 +1,87 @@
+name: 'Go Modules Cache'
+description: 'Smart caching for Go modules and build cache'
+inputs:
+  go-version:
+    description: 'Go version'
+    required: false
+    default: ''
+  cache-dir:
+    description: 'Local cache directory for self-hosted runners'
+    required: false
+    default: '/tmp/action'
+
+outputs:
+  modules-cache-hit:
+    description: 'Whether Go modules cache was hit'
+    value: ${{ steps.modules-cache.outputs.cache-hit }}
+  build-cache-hit:
+    description: 'Whether Go build cache was hit'
+    value: ${{ steps.build-cache.outputs.cache-hit }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get Go cache paths
+      id: go-cache-paths
+      shell: bash
+      run: |
+        echo "go-mod-cache=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+        echo "go-build-cache=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+
+    - name: Generate cache keys
+      id: cache-keys
+      shell: bash
+      run: |
+        # 生成基于 go.mod 和 go.sum 的缓存键
+        GO_VERSION="${{ inputs.go-version }}"
+        if [[ -z "$GO_VERSION" ]]; then
+          GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+        fi
+
+        # Go modules 缓存键
+        if [[ -f "go.sum" ]]; then
+          MODULES_KEY="go-modules-${GO_VERSION}-${{ runner.os }}-$(sha256sum go.sum | cut -d' ' -f1)"
+        else
+          MODULES_KEY="go-modules-${GO_VERSION}-${{ runner.os }}-$(sha256sum go.mod | cut -d' ' -f1)"
+        fi
+
+        # Go build 缓存键
+        BUILD_KEY="go-build-${GO_VERSION}-${{ runner.os }}-${{ github.sha }}"
+        BUILD_RESTORE_KEY="go-build-${GO_VERSION}-${{ runner.os }}-"
+
+        echo "modules-key=${MODULES_KEY}" >> $GITHUB_OUTPUT
+        echo "build-key=${BUILD_KEY}" >> $GITHUB_OUTPUT
+        echo "build-restore-key=${BUILD_RESTORE_KEY}" >> $GITHUB_OUTPUT
+
+        echo "Go modules cache key: ${MODULES_KEY}"
+        echo "Go build cache key: ${BUILD_KEY}"
+
+    - name: Cache Go modules
+      id: modules-cache
+      uses: ./.github/actions/cache
+      with:
+        path: ${{ steps.go-cache-paths.outputs.go-mod-cache }}
+        key: ${{ steps.cache-keys.outputs.modules-key }}
+        cache-dir: ${{ inputs.cache-dir }}/go-modules
+
+    - name: Cache Go build cache
+      id: build-cache
+      uses: ./.github/actions/cache
+      with:
+        path: ${{ steps.go-cache-paths.outputs.go-build-cache }}
+        key: ${{ steps.cache-keys.outputs.build-key }}
+        restore-keys: ${{ steps.cache-keys.outputs.build-restore-key }}
+        cache-dir: ${{ inputs.cache-dir }}/go-build
+
+    - name: Download Go modules
+      if: steps.modules-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Downloading Go modules..."
+        go mod download
+
+    - name: Verify Go modules
+      shell: bash
+      run: |
+        echo "Verifying Go modules..."
+        go mod verify
