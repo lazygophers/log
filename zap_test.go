@@ -13,7 +13,7 @@ import (
 func TestNewZapHook(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel)
 
 	hook := NewZapHook(logger)
@@ -47,7 +47,7 @@ func TestNewZapHook(t *testing.T) {
 func TestZapHook_Write(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 
 	hook := NewZapHook(logger)
 
@@ -72,7 +72,7 @@ func TestZapHook_Write(t *testing.T) {
 func TestZapHook_Sync(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 
 	hook := NewZapHook(logger)
 
@@ -86,7 +86,7 @@ func TestZapHook_Sync(t *testing.T) {
 func TestZapHook_Integration(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel)
 	logger.SetPrefixMsg("ZAP: ")
 
@@ -137,7 +137,7 @@ func TestZapHook_Integration(t *testing.T) {
 func TestZapHook_WithStructuredLogging(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(InfoLevel)
 
 	hook := NewZapHook(logger)
@@ -204,7 +204,7 @@ func TestZapHook_ErrorHandling(t *testing.T) {
 func TestZapHook_WithDifferentLogLevels(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(WarnLevel) // 只记录 WARN 及以上级别
 
 	hook := NewZapHook(logger)
@@ -250,7 +250,7 @@ func TestZapHook_WithDifferentLogLevels(t *testing.T) {
 func TestCreateZapHook(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel) // 确保所有级别都能记录
 
 	// 创建 zap hook 函数
@@ -312,7 +312,7 @@ func TestCreateZapHook(t *testing.T) {
 func TestCreateZapHook_PanicLevels(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel)
 
 	hookFunc := createZapHook(logger)
@@ -365,7 +365,7 @@ func TestCreateZapHook_PanicLevels(t *testing.T) {
 func TestCreateZapHook_UnknownLevel(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel)
 
 	hookFunc := createZapHook(logger)
@@ -404,7 +404,7 @@ func TestCreateZapHook_UnknownLevel(t *testing.T) {
 func TestCreateZapHook_WithPrefixSuffix(t *testing.T) {
 	var buf bytes.Buffer
 	logger := newLogger()
-	logger.SetOutput(&buf)
+	_ = logger.SetOutput(&buf)
 	logger.SetLevel(DebugLevel)
 	logger.SetPrefixMsg("PREFIX: ")
 	logger.SetSuffixMsg(" :SUFFIX")

@@ -97,7 +97,7 @@ func DelTraceWithGID(gid int64) {
 //go:inline
 func fastGenTraceId() string {
 	var buf [8]byte
-	rand.Read(buf[:])
+	_, _ = rand.Read(buf[:])
 	return hex.EncodeToString(buf[:])
 }
 
