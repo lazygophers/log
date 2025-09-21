@@ -1,0 +1,57 @@
+name: 'Setup Go Environment'
+description: 'Setup Go environment with reuse for self-hosted runners'
+inputs:
+  go-version:
+    description: 'Go version to setup'
+    required: false
+    default: '1.21'
+
+outputs:
+  go-version:
+    description: 'Actual Go version in use'
+    value: ${{ steps.check-go.outputs.go-version }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check existing Go installation
+      id: check-go
+      shell: bash
+      run: |
+        # 检查是否已有 Go 环境
+        if command -v go &> /dev/null; then
+          CURRENT_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+          echo "Found Go version: $CURRENT_VERSION"
+          echo "go-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "go-exists=true" >> $GITHUB_OUTPUT
+
+          # 检查版本是否符合要求
+          REQUIRED_VERSION="${{ inputs.go-version }}"
+          if [[ "$CURRENT_VERSION" == "$REQUIRED_VERSION"* ]]; then
+            echo "Go version matches requirement, skipping setup"
+            echo "setup-needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Go version mismatch, setup needed"
+            echo "setup-needed=true" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "Go not found, setup needed"
+          echo "go-exists=false" >> $GITHUB_OUTPUT
+          echo "setup-needed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup Go (if needed)
+      if: steps.check-go.outputs.setup-needed == 'true'
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+        cache: false
+
+    - name: Display Go environment
+      shell: bash
+      run: |
+        echo "Go version: $(go version)"
+        echo "GOROOT: $(go env GOROOT)"
+        echo "GOPATH: $(go env GOPATH)"
+        echo "GOCACHE: $(go env GOCACHE)"
+        echo "GOMODCACHE: $(go env GOMODCACHE)"
