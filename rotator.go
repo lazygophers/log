@@ -24,6 +24,8 @@ type HourlyRotator struct {
 
 // NewHourlyRotator creates a new hourly rotating log writer
 func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotator {
+	filename = strings.TrimSuffix(filename, ".log")
+
 	r := &HourlyRotator{
 		filename: filename,
 		linkName: filename + ".log",
@@ -127,6 +129,10 @@ func (r *HourlyRotator) cleanup() {
 func (r *HourlyRotator) cleanupOldFiles() {
 	dir := filepath.Dir(r.filename)
 	base := filepath.Base(r.filename)
+	if strings.HasSuffix(r.filename, "/") || strings.HasSuffix(r.filename, "\\") {
+		dir = r.filename
+		base = ""
+	}
 
 	// Read all files in directory
 	files, err := os.ReadDir(dir)
