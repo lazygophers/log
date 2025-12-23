@@ -32,20 +32,22 @@ func init() {
 	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
 }
 
-// Debug 空实现函数（发布模式）
+// Debug 记录调试级别的日志。
 //
-// 设计意图：
-//   - 发布模式下不记录调试日志
-//   - 避免不必要的日志处理开销
-//   - 符合生产环境最佳实践
+// 仅当全局日志级别设置为 DebugLevel 或更低时，才会实际输出日志。
 func Debug(args ...interface{}) {
+	// 检查当前日志级别，确保只有在需要时才记录调试信息，以提高性能。
+	if std.level >= DebugLevel {
+		std.Debug(args...)
+	}
 }
 
-// Debugf 空实现函数（发布模式）
+// Debugf 记录格式化的调试级别日志。
 //
-// 设计意图：
-//   - 发布模式下不记录格式化调试日志
-//   - 避免格式化字符串的处理开销
-//   - 提升生产环境性能
+// 仅当全局日志级别设置为 DebugLevel 或更低时，才会实际输出日志。
 func Debugf(format string, args ...interface{}) {
+	// 检查当前日志级别，确保只有在需要时才格式化并记录调试信息。
+	if std.level >= DebugLevel {
+		std.Debug(fmt.Sprintf(format, args...))
+	}
 }

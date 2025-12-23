@@ -33,7 +33,7 @@ func TestLogger_AllLoggingMethods(t *testing.T) {
 		"warning message",
 		"error message",
 	}
-
+	t.Log(output)
 	for _, msg := range expectedMessages {
 		if !strings.Contains(output, msg) {
 			t.Errorf("Output should contain %q, got: %s", msg, output)
