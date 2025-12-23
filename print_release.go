@@ -48,6 +48,6 @@ func Debug(args ...interface{}) {
 func Debugf(format string, args ...interface{}) {
 	// 检查当前日志级别，确保只有在需要时才格式化并记录调试信息。
 	if std.level >= DebugLevel {
-		std.Debug(fmt.Sprintf(format, args...))
+		std.Debugf(format, args...)
 	}
 }
