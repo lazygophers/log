@@ -16,22 +16,45 @@ export default defineConfig({
   themeConfig: {
     nav: [
       {
+        text: 'Home',
+        link: '/',
+      },
+      {
         text: 'API Reference',
         link: '/API',
+      },
+      {
+        text: 'Changelog',
+        link: '/CHANGELOG',
       },
       {
         text: 'Contributing',
         link: '/CONTRIBUTING',
       },
       {
-        text: 'Code of Conduct',
-        link: '/CODE_OF_CONDUCT',
-      },
-      {
-        text: 'Security',
-        link: '/SECURITY',
+        text: 'Community',
+        items: [
+          {
+            text: 'Code of Conduct',
+            link: '/CODE_OF_CONDUCT',
+          },
+          {
+            text: 'Security Policy',
+            link: '/SECURITY',
+          },
+        ],
       },
     ],
+    socialLinks: [
+      {
+        icon: 'github',
+        link: 'https://github.com/lazygophers/log',
+      },
+    ],
+    search: {
+      provider: 'local',
+    },
+    returnToTop: true,
   },
   locales: [
     {
