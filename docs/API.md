@@ -1,73 +1,73 @@
 # 📚 API Documentation
 
-## Overview
+## 概述
 
-LazyGophers Log provides a comprehensive logging API with support for multiple log levels, custom formatting, async writing, and build tag optimization. This documentation covers all public APIs, configuration options, and usage patterns.
+LazyGophers Log 提供了一个全面的日志记录 API，支持多日志级别、自定义格式化、异步写入和构建标签优化。本文档涵盖了所有公共 API、配置选项和使用模式。
 
-## Table of Contents
+## 目录
 
-- [Core Types](#core-types)
+- [核心类型](#核心类型)
 - [Logger API](#logger-api)
-- [Global Functions](#global-functions)
-- [Log Levels](#log-levels)
-- [Formatters](#formatters)
-- [Output Writers](#output-writers)
-- [Context Logging](#context-logging)
-- [Build Tags](#build-tags)
-- [Performance Optimization](#performance-optimization)
-- [Examples](#examples)
+- [全局函数](#全局函数)
+- [日志级别](#日志级别)
+- [格式化器](#格式化器)
+- [输出写入器](#输出写入器)
+- [上下文日志](#上下文日志)
+- [构建标签](#构建标签)
+- [性能优化](#性能优化)
+- [示例](#示例)
 
-## Core Types
+## 核心类型
 
 ### Logger
 
-The main logger struct that provides all logging functionality.
+提供所有日志记录功能的主要日志记录器结构体。
 
 ```go
 type Logger struct {
-    // Contains private fields for thread-safe operation
+    // 包含用于线程安全操作的私有字段
 }
 ```
 
-#### Constructor
+#### 构造函数
 
 ```go
 func New() *Logger
 ```
 
-Creates a new logger instance with default configuration:
-- Level: `DebugLevel`
-- Output: `os.Stdout`
-- Formatter: Default text formatter
-- Caller tracking: Disabled
+创建一个具有默认配置的新日志记录器实例：
+- 级别：`DebugLevel`
+- 输出：`os.Stdout`
+- 格式化器：默认文本格式化器
+- 调用者追踪：禁用
 
-**Example:**
+**示例：**
 ```go
 logger := log.New()
-logger.Info("New logger created")
+logger.Info("新日志记录器已创建")
 ```
 
 ### Entry
 
-Represents a single log entry with all associated metadata.
+表示具有所有关联元数据的单个日志条目。
 
 ```go
 type Entry struct {
-    Time       time.Time     // Timestamp when entry was created
-    Level      Level         // Log level
-    Message    string        // Log message
-    Pid        int          // Process ID
+    Time       time.Time     // 条目创建时的时间戳
+    Level      Level         // 日志级别
+    Message    string        // 日志消息
+    Pid        int          // 进程 ID
     Gid        uint64       // Goroutine ID
-    TraceID    string       // Trace ID for distributed tracing
-    CallerName string       // Caller function name
-    CallerFile string       // Caller file path
-    CallerLine int          // Caller line number
+    TraceID    string       // 分布式追踪的追踪 ID
+    CallerName string       // 调用者函数名
+    CallerFile string       // 调用者文件路径
+    CallerLine int          // 调用者行号
 }
 ```
 
 ## Logger API
 
-### Configuration Methods
+### 配置方法
 
 #### SetLevel
 
@@ -75,19 +75,19 @@ type Entry struct {
 func (l *Logger) SetLevel(level Level) *Logger
 ```
 
-Sets the minimum log level. Messages below this level are ignored.
+设置最低日志级别。低于此级别的消息将被忽略。
 
-**Parameters:**
-- `level`: Minimum log level to process
+**参数：**
+- `level`：要处理的最低日志级别
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
 logger.SetLevel(log.InfoLevel)
-logger.Debug("This won't be shown")  // Ignored
-logger.Info("This will be shown")    // Processed
+logger.Debug("这不会被显示")  // 被忽略
+logger.Info("这会被显示")    // 被处理
 ```
 
 #### SetOutput
@@ -96,20 +96,20 @@ logger.Info("This will be shown")    // Processed
 func (l *Logger) SetOutput(writers ...io.Writer) *Logger
 ```
 
-Sets one or more output destinations for log messages.
+设置日志消息的一个或多个输出目标。
 
-**Parameters:**
-- `writers`: One or more `io.Writer` destinations
+**参数：**
+- `writers`：一个或多个 `io.Writer` 输出目标
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
-// Single output
+// 单一输出
 logger.SetOutput(os.Stdout)
 
-// Multiple outputs
+// 多个输出
 file, _ := os.Create("app.log")
 logger.SetOutput(os.Stdout, file)
 ```
@@ -120,15 +120,15 @@ logger.SetOutput(os.Stdout, file)
 func (l *Logger) SetFormatter(formatter Format) *Logger
 ```
 
-Sets a custom formatter for log output.
+设置日志输出的自定义格式化器。
 
-**Parameters:**
-- `formatter`: Implementation of the `Format` interface
+**参数：**
+- `formatter`：实现 `Format` 接口的格式化器
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
 logger.SetFormatter(&JSONFormatter{})
 ```
@@ -139,18 +139,18 @@ logger.SetFormatter(&JSONFormatter{})
 func (l *Logger) Caller(enabled bool) *Logger
 ```
 
-Enables or disables caller information in log entries.
+启用或禁用日志条目中的调用者信息。
 
-**Parameters:**
-- `enabled`: Whether to include caller information
+**参数：**
+- `enabled`：是否包含调用者信息
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
 logger.Caller(true)
-logger.Info("This will include file:line info")
+logger.Info("这将包含文件:行号信息")
 ```
 
 #### SetCallerDepth
@@ -159,18 +159,18 @@ logger.Info("This will include file:line info")
 func (l *Logger) SetCallerDepth(depth int) *Logger
 ```
 
-Sets the stack depth for caller information when wrapping the logger.
+设置包装日志记录器时调用者信息的堆栈深度。
 
-**Parameters:**
-- `depth`: Number of stack frames to skip
+**参数：**
+- `depth`：要跳过的堆栈帧数
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
 func logWrapper(msg string) {
-    logger.SetCallerDepth(1).Info(msg)  // Skip wrapper function
+    logger.SetCallerDepth(1).Info(msg)  // 跳过包装函数
 }
 ```
 
@@ -181,130 +181,130 @@ func (l *Logger) SetPrefixMsg(prefix string) *Logger
 func (l *Logger) SetSuffixMsg(suffix string) *Logger
 ```
 
-Sets prefix or suffix text for all log messages.
+为所有日志消息设置前缀或后缀文本。
 
-**Parameters:**
-- `prefix/suffix`: Text to prepend/append to messages
+**参数：**
+- `prefix/suffix`：要前置/后置到消息的文本
 
-**Returns:**
-- `*Logger`: Returns self for method chaining
+**返回值：**
+- `*Logger`：返回自身以支持方法链式调用
 
-**Example:**
+**示例：**
 ```go
 logger.SetPrefixMsg("[APP] ").SetSuffixMsg(" [END]")
-logger.Info("Hello")  // Output: [APP] Hello [END]
+logger.Info("Hello")  // 输出: [APP] Hello [END]
 ```
 
-### Logging Methods
+### 日志记录方法
 
-All logging methods come in two variants: simple and formatted.
+所有日志记录方法都有两种变体：简单版本和格式化版本。
 
-#### Trace Level
+#### Trace 级别
 
 ```go
 func (l *Logger) Trace(v ...any)
 func (l *Logger) Tracef(format string, v ...any)
 ```
 
-Logs at trace level (most verbose).
+在 trace 级别记录日志（最详细）。
 
-**Example:**
+**示例：**
 ```go
-logger.Trace("Detailed execution trace")
-logger.Tracef("Processing item %d of %d", i, total)
+logger.Trace("详细执行追踪")
+logger.Tracef("处理第 %d 项，共 %d 项", i, total)
 ```
 
-#### Debug Level
+#### Debug 级别
 
 ```go
 func (l *Logger) Debug(v ...any)
 func (l *Logger) Debugf(format string, v ...any)
 ```
 
-Logs at debug level for development information.
+在 debug 级别记录开发信息。
 
-**Example:**
+**示例：**
 ```go
-logger.Debug("Variable state:", variable)
-logger.Debugf("User %s authenticated successfully", username)
+logger.Debug("变量状态:", variable)
+logger.Debugf("用户 %s 认证成功", username)
 ```
 
-#### Info Level
+#### Info 级别
 
 ```go
 func (l *Logger) Info(v ...any)
 func (l *Logger) Infof(format string, v ...any)
 ```
 
-Logs informational messages.
+记录信息性消息。
 
-**Example:**
+**示例：**
 ```go
-logger.Info("Application started")
-logger.Infof("Server listening on port %d", port)
+logger.Info("应用程序已启动")
+logger.Infof("服务器监听端口 %d", port)
 ```
 
-#### Warn Level
+#### Warn 级别
 
 ```go
 func (l *Logger) Warn(v ...any)
 func (l *Logger) Warnf(format string, v ...any)
 ```
 
-Logs warning messages for potentially problematic situations.
+记录警告消息，用于潜在问题情况。
 
-**Example:**
+**示例：**
 ```go
-logger.Warn("Deprecated function called")
-logger.Warnf("High memory usage: %d%%", memoryPercent)
+logger.Warn("已调用弃用函数")
+logger.Warnf("内存使用率高: %d%%", memoryPercent)
 ```
 
-#### Error Level
+#### Error 级别
 
 ```go
 func (l *Logger) Error(v ...any)
 func (l *Logger) Errorf(format string, v ...any)
 ```
 
-Logs error messages.
+记录错误消息。
 
-**Example:**
+**示例：**
 ```go
-logger.Error("Database connection failed")
-logger.Errorf("Failed to process request: %v", err)
+logger.Error("数据库连接失败")
+logger.Errorf("处理请求失败: %v", err)
 ```
 
-#### Fatal Level
+#### Fatal 级别
 
 ```go
 func (l *Logger) Fatal(v ...any)
 func (l *Logger) Fatalf(format string, v ...any)
 ```
 
-Logs fatal error and calls `os.Exit(1)`.
+记录致命错误并调用 `os.Exit(1)`。
 
-**Example:**
+**示例：**
 ```go
-logger.Fatal("Critical system error")
-logger.Fatalf("Cannot start server: %v", err)
+logger.Fatal("关键系统错误")
+logger.Fatalf("无法启动服务器: %v", err)
 ```
 
-#### Panic Level
+#### Panic 级别
 
 ```go
 func (l *Logger) Panic(v ...any)
 func (l *Logger) Panicf(format string, v ...any)
 ```
 
-Logs error message and calls `panic()`.
+记录错误消息并调用 `panic()`。
 
-**Example:**
+**示例：**
 ```go
-logger.Panic("Unrecoverable error occurred")
-logger.Panicf("Invalid state: %v", state)
+logger.Panic("发生不可恢复错误")
+logger.Panicf("无效状态: %v", state)
 ```
 
-### Utility Methods
+### 实用方法
 
 #### Clone
 
@@ -312,12 +312,12 @@ logger.Panicf("Invalid state: %v", state)
 func (l *Logger) Clone() *Logger
 ```
 
-Creates a copy of the logger with the same configuration.
+创建具有相同配置的日志记录器副本。
 
-**Returns:**
-- `*Logger`: New logger instance with copied settings
+**返回值：**
+- `*Logger`：具有复制设置的新日志记录器实例
 
-**Example:**
+**示例：**
 ```go
 dbLogger := logger.Clone()
 dbLogger.SetPrefixMsg("[DB] ")
@@ -329,20 +329,20 @@ dbLogger.SetPrefixMsg("[DB] ")
 func (l *Logger) CloneToCtx() LoggerWithCtx
 ```
 
-Creates a context-aware logger that accepts `context.Context` as first parameter.
+创建一个上下文感知的日志记录器，接受 `context.Context` 作为第一个参数。
 
-**Returns:**
-- `LoggerWithCtx`: Context-aware logger instance
+**返回值：**
+- `LoggerWithCtx`：上下文感知的日志记录器实例
 
-**Example:**
+**示例：**
 ```go
 ctxLogger := logger.CloneToCtx()
-ctxLogger.Info(ctx, "Context-aware message")
+ctxLogger.Info(ctx, "上下文感知消息")
 ```
 
-## Global Functions
+## 全局函数
 
-Package-level functions that use the default global logger.
+使用默认全局日志记录器的包级函数。
 
 ```go
 func SetLevel(level Level)
@@ -366,52 +366,52 @@ func Panic(v ...any)
 func Panicf(format string, v ...any)
 ```
 
-**Example:**
+**示例：**
 ```go
 import "github.com/lazygophers/log"
 
 log.SetLevel(log.InfoLevel)
-log.Info("Using global logger")
+log.Info("使用全局日志记录器")
 ```
 
-## Log Levels
+## 日志级别
 
-### Level Type
+### Level 类型
 
 ```go
 type Level int8
 ```
 
-### Available Levels
+### 可用级别
 
 ```go
 const (
-    PanicLevel Level = iota  // 0 - Panic and exit
-    FatalLevel              // 1 - Fatal error and exit  
-    ErrorLevel              // 2 - Error conditions
-    WarnLevel               // 3 - Warning conditions
-    InfoLevel               // 4 - Informational messages
-    DebugLevel              // 5 - Debug messages
-    TraceLevel              // 6 - Most verbose tracing
+    PanicLevel Level = iota  // 0 - Panic 并退出
+    FatalLevel              // 1 - 致命错误并退出  
+    ErrorLevel              // 2 - 错误条件
+    WarnLevel               // 3 - 警告条件
+    InfoLevel               // 4 - 信息性消息
+    DebugLevel              // 5 - 调试消息
+    TraceLevel              // 6 - 最详细的追踪
 )
 ```
 
-### Level Methods
+### Level 方法
 
 ```go
 func (l Level) String() string
 ```
 
-Returns the string representation of the level.
+返回级别的字符串表示。
 
-**Example:**
+**示例：**
 ```go
 fmt.Println(log.InfoLevel.String())  // "INFO"
 ```
 
-## Formatters
+## 格式化器
 
-### Format Interface
+### Format 接口
 
 ```go
 type Format interface {
@@ -419,19 +419,19 @@ type Format interface {
 }
 ```
 
-Custom formatters must implement this interface.
+自定义格式化器必须实现此接口。
 
-### Default Formatter
+### 默认格式化器
 
-The built-in text formatter with customizable options.
+具有可自定义选项的内置文本格式化器。
 
 ```go
 type Formatter struct {
-    // Configuration options
+    // 配置选项
 }
 ```
 
-### JSON Formatter Example
+### JSON 格式化器示例
 
 ```go
 type JSONFormatter struct{}
@@ -451,55 +451,55 @@ func (f *JSONFormatter) Format(entry *Entry) []byte {
     return append(jsonData, '\n')
 }
 
-// Usage
+// 使用
 logger.SetFormatter(&JSONFormatter{})
 ```
 
-## Output Writers
+## 输出写入器
 
-### File Output with Rotation
+### 文件输出与轮转
 
 ```go
 func GetOutputWriterHourly(filename string) io.Writer
 ```
 
-Creates a writer that rotates log files hourly.
+创建一个每小时轮转日志文件的写入器。
 
-**Parameters:**
-- `filename`: Base filename for log files
+**参数：**
+- `filename`：日志文件的基础文件名
 
-**Returns:**
-- `io.Writer`: Rotating file writer
+**返回值：**
+- `io.Writer`：轮转文件写入器
 
-**Example:**
+**示例：**
 ```go
 writer := log.GetOutputWriterHourly("./logs/app.log")
 logger.SetOutput(writer)
-// Creates files like: app-2024010115.log, app-2024010116.log, etc.
+// 创建类似的文件：app-2024010115.log, app-2024010116.log 等
 ```
 
-### Async Writer
+### 异步写入器
 
 ```go
 func NewAsyncWriter(writer io.Writer, bufferSize int) *AsyncWriter
 ```
 
-Creates an asynchronous writer for high-performance logging.
+为高性能日志记录创建异步写入器。
 
-**Parameters:**
-- `writer`: Underlying writer
-- `bufferSize`: Internal buffer size
+**参数：**
+- `writer`：底层写入器
+- `bufferSize`：内部缓冲区大小
 
-**Returns:**
-- `*AsyncWriter`: Async writer instance
+**返回值：**
+- `*AsyncWriter`：异步写入器实例
 
-**Methods:**
+**方法：**
 ```go
 func (aw *AsyncWriter) Write(data []byte) (int, error)
 func (aw *AsyncWriter) Close() error
 ```
 
-**Example:**
+**示例：**
 ```go
 file, _ := os.Create("app.log")
 asyncWriter := log.NewAsyncWriter(file, 1000)
@@ -508,9 +508,9 @@ defer asyncWriter.Close()
 logger.SetOutput(asyncWriter)
 ```
 
-## Context Logging
+## 上下文日志
 
-### LoggerWithCtx Interface
+### LoggerWithCtx 接口
 
 ```go
 type LoggerWithCtx interface {
@@ -531,110 +531,110 @@ type LoggerWithCtx interface {
 }
 ```
 
-### Context Functions
+### 上下文函数
 
 ```go
 func SetTrace(traceID string)
 func GetTrace() string
 ```
 
-Set and get trace ID for the current goroutine.
+设置和获取当前 goroutine 的追踪 ID。
 
-**Example:**
+**示例：**
 ```go
 log.SetTrace("trace-123-456")
-log.Info("This message will include trace ID")
+log.Info("此消息将包含追踪 ID")
 
 traceID := log.GetTrace()
-fmt.Println("Current trace ID:", traceID)
+fmt.Println("当前追踪 ID:", traceID)
 ```
 
-## Build Tags
+## 构建标签
 
-The library supports conditional compilation with build tags:
+该库支持使用构建标签进行条件编译：
 
-### Default Mode
+### 默认模式
 ```bash
 go build
 ```
-- Full functionality enabled
-- Debug messages included
-- Standard performance
+- 启用完整功能
+- 包含调试消息
+- 标准性能
 
-### Debug Mode
+### 调试模式
 ```bash
 go build -tags debug
 ```
-- Enhanced debug information
-- Additional runtime checks
-- Detailed caller information
+- 增强的调试信息
+- 额外的运行时检查
+- 详细的调用者信息
 
-### Release Mode
+### 发布模式
 ```bash
 go build -tags release
 ```
-- Optimized for production
-- Debug messages disabled
-- Automatic log rotation enabled
+- 为生产环境优化
+- 调试消息被禁用
+- 启用自动日志轮转
 
-### Discard Mode
+### 丢弃模式
 ```bash
 go build -tags discard
 ```
-- Maximum performance
-- All logging operations are no-ops
-- Zero overhead
+- 最大性能
+- 所有日志操作都是空操作
+- 零开销
 
-### Combined Modes
+### 组合模式
 ```bash
-go build -tags "debug,discard"    # Debug with discard
-go build -tags "release,discard"  # Release with discard
+go build -tags "debug,discard"    # 调试与丢弃
+go build -tags "release,discard"  # 发布与丢弃
 ```
 
-## Performance Optimization
+## 性能优化
 
-### Object Pooling
+### 对象池
 
-The library uses `sync.Pool` internally for:
-- Log entry objects
-- Byte buffers
-- Formatter buffers
+该库在内部使用 `sync.Pool` 来管理：
+- 日志条目对象
+- 字节缓冲区
+- 格式化器缓冲区
 
-This reduces garbage collection pressure in high-throughput scenarios.
+这减少了高吞吐量场景下的垃圾收集压力。
 
-### Level Checking
+### 级别检查
 
-Log level checks happen before expensive operations:
+日志级别检查发生在昂贵操作之前：
 
 ```go
-// Efficient - message formatting only happens if level is enabled
-logger.Debugf("Expensive operation result: %+v", expensiveCall())
+// 高效 - 仅当级别启用时才进行消息格式化
+logger.Debugf("昂贵操作结果: %+v", expensiveCall())
 
-// Less efficient in production when debug is disabled
+// 在生产环境中调试被禁用时效率较低
 result := expensiveCall()
-logger.Debug("Result:", result)
+logger.Debug("结果:", result)
 ```
 
-### Async Writing
+### 异步写入
 
-For high-throughput applications:
+对于高吞吐量应用程序：
 
 ```go
-asyncWriter := log.NewAsyncWriter(file, 10000)  // Large buffer
+asyncWriter := log.NewAsyncWriter(file, 10000)  // 大缓冲区
 logger.SetOutput(asyncWriter)
 defer asyncWriter.Close()
 ```
 
-### Build Tag Optimization
+### 构建标签优化
 
-Use appropriate build tags for your environment:
-- Development: Default or debug tags
-- Production: Release tag
-- Performance-critical: Discard tag
+根据环境使用适当的构建标签：
+- 开发：默认或调试标签
+- 生产：发布标签
+- 性能关键：丢弃标签
 
-## Examples
+## 示例
 
-### Basic Usage
+### 基本用法
 
 ```go
 package main
@@ -645,13 +645,13 @@ import (
 
 func main() {
     log.SetLevel(log.InfoLevel)
-    log.Info("Application starting")
-    log.Warn("This is a warning")
-    log.Error("This is an error")
+    log.Info("应用程序启动中")
+    log.Warn("这是一个警告")
+    log.Error("这是一个错误")
 }
 ```
 
-### Custom Logger
+### 自定义日志记录器
 
 ```go
 package main
@@ -664,12 +664,12 @@ import (
 func main() {
     logger := log.New()
     
-    // Configure logger
+    // 配置日志记录器
     logger.SetLevel(log.DebugLevel)
     logger.Caller(true)
     logger.SetPrefixMsg("[MyApp] ")
     
-    // Set output to file
+    // 设置输出到文件
     file, err := os.Create("app.log")
     if err != nil {
         log.Fatal(err)
@@ -678,12 +678,12 @@ func main() {
     
     logger.SetOutput(file)
     
-    logger.Info("Custom logger configured")
-    logger.Debug("Debug information with caller")
+    logger.Info("自定义日志记录器已配置")
+    logger.Debug("带调用者的调试信息")
 }
 ```
 
-### High-Performance Logging
+### 高性能日志记录
 
 ```go
 package main
@@ -694,7 +694,7 @@ import (
 )
 
 func main() {
-    // Create rotating file writer
+    // 创建轮转文件写入器
     writer := log.GetOutputWriterHourly("./logs/app.log")
     
     // Wrap with async writer for performance
@@ -712,7 +712,7 @@ func main() {
 }
 ```
 
-### Context-Aware Logging
+### 上下文感知日志记录
 
 ```go
 package main
@@ -729,12 +729,12 @@ func main() {
     ctx := context.Background()
     log.SetTrace("trace-123-456")
     
-    ctxLogger.Info(ctx, "Processing user request")
-    ctxLogger.Debug(ctx, "Validation completed")
+    ctxLogger.Info(ctx, "处理用户请求")
+    ctxLogger.Debug(ctx, "验证完成")
 }
 ```
 
-### Custom JSON Formatter
+### 自定义JSON格式化器
 
 ```go
 package main
@@ -780,13 +780,13 @@ func main() {
     logger.SetOutput(os.Stdout)
     
     log.SetTrace("request-456")
-    logger.Info("JSON formatted message")
+    logger.Info("JSON格式化消息")
 }
 ```
 
-## Error Handling
+## 错误处理
 
-Most logger methods don't return errors for performance reasons. If you need error handling for output operations, implement a custom writer:
+出于性能考虑，大多数日志记录器方法不返回错误。如果您需要对输出操作进行错误处理，请实现自定义写入器：
 
 ```go
 type ErrorCapturingWriter struct {
@@ -807,17 +807,17 @@ func (w *ErrorCapturingWriter) LastError() error {
 }
 ```
 
-## Thread Safety
+## 线程安全
 
-All logger operations are thread-safe and can be used concurrently from multiple goroutines without additional synchronization.
+所有日志记录器操作都是线程安全的，可以在多个goroutine中并发使用，无需额外的同步机制。
 
 ---
 
-## 🌍 Multilingual Documentation
+## 🌍 多语言文档
 
-This document is available in multiple languages:
+本文档提供多种语言版本：
 
-- [🇺🇸 English](API.md) (Current)
+- [🇺🇸 English](API.md) (当前)
 - [🇨🇳 简体中文](API_zh-CN.md)
 - [🇹🇼 繁體中文](API_zh-TW.md)
 - [🇫🇷 Français](API_fr.md)
@@ -827,4 +827,4 @@ This document is available in multiple languages:
 
 ---
 
-**Complete API reference for LazyGophers Log - Build better applications with superior logging! 🚀**
+**LazyGophers Log 完整API参考 - 使用卓越的日志记录构建更好的应用程序！🚀**
