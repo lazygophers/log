@@ -16,30 +16,30 @@ export default defineConfig({
   themeConfig: {
     nav: [
       {
-        text: 'Home',
+        text: 'nav.home',
         link: '/',
       },
       {
-        text: 'API Reference',
+        text: 'nav.api',
         link: '/API',
       },
       {
-        text: 'Changelog',
+        text: 'nav.changelog',
         link: '/CHANGELOG',
       },
       {
-        text: 'Contributing',
+        text: 'nav.contributing',
         link: '/CONTRIBUTING',
       },
       {
-        text: 'Community',
+        text: 'nav.community',
         items: [
           {
-            text: 'Code of Conduct',
+            text: 'nav.codeOfConduct',
             link: '/CODE_OF_CONDUCT',
           },
           {
-            text: 'Security Policy',
+            text: 'nav.securityPolicy',
             link: '/SECURITY',
           },
         ],
@@ -55,6 +55,20 @@ export default defineConfig({
       provider: 'local',
     },
     returnToTop: true,
+    locales: [
+      {
+        lang: 'en',
+        outlineTitle: 'ON THIS PAGE',
+      },
+      {
+        lang: 'zh-CN',
+        outlineTitle: '大纲',
+      },
+      {
+        lang: 'zh-TW',
+        outlineTitle: '大綱',
+      },
+    ],
   },
   locales: [
     {
@@ -76,4 +90,7 @@ export default defineConfig({
       description: '一個全面的 Go 語言日誌庫',
     },
   ],
+  i18n: {
+    path: './i18n.json',
+  },
 });

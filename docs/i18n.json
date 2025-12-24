@@ -1,0 +1,167 @@
+{
+  "nav.home": {
+    "en": "Home",
+    "zh-CN": "首页",
+    "zh-TW": "首頁"
+  },
+  "nav.api": {
+    "en": "API Reference",
+    "zh-CN": "API 参考",
+    "zh-TW": "API 參考"
+  },
+  "nav.changelog": {
+    "en": "Changelog",
+    "zh-CN": "更新日志",
+    "zh-TW": "更新日誌"
+  },
+  "nav.contributing": {
+    "en": "Contributing",
+    "zh-CN": "贡献指南",
+    "zh-TW": "貢獻指南"
+  },
+  "nav.community": {
+    "en": "Community",
+    "zh-CN": "社区",
+    "zh-TW": "社群"
+  },
+  "nav.codeOfConduct": {
+    "en": "Code of Conduct",
+    "zh-CN": "行为准则",
+    "zh-TW": "行為準則"
+  },
+  "nav.securityPolicy": {
+    "en": "Security Policy",
+    "zh-CN": "安全策略",
+    "zh-TW": "安全策略"
+  },
+  "hero.name": {
+    "en": "LazyGophers Log",
+    "zh-CN": "LazyGophers 日志库",
+    "zh-TW": "LazyGophers 日誌庫"
+  },
+  "hero.text": {
+    "en": "A High-Performance Logging Library for Go",
+    "zh-CN": "一个高性能的 Go 语言日志库",
+    "zh-TW": "一個高性能的 Go 語言日誌庫"
+  },
+  "hero.tagline": {
+    "en": "Simple API, excellent performance, and flexible configuration",
+    "zh-CN": "简洁的 API、卓越的性能和灵活的配置",
+    "zh-TW": "簡潔的 API、卓越的性能和靈活的配置"
+  },
+  "hero.gettingStarted": {
+    "en": "Getting Started",
+    "zh-CN": "快速开始",
+    "zh-TW": "快速開始"
+  },
+  "hero.apiReference": {
+    "en": "API Reference",
+    "zh-CN": "API 参考",
+    "zh-TW": "API 參考"
+  },
+  "feature.highPerformance": {
+    "en": "High Performance",
+    "zh-CN": "高性能",
+    "zh-TW": "高性能"
+  },
+  "feature.highPerformance.desc": {
+    "en": "Built on zap, using object pooling and conditional field recording technology to ensure excellent performance",
+    "zh-CN": "基于 zap 构建，采用对象池和条件字段记录技术，确保出色的性能表现",
+    "zh-TW": "基於 zap 構建，採用物件池和條件欄位記錄技術，確保出色的性能表現"
+  },
+  "feature.richLevels": {
+    "en": "Rich Log Levels",
+    "zh-CN": "丰富的日志级别",
+    "zh-TW": "豐富的日誌級別"
+  },
+  "feature.richLevels.desc": {
+    "en": "Supports seven log levels: Trace, Debug, Info, Warn, Error, Fatal, Panic",
+    "zh-CN": "支持 Trace、Debug、Info、Warn、Error、Fatal、Panic 七个日志级别",
+    "zh-TW": "支援 Trace、Debug、Info、Warn、Error、Fatal、Panic 七個日誌級別"
+  },
+  "feature.flexibleConfig": {
+    "en": "Flexible Configuration",
+    "zh-CN": "灵活的配置",
+    "zh-TW": "靈活的配置"
+  },
+  "feature.flexibleConfig.desc": {
+    "en": "Supports log level control, caller information recording, trace information, custom prefixes and suffixes, etc.",
+    "zh-CN": "支持日志级别控制、调用者信息记录、跟踪信息、自定义前缀后缀等",
+    "zh-TW": "支援日誌級別控制、呼叫者資訊記錄、跟蹤資訊、自定義前綴後綴等"
+  },
+  "feature.fileRotation": {
+    "en": "File Rotation",
+    "zh-CN": "文件轮换",
+    "zh-TW": "文件輪換"
+  },
+  "feature.fileRotation.desc": {
+    "en": "Built-in log file rotation function, supporting automatic hourly log file rotation",
+    "zh-CN": "内置日志文件轮换功能，支持按小时自动轮换日志文件",
+    "zh-TW": "內置日誌文件輪換功能，支援按小時自動輪換日誌文件"
+  },
+  "feature.zapCompatibility": {
+    "en": "Zap Compatibility",
+    "zh-CN": "Zap 兼容性",
+    "zh-TW": "Zap 兼容性"
+  },
+  "feature.zapCompatibility.desc": {
+    "en": "Seamless integration with zap WriteSyncer, supporting custom output targets",
+    "zh-CN": "与 zap WriteSyncer 无缝集成，支持自定义输出目标",
+    "zh-TW": "與 zap WriteSyncer 無縫集成，支援自定義輸出目標"
+  },
+  "feature.simpleAPI": {
+    "en": "Simple API",
+    "zh-CN": "简洁的 API",
+    "zh-TW": "簡潔的 API"
+  },
+  "feature.simpleAPI.desc": {
+    "en": "API designed similar to the standard log library, easy to use and migrate",
+    "zh-CN": "API 设计类似于标准日志库，易于使用和迁移",
+    "zh-TW": "API 設計類似於標準日誌庫，易於使用和遷移"
+  },
+  "quickStart.title": {
+    "en": "Quick Start",
+    "zh-CN": "快速开始",
+    "zh-TW": "快速開始"
+  },
+  "quickStart.install": {
+    "en": "Install",
+    "zh-CN": "安装",
+    "zh-TW": "安裝"
+  },
+  "quickStart.usage": {
+    "en": "Basic Usage",
+    "zh-CN": "基本使用",
+    "zh-TW": "基本使用"
+  },
+  "quickStart.configuration": {
+    "en": "Configuration",
+    "zh-CN": "配置",
+    "zh-TW": "配置"
+  },
+  "docs.navigation": {
+    "en": "Documentation Navigation",
+    "zh-CN": "文档导航",
+    "zh-TW": "文檔導航"
+  },
+  "docs.guides": {
+    "en": "Guides",
+    "zh-CN": "指南",
+    "zh-TW": "指南"
+  },
+  "docs.references": {
+    "en": "References",
+    "zh-CN": "参考",
+    "zh-TW": "參考"
+  },
+  "docs.community": {
+    "en": "Community",
+    "zh-CN": "社区",
+    "zh-TW": "社群"
+  },
+  "outlineTitle": {
+    "en": "ON THIS PAGE",
+    "zh-CN": "大纲",
+    "zh-TW": "大綱"
+  }
+}
