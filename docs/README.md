@@ -10,12 +10,12 @@ A high-performance, flexible Go logging library built on zap, providing rich fea
 ## 📖 Documentation Languages
 
 -   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](docs/README_zh-CN.md)
--   [🇹🇼 繁體中文](docs/README_zh-TW.md)
--   [🇫🇷 Français](docs/README_fr.md)
--   [🇷🇺 Русский](docs/README_ru.md)
--   [🇪🇸 Español](docs/README_es.md)
--   [🇸🇦 العربية](docs/README_ar.md)
+-   [🇨🇳 简体中文](README_zh-CN.md)
+-   [🇹🇼 繁體中文](README_zh-TW.md)
+-   [🇫🇷 Français](README_fr.md)
+-   [🇷🇺 Русский](README_ru.md)
+-   [🇪🇸 Español](README_es.md)
+-   [🇸🇦 العربية](README_ar.md)
 
 ## ✨ Features
 
@@ -166,11 +166,11 @@ func main() {
 
 ## 🔗 Related Documentation
 
--   [📚 API Documentation](docs/API.md) - Complete API reference
--   [🤝 Contributing Guide](docs/CONTRIBUTING.md) - How to contribute
--   [📋 Changelog](CHANGELOG.md) - Version history
--   [🔒 Security Policy](docs/SECURITY.md) - Security guidelines
--   [📜 Code of Conduct](docs/CODE_OF_CONDUCT.md) - Community guidelines
+-   [📚 API Documentation](API.md) - Complete API reference
+-   [🤝 Contributing Guide](CONTRIBUTING.md) - How to contribute
+-   [📋 Changelog](../CHANGELOG.md) - Version history
+-   [🔒 Security Policy](SECURITY.md) - Security guidelines
+-   [📜 Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
 
 ## 🚀 Getting Help
 
@@ -180,11 +180,11 @@ func main() {
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ---
 

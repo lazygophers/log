@@ -2,7 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Common Development Commands
+## 🚀 Quick Start
+
+### Development Commands
 
 **Testing:**
 - `go test ./...` - Run all tests in the project
@@ -16,11 +18,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `go fmt ./...` - Format all Go source files
 - `go mod tidy` - Clean up go.mod dependencies
 
-## Project Architecture
+## 🏗️ Project Architecture
 
 This is a high-performance Go logging library (`github.com/lazygophers/log`) designed for simplicity and extensibility.
 
-### Core Components
+### 📋 Core Components
 
 **Logger (`logger.go`):**
 - Main `Logger` struct with configurable level, output, formatter, and caller depth
@@ -56,7 +58,7 @@ This is a high-performance Go logging library (`github.com/lazygophers/log`) des
 - Package-level functions (Info, Debug, etc.) that delegate to a global logger instance
 - Default logger configured with DebugLevel and stdout output
 
-### Key Design Patterns
+## 🔧 Key Design Patterns
 
 - **Object Pooling**: Extensive use of `sync.Pool` for Entry objects and byte buffers to reduce GC pressure
 - **Interface-based Design**: Pluggable formatters and writers via interfaces
@@ -64,17 +66,90 @@ This is a high-performance Go logging library (`github.com/lazygophers/log`) des
 - **Conditional Compilation**: Build tags for different environments (debug/release)
 - **Performance Optimization**: Level checking before expensive operations, buffer reuse
 
-### Dependencies
+## 📦 Dependencies
 
 - `go.uber.org/zap` - Used for WriteSyncer and multi-writer functionality
 - `github.com/petermattis/goid` - Goroutine ID extraction for tracing
 - `github.com/lestrrat-go/file-rotatelogs` - Time-based log file rotation
 - `github.com/google/uuid` - UUID generation (likely for trace IDs)
 
-### Testing Structure
+## 🧪 Testing Structure
 
 Tests are co-located with source files (`*_test.go`). Key test files:
 - `logger_test.go` - Core logger functionality
 - `benchmark_test.go` - Performance benchmarks  
 - `formatter_test.go` - Format testing
 - `pool_test.go` - Object pool behavior
+
+## 📚 Documentation Structure
+
+### Main Documentation
+- `README.md` - Primary project documentation (English)
+- `docs/README_zh-CN.md` - Chinese documentation
+- `docs/API.md` - Complete API reference
+- `CHANGELOG.md` - Version history
+
+### Contributing & Community
+- `docs/CONTRIBUTING.md` - Contribution guidelines
+- `docs/CODE_OF_CONDUCT.md` - Community standards
+- `docs/SECURITY.md` - Security policy
+
+### GitHub Templates
+- `.github/ISSUE_TEMPLATE/` - Bug reports, feature requests, questions
+- `.github/pull_request_template.md` - PR template
+
+## 🎯 Development Guidelines
+
+### Code Style
+- Follow Go standard formatting (`go fmt`)
+- Use descriptive variable and function names
+- Add comments for complex logic
+- Maintain consistent error handling patterns
+
+### Performance Considerations
+- Always use object pooling for frequently allocated objects
+- Check log levels before expensive operations
+- Use conditional compilation for environment-specific optimizations
+- Benchmark performance-critical code paths
+
+### Testing Requirements
+- Write tests for all public APIs
+- Include benchmarks for performance-critical code
+- Test across different build tag configurations
+- Ensure test coverage remains above 90%
+
+## 🔄 Build Tags
+
+This project uses build tags for conditional compilation:
+
+- `debug` - Enables additional debugging features
+- `release` - Optimizes for production performance  
+- `discard` - Discards all log output (for testing)
+
+## 🚨 Important Notes
+
+### Memory Management
+- The library extensively uses `sync.Pool` for performance
+- Always return objects to pools after use
+- Be aware of pool contention in highly concurrent scenarios
+
+### Concurrency Safety
+- Logger instances are designed to be thread-safe
+- Individual Entry objects are not thread-safe (single-use)
+- Use appropriate synchronization when extending functionality
+
+### Extension Points
+- The `Format` interface allows custom formatting implementations
+- Output can be customized via `io.Writer` implementations
+- Log levels can be extended by implementing the `Level` interface
+
+## 📞 Getting Help
+
+- Check the [API Documentation](docs/API.md) for detailed usage
+- Review [examples](examples/) for common patterns
+- Open an [issue](https://github.com/lazygophers/log/issues) for bugs or questions
+- Refer to [contributing guidelines](docs/CONTRIBUTING.md) for development help
+
+---
+
+**Remember**: This is a performance-focused logging library. Always consider the performance implications of any changes, especially in the hot path of logging operations.

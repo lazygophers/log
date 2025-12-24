@@ -1,36 +1,36 @@
-# 🚀 LazyGophers Log
+# lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
 [![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
-[![DeepWiki](https://img.shields.io/badge/DeepWiki-documented-blue?logo=bookstack&logoColor=white)](https://deepwiki.ai/docs/lazygophers/log)
-[![Go.Dev Downloads](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
-[![Goproxy.cn](https://goproxy.cn/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.cn/stats/github.com/lazygophers/log)
-[![Goproxy.io](https://goproxy.io/stats/github.com/lazygophers/log/badges/download-count.svg)](https://goproxy.io/stats/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Une bibliothèque de journalisation hautes performances et riche en fonctionnalités pour les applications Go avec support multi-balises de construction, écriture asynchrone et options de personnalisation étendues.
+Une bibliothèque de journalisation Go performante et flexible, construite sur zap, offrant des fonctionnalités riches et une API simple.
 
 ## 📖 Langues de documentation
 
-- [🇺🇸 English](../README.md)
-- [🇨🇳 简体中文](README.zh-CN.md)
-- [🇹🇼 繁體中文](README.zh-TW.md)
-- [🇫🇷 Français](README.fr.md) (Actuel)
-- [🇷🇺 Русский](README.ru.md)
-- [🇪🇸 Español](README.es.md)
-- [🇸🇦 العربية](README.ar.md)
+-   [🇺🇸 English](README.md)
+-   [🇨🇳 简体中文](README_zh-CN.md)
+-   [🇹🇼 繁體中文](README_zh-TW.md)
+-   [🇫🇷 Français](README_fr.md)
+-   [🇷🇺 Русский](README_ru.md)
+-   [🇪🇸 Español](README_es.md)
+-   [🇸🇦 العربية](README_ar.md)
 
 ## ✨ Fonctionnalités
 
-- **🚀 Hautes performances**: Support du pooling d'objets et écriture asynchrone
-- **🏗️ Support des balises de construction**: Différents comportements pour les modes debug, release et discard
-- **🔄 Rotation des journaux**: Rotation automatique des fichiers de journaux par heure
-- **🎨 Formatage riche**: Formats de journaux personnalisables avec support des couleurs
-- **🔍 Traçage contextuel**: Suivi des ID de Goroutine et ID de trace
-- **🔌 Intégration de frameworks**: Intégration native du logger Zap
-- **⚙️ Hautement configurable**: Niveaux flexibles, sorties et formatage
-- **🧪 Bien testé**: 93.0% de couverture de test à travers toutes les configurations de construction
+-   **🚀 Haute performance** : Construite sur zap avec réutilisation d'objets Entry via un pool, réduisant l'allocation mémoire
+-   **📊 Niveaux de journalisation riches** : Niveaux Trace, Debug, Info, Warn, Error, Fatal, Panic
+-   **⚙️ Configuration flexible** :
+    -   Contrôle du niveau de journalisation
+    -   Enregistrement des informations d'appelant
+    -   Informations de trace (y compris l'ID de goroutine)
+    -   Préfixes et suffixes de journalisation personnalisés
+    -   Cibles de sortie personnalisées (console, fichiers, etc.)
+    -   Options de formatage de journalisation
+-   **🔄 Rotation de fichiers** : Support de la rotation horaire des fichiers journaux
+-   **🔌 Compatibilité Zap** : Intégration transparente avec zap WriteSyncer
+-   **🎯 API simple** : API claire similaire à la bibliothèque de journalisation standard, facile à utiliser
 
 ## 🚀 Démarrage rapide
 
@@ -50,302 +50,142 @@ import (
 )
 
 func main() {
-    // Journalisation simple
-    log.Info("Bonjour, Monde!")
-    log.Debug("Ceci est un message de débogage")
-    log.Warn("Ceci est un avertissement")
-    log.Error("Ceci est une erreur")
+    // Utiliser le logger global par défaut
+    log.Debug("Message de débogage")
+    log.Info("Message d'information")
+    log.Warn("Message d'avertissement")
+    log.Error("Message d'erreur")
 
-    // Journalisation formatée
-    log.Infof("L'utilisateur %s s'est connecté avec l'ID %d", "jean", 123)
-    
-    // Avec un logger personnalisé
-    logger := log.New()
-    logger.SetLevel(log.InfoLevel)
-    logger.Info("Message du logger personnalisé")
+    // Utiliser la sortie formatée
+    log.Infof("L'utilisateur %s s'est connecté avec succès", "admin")
+
+    // Configuration personnalisée
+    customLogger := log.New().
+        SetLevel(log.InfoLevel).
+        EnableCaller(false).
+        SetPrefixMsg("[MyApp]")
+
+    customLogger.Info("Ceci est un journal du logger personnalisé")
 }
 ```
 
-### Utilisation avancée
+## 📚 Utilisation avancée
+
+### Logger personnalisé avec sortie fichier
 
 ```go
 package main
 
 import (
-    "context"
     "os"
     "github.com/lazygophers/log"
 )
 
 func main() {
-    // Créer un logger avec sortie vers fichier
-    logger := log.New()
-    
-    // Définir la sortie vers un fichier avec rotation horaire
-    writer := log.GetOutputWriterHourly("./logs/app.log")
-    logger.SetOutput(writer)
-    
-    // Configurer le formatage
-    logger.SetLevel(log.DebugLevel)
-    logger.SetPrefixMsg("[APP] ")
-    logger.Caller(true) // Activer les informations d'appelant
-    
-    // Journalisation contextuelle
-    ctxLogger := logger.CloneToCtx()
-    ctxLogger.Info(context.Background(), "Journalisation sensible au contexte")
-    
-    // Journalisation asynchrone pour les scénarios à haut débit
-    asyncWriter := log.NewAsyncWriter(writer, 1000)
-    logger.SetOutput(asyncWriter)
-    defer asyncWriter.Close()
-    
-    logger.Info("Journalisation asynchrone hautes performances")
+    // Créer un logger avec sortie fichier
+    logger := log.New().
+        SetLevel(log.DebugLevel).
+        EnableCaller(true).
+        EnableTrace(true).
+        SetOutput(os.Stdout, log.GetOutputWriterHourly("/var/log/myapp.log"))
+
+    logger.Debug("Message de débogage avec informations d'appelant")
+    logger.Info("Message d'information avec informations de trace")
 }
 ```
 
-## 🏗️ Balises de construction
-
-La bibliothèque prend en charge différents modes de construction via les balises de construction Go :
-
-### Mode par défaut (Aucune balise)
-```bash
-go build
-```
-- Fonctionnalité complète de journalisation
-- Messages de débogage activés
-- Performances standard
-
-### Mode débogage
-```bash
-go build -tags debug
-```
-- Informations de débogage améliorées
-- Informations détaillées sur l'appelant
-- Support du profilage de performance
-
-### Mode release
-```bash
-go build -tags release
-```
-- Optimisé pour la production
-- Messages de débogage désactivés
-- Rotation automatique des fichiers de journaux
-
-### Mode discard
-```bash
-go build -tags discard
-```
-- Performances maximales
-- Tous les journaux sont supprimés
-- Zéro surcharge de journalisation
-
-### Modes combinés
-```bash
-go build -tags "debug,discard"    # Debug avec discard
-go build -tags "release,discard"  # Release avec discard
-```
-
-## 📊 Niveaux de journaux
-
-La bibliothèque prend en charge 7 niveaux de journaux (de la priorité la plus haute à la plus basse) :
-
-| Niveau | Valeur | Description |
-|--------|--------|-------------|
-| `PanicLevel` | 0 | Journalise puis appelle panic |
-| `FatalLevel` | 1 | Journalise puis appelle os.Exit(1) |
-| `ErrorLevel` | 2 | Conditions d'erreur |
-| `WarnLevel` | 3 | Conditions d'avertissement |
-| `InfoLevel` | 4 | Messages informatifs |
-| `DebugLevel` | 5 | Messages de niveau débogage |
-| `TraceLevel` | 6 | Journalisation la plus détaillée |
-
-## 🔌 Intégration de frameworks
-
-### Intégration Zap
+### Contrôle du niveau de journalisation
 
 ```go
-import (
-    "go.uber.org/zap"
-    "go.uber.org/zap/zapcore"
-    "github.com/lazygophers/log"
-)
+package main
 
-// Créer un logger zap qui écrit dans notre système de journaux
-logger := log.New()
-hook := log.NewZapHook(logger)
+import "github.com/lazygophers/log"
 
-core := zapcore.NewCore(
-    zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-    hook,
-    zapcore.InfoLevel,
-)
-zapLogger := zap.New(core)
+func main() {
+    logger := log.New().SetLevel(log.WarnLevel)
 
-zapLogger.Info("Message de Zap", zap.String("key", "value"))
+    // Seuls les messages warn et supérieurs seront journalisés
+    logger.Debug("Ceci ne sera pas journalisé")  // Ignoré
+    logger.Info("Ceci ne sera pas journalisé")   // Ignoré
+    logger.Warn("Ceci sera journalisé")    // Journalisé
+    logger.Error("Ceci sera journalisé")   // Journalisé
+}
 ```
 
-## 🧪 Tests
+## 🔧 Options de configuration
 
-La bibliothèque est livrée avec un support de test complet :
+### Configuration du Logger
 
-```bash
-# Exécuter tous les tests
-make test
+| Méthode                 | Description                 | Valeur par défaut |
+| ----------------------- | --------------------------- | ---------------- |
+| `SetLevel(level)`       | Définir le niveau minimum de journalisation | `DebugLevel` |
+| `EnableCaller(enable)`  | Activer/désactiver les informations d'appelant | `false` |
+| `EnableTrace(enable)`   | Activer/désactiver les informations de trace | `false` |
+| `SetCallerDepth(depth)` | Définir la profondeur de l'appelant | `2` |
+| `SetPrefixMsg(prefix)`  | Définir le préfixe du journal | `""` |
+| `SetSuffixMsg(suffix)`  | Définir le suffixe du journal | `""` |
+| `SetOutput(writers...)` | Définir les cibles de sortie | `os.Stdout` |
 
-# Exécuter les tests avec couverture pour toutes les balises de construction
-make coverage-all
+### Niveaux de journalisation
 
-# Test rapide à travers toutes les balises de construction
-make test-quick
+| Niveau        | Description                        |
+| ------------- | ---------------------------------- |
+| `TraceLevel`  | Le plus verbeux, pour le suivi détaillé |
+| `DebugLevel`  | Informations de débogage           |
+| `InfoLevel`   | Informations générales             |
+| `WarnLevel`   | Messages d'avertissement           |
+| `ErrorLevel`  | Messages d'erreur                  |
+| `FatalLevel`  | Erreurs fatales (appelle os.Exit(1)) |
+| `PanicLevel`  | Erreurs de panique (appelle panic()) |
 
-# Générer les rapports de couverture HTML
-make coverage-html
-```
+## 🏗️ Architecture
 
-### Résultats de couverture par balise de construction
+### Composants principaux
 
-| Balise de construction | Couverture |
-|------------------------|------------|
-| Par défaut | 92.9% |
-| Debug | 93.1% |
-| Release | 93.5% |
-| Discard | 93.1% |
-| Debug+Discard | 93.1% |
-| Release+Discard | 93.3% |
+-   **Logger** : Structure de journalisation principale avec niveaux, sorties, formateurs et profondeur d'appelant configurables
+-   **Entry** : Enregistrement de journal unique avec support complet de métadonnées
+-   **Level** : Définitions de niveaux de journalisation et fonctions utilitaires
+-   **Format** : Interface et implémentations de formatage de journalisation
 
-## ⚙️ Options de configuration
+### Optimisations de performance
 
-### Configuration du logger
+-   **Pool d'objets** : Réutilisation des objets Entry pour réduire l'allocation mémoire
+-   **Enregistrement conditionnel** : Enregistrement des champs coûteux uniquement lorsque nécessaire
+-   **Vérification rapide du niveau** : Vérification du niveau de journalisation à la couche la plus externe
+-   **Conception sans verrou** : La plupart des opérations ne nécessitent pas de verrou
 
-```go
-logger := log.New()
+## 📊 Comparaison des performances
 
-// Définir le niveau minimum de journalisation
-logger.SetLevel(log.InfoLevel)
+| Caractéristique      | lazygophers/log | zap    | logrus | journalisation standard |
+| -------------------- | --------------- | ------ | ------ | ----------------------- |
+| Performance          | Haute           | Haute  | Moyenne | Basse                   |
+| Simplicité de l'API  | Haute           | Moyenne | Haute  | Haute                   |
+| Richesse de fonctionnalités | Moyenne | Haute  | Haute  | Basse                   |
+| Flexibilité          | Moyenne         | Haute  | Haute  | Basse                   |
+| Courbe d'apprentissage | Basse          | Moyenne | Moyenne | Basse                   |
 
-// Configurer la sortie
-logger.SetOutput(os.Stdout) // Un seul writer
-logger.SetOutput(writer1, writer2, writer3) // Plusieurs writers
+## 🔗 Documentation associée
 
-// Personnaliser les messages
-logger.SetPrefixMsg("[MonApp] ")
-logger.SetSuffixMsg(" [FIN]")
-logger.AppendPrefixMsg("Extra: ")
+-   [📚 Documentation API](API.md) - Référence API complète
+-   [🤝 Guide de contribution](CONTRIBUTING.md) - Comment contribuer
+-   [📋 Journal des modifications](../CHANGELOG.md) - Historique des versions
+-   [🔒 Politique de sécurité](SECURITY.md) - Directives de sécurité
+-   [📜 Code de conduite](CODE_OF_CONDUCT.md) - Directives de communauté
 
-// Configurer le formatage
-logger.ParsingAndEscaping(false) // Désactiver les séquences d'échappement
-logger.Caller(true) // Activer les informations d'appelant
-logger.SetCallerDepth(4) // Ajuster la profondeur de pile d'appelant
-```
+## 🚀 Obtenir de l'aide
 
-## 📁 Rotation des journaux
-
-Rotation automatique des journaux avec intervalles configurables :
-
-```go
-// Rotation horaire
-writer := log.GetOutputWriterHourly("./logs/app.log")
-
-// La bibliothèque créera des fichiers comme :
-// - app-2024010115.log (2024-01-01 15:00)
-// - app-2024010116.log (2024-01-01 16:00)
-// - app-2024010117.log (2024-01-01 17:00)
-```
-
-## 🔍 Contexte et traçage
-
-Support intégré pour la journalisation sensible au contexte et le traçage distribué :
-
-```go
-// Définir l'ID de trace pour la goroutine actuelle
-log.SetTrace("trace-123-456")
-
-// Obtenir l'ID de trace
-traceID := log.GetTrace()
-
-// Journalisation sensible au contexte
-ctx := context.Background()
-ctxLogger := log.CloneToCtx()
-ctxLogger.Info(ctx, "Requête traitée", "user_id", 123)
-
-// Suivi automatique des ID de goroutine
-log.Info("Ce journal inclut automatiquement l'ID de goroutine")
-```
-
-## 📈 Performances
-
-La bibliothèque est conçue pour les applications hautes performances :
-
-- **Pooling d'objets**: Réutilise les objets d'entrée de journal pour réduire la pression GC
-- **Écriture asynchrone**: Écritures de journaux non bloquantes pour les scénarios à haut débit
-- **Filtrage de niveau**: Le filtrage précoce évite les opérations coûteuses
-- **Optimisation des balises de construction**: Optimisation au moment de la compilation pour différents environnements
-
-### Benchmarks
-
-```bash
-# Exécuter les benchmarks de performance
-make benchmark
-
-# Benchmark des différents modes de construction
-make benchmark-debug
-make benchmark-release  
-make benchmark-discard
-```
-
-## 🤝 Contribuer
-
-Nous accueillons les contributions ! Veuillez consulter notre [Guide de contribution](CONTRIBUTING.md) pour plus de détails.
-
-### Configuration de développement
-
-1. **Fork et Clone**
-   ```bash
-   git clone https://github.com/your-username/log.git
-   cd log
-   ```
-
-2. **Installer les dépendances**
-   ```bash
-   go mod tidy
-   ```
-
-3. **Exécuter les tests**
-   ```bash
-   make test-all
-   ```
-
-4. **Soumettre une Pull Request**
-   - Suivez notre [Modèle PR](../.github/pull_request_template.md)
-   - Assurez-vous que les tests passent
-   - Mettez à jour la documentation si nécessaire
-
-## 📋 Exigences
-
-- **Go**: 1.19 ou supérieur
-- **Dépendances**: 
-  - `go.uber.org/zap` (pour l'intégration Zap)
-  - `github.com/petermattis/goid` (pour l'ID de goroutine)
-  - `github.com/lestrrat-go/file-rotatelogs` (pour la rotation des journaux)
-  - `github.com/google/uuid` (pour les ID de trace)
+-   **GitHub Issues** : [Signaler des bugs ou demander des fonctionnalités](https://github.com/lazygophers/log/issues)
+-   **GoDoc** : [Documentation API](https://pkg.go.dev/github.com/lazygophers/log)
+-   **Exemples** : [Exemples d'utilisation](https://github.com/lazygophers/log/tree/main/examples)
 
 ## 📄 Licence
 
 Ce projet est sous licence MIT - voir le fichier [LICENSE](../LICENSE) pour plus de détails.
 
-## 🙏 Remerciements
+## 🤝 Contribution
 
-- [Zap](https://github.com/uber-go/zap) pour l'inspiration et le support d'intégration
-- [Logrus](https://github.com/sirupsen/logrus) pour les modèles de conception de niveaux
-- La communauté Go pour les commentaires continus et les améliorations
-
-## 📞 Support
-
-- 📖 [Documentation](../docs/)
-- 🐛 [Suivi des problèmes](https://github.com/lazygophers/log/issues)
-- 💬 [Discussions](https://github.com/lazygophers/log/discussions)
-- 📧 Email: support@lazygophers.com
+Nous accueillons les contributions ! Veuillez consulter notre [Guide de contribution](CONTRIBUTING.md) pour plus de détails.
 
 ---
 
-**Fait avec ❤️ par l'équipe LazyGophers**
+**lazygophers/log** est conçu pour être la solution de journalisation de choix pour les développeurs Go qui valorisent à la fois la performance et la simplicité. Que vous construisiez un petit utilitaire ou un système distribué à grande échelle, cette bibliothèque offre le bon équilibre entre fonctionnalités et facilité d'utilisation.
