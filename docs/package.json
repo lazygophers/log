@@ -4,7 +4,7 @@
   "description": "Documentation for LazyGophers Log",
   "scripts": {
     "dev": "rspress dev",
-    "build": "rspress build --outDir dist",
+    "build": "rspress build",
     "clean": "rm -rf doc_build/",
     "preview": "rspress preview"
   },

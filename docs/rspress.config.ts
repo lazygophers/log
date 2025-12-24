@@ -6,8 +6,12 @@ export default defineConfig({
   description: 'A comprehensive logging library for Go',
   base: '/log/',
   root: '.',
-  build: {
-    outDir: 'dist',
+  builderConfig: {
+    output: {
+      distPath: {
+        root: 'dist',
+      },
+    },
   },
   themeConfig: {
     nav: [
