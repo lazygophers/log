@@ -1,0 +1,95 @@
+# lazygophers/log
+
+> lazygophers/log is a high-performance Go logging library built on zap, providing simple API, flexible configuration, and excellent performance for Go applications of all sizes.
+
+lazygophers/log combines the performance benefits of zap with a simplified API that's easy to use. It's designed for developers who need fast, reliable logging without complex configuration.
+
+## Key Features
+
+- **High Performance**: Built on zap with object pooling and conditional field recording
+- **Simple API**: Chainable configuration and familiar logging methods
+- **Flexible Output**: Support for multiple output targets including file rotation
+- **Rich Log Levels**: Trace, Debug, Info, Warn, Error, Fatal, Panic levels
+- **Caller Information**: Optional recording of file, line, and function information
+- **Goroutine Tracking**: Built-in goroutine ID tracking for concurrent applications
+
+## Core Components
+
+- [Logger](https://github.com/lazygophers/log/blob/main/logger.go): Main logging structure with configurable options
+- [Entry](https://github.com/lazygophers/log/blob/main/logger.go): Individual log record with comprehensive field support
+- [Level](https://github.com/lazygophers/log/blob/main/level.go): Log level definitions and utility functions
+- [Format](https://github.com/lazygophers/log/blob/main/format.go): Log formatting interface and implementations
+
+## Quick Start
+
+```go
+package main
+
+import "github.com/lazygophers/log"
+
+func main() {
+    // Use default global logger
+    log.Info("Application started")
+    log.Infof("User %s logged in", "admin")
+    
+    // Custom configuration
+    logger := log.New().
+        SetLevel(log.InfoLevel).
+        EnableCaller(true).
+        SetPrefixMsg("[MyApp]")
+    
+    logger.Info("Custom logger message")
+}
+```
+
+## Configuration Options
+
+- **Log Level Control**: Set minimum log level to filter output
+- **Caller Information**: Enable/disable file and line number recording
+- **Trace Support**: Optional trace ID tracking for distributed systems
+- **Custom Formatting**: Flexible log message formatting
+- **Multiple Outputs**: Support for stdout, files, and custom writers
+- **File Rotation**: Built-in hourly log file rotation
+
+## Performance Characteristics
+
+- Low memory allocation through object pooling
+- Fast level checking to avoid unnecessary processing
+- Conditional recording of expensive fields
+- Lock-free design for concurrent operations
+- Based on high-performance zap foundation
+
+## Best Practices
+
+- Use global logger for simple applications
+- Create separate logger instances for different modules
+- Disable debug logs in production environments
+- Enable caller information only when needed
+- Use file rotation to manage log file sizes
+- Set appropriate log levels to balance performance and debugging
+
+## Documentation Files
+
+- [README.md](https://github.com/lazygophers/log/blob/main/README.md): Complete usage guide and examples
+- [logger.go](https://github.com/lazygophers/log/blob/main/logger.go): Core Logger implementation
+- [level.go](https://github.com/lazygophers/log/blob/main/level.go): Log level definitions and utilities
+- [format.go](https://github.com/lazygophers/log/blob/main/format.go): Formatting interface and implementations
+- [go.mod](https://github.com/lazygophers/log/blob/main/go.mod): Dependencies and module configuration
+
+## Comparison with Other Libraries
+
+| Feature | lazygophers/log | zap | logrus | standard log |
+|---------|----------------|-----|--------|--------------|
+| Performance | High | High | Medium | Low |
+| API Simplicity | High | Medium | High | High |
+| Feature Richness | Medium | High | High | Low |
+| Flexibility | Medium | High | High | Low |
+| Learning Curve | Low | Medium | Medium | Low |
+
+## Getting Help
+
+- [GitHub Repository](https://github.com/lazygophers/log): Source code and issue tracking
+- [GoDoc](https://pkg.go.dev/github.com/lazygophers/log): API documentation
+- [Examples](https://github.com/lazygophers/log/tree/main/examples): Usage examples and patterns
+
+lazygophers/log is designed to be the go-to logging solution for Go developers who value both performance and simplicity. Whether you're building a small utility or a large-scale distributed system, this library provides the right balance of features and ease of use.
