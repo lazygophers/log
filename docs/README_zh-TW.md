@@ -168,7 +168,7 @@ func main() {
 
 -   [📚 API 文檔](API.md) - 完整的 API 參考
 -   [🤝 貢獻指南](CONTRIBUTING.md) - 如何貢獻
--   [📋 變更日誌](../CHANGELOG.md) - 版本歷史
+-   [📋 變更日誌](CHANGELOG.md) - 版本歷史
 -   [🔒 安全政策](SECURITY.md) - 安全指南
 -   [📜 行為準則](CODE_OF_CONDUCT.md) - 社區準則
 
@@ -180,7 +180,7 @@ func main() {
 
 ## 📄 許可證
 
-本專案採用 MIT 許可證 - 詳見 [LICENSE](../LICENSE) 文件。
+本專案採用 MIT 許可證 - 詳見 [LICENSE](LICENSE) 文件。
 
 ## 🤝 貢獻
 

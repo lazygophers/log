@@ -1,0 +1,15 @@
+{
+  "name": "lazygophers-log-docs",
+  "version": "1.0.0",
+  "description": "Documentation for LazyGophers Log",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build --outDir dist",
+    "clean": "rm -rf doc_build/",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "rspress": "^1.0.0"
+  },
+  "type": "module"
+}

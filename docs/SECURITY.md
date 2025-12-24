@@ -299,7 +299,7 @@ Proof of Concept:
 -   [贡献指南](CONTRIBUTING.md) - 贡献者的安全考虑
 -   [行为准则](CODE_OF_CONDUCT.md) - 社区安全与安全
 -   [API 文档](API.md) - 安全使用模式和示例
--   [构建配置指南](../README.md#build-tags) - 构建标签的安全影响
+-   [构建配置指南](README.md#build-tags) - 构建标签的安全影响
 
 ### 外部安全标准与框架
 

@@ -168,7 +168,7 @@ func main() {
 
 -   [📚 Documentation API](API.md) - Référence API complète
 -   [🤝 Guide de contribution](CONTRIBUTING.md) - Comment contribuer
--   [📋 Journal des modifications](../CHANGELOG.md) - Historique des versions
+-   [📋 Journal des modifications](CHANGELOG.md) - Historique des versions
 -   [🔒 Politique de sécurité](SECURITY.md) - Directives de sécurité
 -   [📜 Code de conduite](CODE_OF_CONDUCT.md) - Directives de communauté
 
@@ -180,7 +180,7 @@ func main() {
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](../LICENSE) pour plus de détails.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ## 🤝 Contribution
 
