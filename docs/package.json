@@ -11,5 +11,8 @@
   "dependencies": {
     "rspress": "^1.47.0"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "tailwindcss": "^4.1.18"
+  }
 }
