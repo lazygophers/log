@@ -19,40 +19,46 @@ Simple API, excellent performance, and flexible configuration
   </div>
   
   <div style="margin: 2rem 0">
-    <a href="#quick-start" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">快速开始</a>
-    <a href="/API" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">API 参考</a>
+    <a href="#quick-start" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">Getting Started</a>
+    <a href="/API" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">API Reference</a>
   </div>
 </div>
 
-## ✨ 核心特性
+## ✨ Core Features
 
-### 高性能
-基于 zap 构建，采用对象池和条件字段记录技术，确保出色的性能表现
+### High Performance
 
-### 丰富的日志级别
-支持 Trace、Debug、Info、Warn、Error、Fatal、Panic 七个日志级别
+Built on zap, using object pooling and conditional field recording technology to ensure excellent performance
 
-### 灵活的配置
-支持日志级别控制、调用者信息记录、跟踪信息、自定义前缀后缀等
+### Rich Log Levels
 
-### 文件轮换
-内置日志文件轮换功能，支持按小时自动轮换日志文件
+Supports seven log levels: Trace, Debug, Info, Warn, Error, Fatal, Panic
 
-### Zap 兼容性
-与 zap WriteSyncer 无缝集成，支持自定义输出目标
+### Flexible Configuration
 
-### 简洁的 API
-API 设计类似于标准日志库，易于使用和迁移
+Supports log level control, caller information recording, trace information, custom prefix and suffix, etc.
 
-## 🚀 快速开始
+### File Rotation
 
-### 安装
+Built-in log file rotation function, supporting automatic hourly log file rotation
+
+### Zap Compatibility
+
+Seamlessly integrates with zap WriteSyncer, supporting custom output targets
+
+### Simple API
+
+API designed similar to the standard log library, easy to use and migrate
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 go get github.com/lazygophers/log
 ```
 
-### 基本使用
+### Basic Usage
 
 ```go
 package main
@@ -62,53 +68,53 @@ import (
 )
 
 func main() {
-    // 使用默认全局日志器
-    log.Debug("Debug 消息")
-    log.Info("Info 消息")
-    log.Warn("Warning 消息")
-    log.Error("Error 消息")
+    // Use default global logger
+    log.Debug("Debug message")
+    log.Info("Info message")
+    log.Warn("Warning message")
+    log.Error("Error message")
 
-    // 使用格式化输出
-    log.Infof("用户 %s 登录成功", "admin")
+    // Use formatted output
+    log.Infof("User %s logged in successfully", "admin")
 
-    // 自定义配置
+    // Custom configuration
     customLogger := log.New().
         SetLevel(log.InfoLevel).
         EnableCaller(false).
         SetPrefixMsg("[MyApp]")
 
-    customLogger.Info("这是来自自定义日志器的消息")
+    customLogger.Info("This is a message from a custom logger")
 }
 ```
 
-## 📚 文档导航
+## 📚 Documentation Navigation
 
-| 文档 | 描述 |
-|------|------|
-| [API 参考](/API) | 详细的 API 文档 |
-| [版本历史](/CHANGELOG) | 查看所有版本更新记录 |
-| [贡献指南](/CONTRIBUTING) | 如何为项目贡献代码 |
-| [行为准则](/CODE_OF_CONDUCT) | 社区行为规范 |
-| [安全政策](/SECURITY) | 安全漏洞报告流程 |
+| Document                            | Description                              |
+| ----------------------------------- | ---------------------------------------- |
+| [API Reference](/API)               | Detailed API documentation               |
+| [Changelog](/CHANGELOG)             | View all version update records          |
+| [Contributing Guide](/CONTRIBUTING) | How to contribute code to the project    |
+| [Code of Conduct](/CODE_OF_CONDUCT) | Community code of conduct                |
+| [Security Policy](/SECURITY)        | Security vulnerability reporting process |
 
-## 🌍 多语言文档
+## 🌍 Multilingual Documentation
 
-- [🇺🇸 English](/)
-- [🇨🇳 简体中文](/zh-CN/)
-- [🇹🇼 繁體中文](/zh-TW/)
+-   [🇺🇸 English](/)
+-   [🇨🇳 Simplified Chinese](/zh-CN/)
+-   [🇹🇼 Traditional Chinese](/zh-TW/)
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](/LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
 
-## 🤝 贡献
+## 🤝 Contributing
 
-我们欢迎贡献！请查看 [贡献指南](/CONTRIBUTING) 了解详情。
+We welcome contributions! Please see the [Contributing Guide](/CONTRIBUTING) for details.
 
 ---
 
 <div align="center">
-  <p><strong>LazyGophers Log</strong> 旨在成为 Go 开发者的首选日志解决方案，既注重性能又注重易用性。无论您是构建小型工具还是大型分布式系统，这个库都能提供恰到好处的功能和易用性平衡。</p>
+  <p><strong>LazyGophers Log</strong> aims to be the preferred logging solution for Go developers, focusing on both performance and usability. Whether you're building small tools or large distributed systems, this library provides the perfect balance of functionality and ease of use.</p>
   <a href="https://github.com/lazygophers/log" style="display: inline-block; padding: 12px 24px; background-color: #24292e; color: white; text-decoration: none; border-radius: 6px; margin: 1rem 0">
     <span style="margin-right: 8px">⭐</span>Star on GitHub
   </a>
