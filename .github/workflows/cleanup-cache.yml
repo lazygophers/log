@@ -1,0 +1,24 @@
+name: Cleanup Cache
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天 0 点 0 分 0 秒执行
+  workflow_dispatch:  # 允许手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: lazy  # 使用自托管运行器
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run cache cleanup script
+        run: |
+          chmod +x .github/scripts/cleanup-cache.sh
+          .github/scripts/cleanup-cache.sh -r 3 -v
+        env:
+          RETENTION_DAYS: 3
+          VERBOSE: "true"
