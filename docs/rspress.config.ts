@@ -9,7 +9,7 @@ export default defineConfig({
   builderConfig: {
     output: {
       distPath: {
-        root: 'dist',
+        root: 'doc_build',
       },
     },
   },
