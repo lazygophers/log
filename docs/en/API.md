@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 # 📚 API Documentation
 
 ## 概述

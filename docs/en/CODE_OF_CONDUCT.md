@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 # 📋 Code of Conduct
 
 ## Our Pledge

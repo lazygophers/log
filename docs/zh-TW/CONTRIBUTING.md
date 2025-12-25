@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 # 🤝 为 LazyGophers Log 贡献代码
 
 我们非常欢迎您的贡献！我们希望让为 LazyGophers Log 贡献代码变得尽可能简单和透明，无论是：

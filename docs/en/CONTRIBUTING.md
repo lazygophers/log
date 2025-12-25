@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 # 🤝 Contributing to LazyGophers Log
 
 We welcome your contributions! We want to make contributing to LazyGophers Log as simple and transparent as possible, whether it's:

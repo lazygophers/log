@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)

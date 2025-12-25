@@ -1,3 +1,6 @@
+---
+pageType: custom
+---
 import { HomeHero } from '@theme';
 
 <HomeHero

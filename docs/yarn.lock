@@ -2327,7 +2327,7 @@ rspack-plugin-virtual-module@0.1.13:
   dependencies:
     fs-extra "^11.1.1"
 
-rspress@^1.0.0:
+rspress@^1.47.0:
   version "1.47.0"
   resolved "https://registry.npmmirror.com/rspress/-/rspress-1.47.0.tgz#7b41de19be2c99b9e1e0a6901cbca1830ae9b351"
   integrity sha512-/zvp/etlIsxahbege6mP4vDC49uliUSCZdjU8/9XHYas3Bw6ySAL46lhARocUAbztDlzgf3LakT/kB3g83rEEA==

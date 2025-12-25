@@ -1,3 +1,7 @@
+---
+pageType: custom
+---
+
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
@@ -116,27 +120,27 @@ func main() {
 
 ### Configuración del Logger
 
-| Método                 | Descripción                  | Valor por defecto |
-| ---------------------- | ---------------------------- | ---------------- |
-| `SetLevel(level)`      | Establecer nivel mínimo de registro | `DebugLevel` |
-| `EnableCaller(enable)` | Habilitar/deshabilitar información del llamador | `false` |
-| `EnableTrace(enable)`  | Habilitar/deshabilitar información de traza | `false` |
-| `SetCallerDepth(depth)` | Establecer profundidad del llamador | `2` |
-| `SetPrefixMsg(prefix)` | Establecer prefijo de registro | `""` |
-| `SetSuffixMsg(suffix)` | Establecer sufijo de registro | `""` |
-| `SetOutput(writers...)` | Establecer destinos de salida | `os.Stdout` |
+| Método                  | Descripción                                     | Valor por defecto |
+| ----------------------- | ----------------------------------------------- | ----------------- |
+| `SetLevel(level)`       | Establecer nivel mínimo de registro             | `DebugLevel`      |
+| `EnableCaller(enable)`  | Habilitar/deshabilitar información del llamador | `false`           |
+| `EnableTrace(enable)`   | Habilitar/deshabilitar información de traza     | `false`           |
+| `SetCallerDepth(depth)` | Establecer profundidad del llamador             | `2`               |
+| `SetPrefixMsg(prefix)`  | Establecer prefijo de registro                  | `""`              |
+| `SetSuffixMsg(suffix)`  | Establecer sufijo de registro                   | `""`              |
+| `SetOutput(writers...)` | Establecer destinos de salida                   | `os.Stdout`       |
 
 ### Niveles de registro
 
-| Nivel        | Descripción                        |
-| ------------- | ---------------------------------- |
-| `TraceLevel`  | El más detallado, para traza detallada |
-| `DebugLevel`  | Información de depuración          |
-| `InfoLevel`   | Información general                |
-| `WarnLevel`   | Mensajes de advertencia            |
-| `ErrorLevel`  | Mensajes de error                  |
-| `FatalLevel`  | Errores fatales (llama a os.Exit(1)) |
-| `PanicLevel`  | Errores de pánico (llama a panic()) |
+| Nivel        | Descripción                            |
+| ------------ | -------------------------------------- |
+| `TraceLevel` | El más detallado, para traza detallada |
+| `DebugLevel` | Información de depuración              |
+| `InfoLevel`  | Información general                    |
+| `WarnLevel`  | Mensajes de advertencia                |
+| `ErrorLevel` | Mensajes de error                      |
+| `FatalLevel` | Errores fatales (llama a os.Exit(1))   |
+| `PanicLevel` | Errores de pánico (llama a panic())    |
 
 ## 🏗️ Arquitectura
 
@@ -156,13 +160,13 @@ func main() {
 
 ## 📊 Comparación de rendimiento
 
-| Característica         | lazygophers/log | zap    | logrus | registro estándar |
-| ---------------------- | --------------- | ------ | ------ | ---------------- |
-| Rendimiento            | Alto            | Alto   | Medio  | Bajo             |
-| Simplicidad de API     | Alto            | Medio  | Alto   | Alto             |
-| Riqueza de funciones   | Medio           | Alto   | Alto   | Bajo             |
-| Flexibilidad           | Medio           | Alto   | Alto   | Bajo             |
-| Curva de aprendizaje   | Baja            | Medio  | Medio  | Baja             |
+| Característica       | lazygophers/log | zap   | logrus | registro estándar |
+| -------------------- | --------------- | ----- | ------ | ----------------- |
+| Rendimiento          | Alto            | Alto  | Medio  | Bajo              |
+| Simplicidad de API   | Alto            | Medio | Alto   | Alto              |
+| Riqueza de funciones | Medio           | Alto  | Alto   | Bajo              |
+| Flexibilidad         | Medio           | Alto  | Alto   | Bajo              |
+| Curva de aprendizaje | Baja            | Medio | Medio  | Baja              |
 
 ## 🔗 Documentación relacionada
 
