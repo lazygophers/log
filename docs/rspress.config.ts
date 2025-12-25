@@ -124,6 +124,13 @@ export default defineConfig({
       description: '一個全面的 Go 語言日誌庫',
       path: '/zh-TW/',
     },
+    {
+      lang: 'fr',
+      label: 'Français',
+      title: 'Documentation LazyGophers Log',
+      description: 'Une bibliothèque de journalisation complète pour Go',
+      path: '/fr/',
+    },
   ],
   themeConfig: {
     enableContentAnimation: true,

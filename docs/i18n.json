@@ -2,166 +2,199 @@
   "nav.home": {
     "en": "Home",
     "zh-CN": "首页",
-    "zh-TW": "首頁"
+    "zh-TW": "首頁",
+    "fr": "Accueil"
   },
   "nav.api": {
     "en": "API Reference",
     "zh-CN": "API 参考",
-    "zh-TW": "API 參考"
+    "zh-TW": "API 參考",
+    "fr": "Référence API"
   },
   "nav.changelog": {
     "en": "Changelog",
     "zh-CN": "更新日志",
-    "zh-TW": "更新日誌"
+    "zh-TW": "更新日誌",
+    "fr": "Journal des modifications"
   },
   "nav.contributing": {
     "en": "Contributing",
     "zh-CN": "贡献指南",
-    "zh-TW": "貢獻指南"
+    "zh-TW": "貢獻指南",
+    "fr": "Contribution"
   },
   "nav.community": {
     "en": "Community",
     "zh-CN": "社区",
-    "zh-TW": "社群"
+    "zh-TW": "社群",
+    "fr": "Communauté"
   },
   "nav.codeOfConduct": {
     "en": "Code of Conduct",
     "zh-CN": "行为准则",
-    "zh-TW": "行為準則"
+    "zh-TW": "行為準則",
+    "fr": "Code de conduite"
   },
   "nav.securityPolicy": {
     "en": "Security Policy",
     "zh-CN": "安全策略",
-    "zh-TW": "安全策略"
+    "zh-TW": "安全策略",
+    "fr": "Politique de sécurité"
   },
   "hero.name": {
     "en": "LazyGophers Log",
     "zh-CN": "LazyGophers 日志库",
-    "zh-TW": "LazyGophers 日誌庫"
+    "zh-TW": "LazyGophers 日誌庫",
+    "fr": "LazyGophers Log"
   },
   "hero.text": {
     "en": "A High-Performance Logging Library for Go",
     "zh-CN": "一个高性能的 Go 语言日志库",
-    "zh-TW": "一個高性能的 Go 語言日誌庫"
+    "zh-TW": "一個高性能的 Go 語言日誌庫",
+    "fr": "Une bibliothèque de journalisation haute performance pour Go"
   },
   "hero.tagline": {
     "en": "Simple API, excellent performance, and flexible configuration",
     "zh-CN": "简洁的 API、卓越的性能和灵活的配置",
-    "zh-TW": "簡潔的 API、卓越的性能和靈活的配置"
+    "zh-TW": "簡潔的 API、卓越的性能和靈活的配置",
+    "fr": "API simple, performance excellente et configuration flexible"
   },
   "hero.gettingStarted": {
     "en": "Getting Started",
     "zh-CN": "快速开始",
-    "zh-TW": "快速開始"
+    "zh-TW": "快速開始",
+    "fr": "Commencer"
   },
   "hero.apiReference": {
     "en": "API Reference",
     "zh-CN": "API 参考",
-    "zh-TW": "API 參考"
+    "zh-TW": "API 參考",
+    "fr": "Référence API"
   },
   "feature.highPerformance": {
     "en": "High Performance",
     "zh-CN": "高性能",
-    "zh-TW": "高性能"
+    "zh-TW": "高性能",
+    "fr": "Haute performance"
   },
   "feature.highPerformance.desc": {
     "en": "Built on zap, using object pooling and conditional field recording technology to ensure excellent performance",
     "zh-CN": "基于 zap 构建，采用对象池和条件字段记录技术，确保出色的性能表现",
-    "zh-TW": "基於 zap 構建，採用物件池和條件欄位記錄技術，確保出色的性能表現"
+    "zh-TW": "基於 zap 構建，採用物件池和條件欄位記錄技術，確保出色的性能表現",
+    "fr": "Construit sur zap, utilisant la mise en pool d'objets et l'enregistrement conditionnel de champs pour assurer une performance excellente"
   },
   "feature.richLevels": {
     "en": "Rich Log Levels",
     "zh-CN": "丰富的日志级别",
-    "zh-TW": "豐富的日誌級別"
+    "zh-TW": "豐富的日誌級別",
+    "fr": "Niveaux de journalisation riches"
   },
   "feature.richLevels.desc": {
     "en": "Supports seven log levels: Trace, Debug, Info, Warn, Error, Fatal, Panic",
     "zh-CN": "支持 Trace、Debug、Info、Warn、Error、Fatal、Panic 七个日志级别",
-    "zh-TW": "支援 Trace、Debug、Info、Warn、Error、Fatal、Panic 七個日誌級別"
+    "zh-TW": "支援 Trace、Debug、Info、Warn、Error、Fatal、Panic 七個日誌級別",
+    "fr": "Supporte sept niveaux de journalisation : Trace, Debug, Info, Warn, Error, Fatal, Panic"
   },
   "feature.flexibleConfig": {
     "en": "Flexible Configuration",
     "zh-CN": "灵活的配置",
-    "zh-TW": "靈活的配置"
+    "zh-TW": "靈活的配置",
+    "fr": "Configuration flexible"
   },
   "feature.flexibleConfig.desc": {
     "en": "Supports log level control, caller information recording, trace information, custom prefixes and suffixes, etc.",
     "zh-CN": "支持日志级别控制、调用者信息记录、跟踪信息、自定义前缀后缀等",
-    "zh-TW": "支援日誌級別控制、呼叫者資訊記錄、跟蹤資訊、自定義前綴後綴等"
+    "zh-TW": "支援日誌級別控制、呼叫者資訊記錄、跟蹤資訊、自定義前綴後綴等",
+    "fr": "Supporte le contrôle du niveau de journalisation, l'enregistrement des informations de l'appelant, les informations de trace, les préfixes et suffixes personnalisés, etc."
   },
   "feature.fileRotation": {
     "en": "File Rotation",
     "zh-CN": "文件轮换",
-    "zh-TW": "文件輪換"
+    "zh-TW": "文件輪換",
+    "fr": "Rotation des fichiers"
   },
   "feature.fileRotation.desc": {
     "en": "Built-in log file rotation function, supporting automatic hourly log file rotation",
     "zh-CN": "内置日志文件轮换功能，支持按小时自动轮换日志文件",
-    "zh-TW": "內置日誌文件輪換功能，支援按小時自動輪換日誌文件"
+    "zh-TW": "內置日誌文件輪換功能，支援按小時自動輪換日誌文件",
+    "fr": "Fonction de rotation des fichiers de journal intégrée, supportant la rotation automatique horaire des fichiers de journal"
   },
   "feature.zapCompatibility": {
     "en": "Zap Compatibility",
     "zh-CN": "Zap 兼容性",
-    "zh-TW": "Zap 兼容性"
+    "zh-TW": "Zap 兼容性",
+    "fr": "Compatibilité Zap"
   },
   "feature.zapCompatibility.desc": {
     "en": "Seamless integration with zap WriteSyncer, supporting custom output targets",
     "zh-CN": "与 zap WriteSyncer 无缝集成，支持自定义输出目标",
-    "zh-TW": "與 zap WriteSyncer 無縫集成，支援自定義輸出目標"
+    "zh-TW": "與 zap WriteSyncer 無縫集成，支援自定義輸出目標",
+    "fr": "Intégration transparente avec zap WriteSyncer, supportant les cibles de sortie personnalisées"
   },
   "feature.simpleAPI": {
     "en": "Simple API",
     "zh-CN": "简洁的 API",
-    "zh-TW": "簡潔的 API"
+    "zh-TW": "簡潔的 API",
+    "fr": "API simple"
   },
   "feature.simpleAPI.desc": {
     "en": "API designed similar to the standard log library, easy to use and migrate",
     "zh-CN": "API 设计类似于标准日志库，易于使用和迁移",
-    "zh-TW": "API 設計類似於標準日誌庫，易於使用和遷移"
+    "zh-TW": "API 設計類似於標準日誌庫，易於使用和遷移",
+    "fr": "API conçue similaire à la bibliothèque de journalisation standard, facile à utiliser et à migrer"
   },
   "quickStart.title": {
     "en": "Quick Start",
     "zh-CN": "快速开始",
-    "zh-TW": "快速開始"
+    "zh-TW": "快速開始",
+    "fr": "Démarrage rapide"
   },
   "quickStart.install": {
     "en": "Install",
     "zh-CN": "安装",
-    "zh-TW": "安裝"
+    "zh-TW": "安裝",
+    "fr": "Installation"
   },
   "quickStart.usage": {
     "en": "Basic Usage",
     "zh-CN": "基本使用",
-    "zh-TW": "基本使用"
+    "zh-TW": "基本使用",
+    "fr": "Utilisation de base"
   },
   "quickStart.configuration": {
     "en": "Configuration",
     "zh-CN": "配置",
-    "zh-TW": "配置"
+    "zh-TW": "配置",
+    "fr": "Configuration"
   },
   "docs.navigation": {
     "en": "Documentation Navigation",
     "zh-CN": "文档导航",
-    "zh-TW": "文檔導航"
+    "zh-TW": "文檔導航",
+    "fr": "Navigation de la documentation"
   },
   "docs.guides": {
     "en": "Guides",
     "zh-CN": "指南",
-    "zh-TW": "指南"
+    "zh-TW": "指南",
+    "fr": "Guides"
   },
   "docs.references": {
     "en": "References",
     "zh-CN": "参考",
-    "zh-TW": "參考"
+    "zh-TW": "參考",
+    "fr": "Références"
   },
   "docs.community": {
     "en": "Community",
     "zh-CN": "社区",
-    "zh-TW": "社群"
+    "zh-TW": "社群",
+    "fr": "Communauté"
   },
   "outlineTitle": {
     "en": "ON THIS PAGE",
     "zh-CN": "大纲",
-    "zh-TW": "大綱"
+    "zh-TW": "大綱",
+    "fr": "SUR CETTE PAGE"
   }
 }
