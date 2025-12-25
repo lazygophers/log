@@ -106,18 +106,21 @@ export default defineConfig({
       label: 'English',
       title: 'LazyGophers Log Documentation',
       description: 'A comprehensive logging library for Go',
+      path: '/',
     },
     {
       lang: 'zh-CN',
       label: '简体中文',
       title: 'LazyGophers Log 文档',
       description: '一个全面的 Go 语言日志库',
+      path: '/zh-CN/',
     },
     {
       lang: 'zh-TW',
       label: '繁體中文',
       title: 'LazyGophers Log 文檔',
       description: '一個全面的 Go 語言日誌庫',
+      path: '/zh-TW/',
     },
   ],
   themeConfig: {
