@@ -53,8 +53,38 @@ runs:
         echo "is-self-hosted=$IS_SELF_HOSTED" >> $GITHUB_OUTPUT
         echo "Runner type: $([ "$IS_SELF_HOSTED" = "true" ] && echo "self-hosted" || echo "github-hosted")"
 
+    - name: Validate and normalize cache path
+      id: validate-path
+      shell: bash
+      run: |
+        # 验证并规范化缓存路径，防止路径遍历攻击
+        INPUT_PATH="${{ inputs.path }}"
+        
+        # 获取绝对路径
+        ABSOLUTE_PATH=$(realpath -m "${INPUT_PATH}" 2>/dev/null || echo "${INPUT_PATH}")
+        
+        # 检查路径是否包含可疑字符或模式
+        if [[ "${INPUT_PATH}" == *".."* ]] || [[ "${INPUT_PATH}" == *"~"* ]]; then
+          echo "Error: Path contains invalid characters or patterns"
+          echo "valid-path=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        # 确保路径在允许的范围内（工作目录或用户主目录）
+        WORKSPACE_DIR="${GITHUB_WORKSPACE}"
+        HOME_DIR="${HOME}"
+        
+        if [[ "${ABSOLUTE_PATH}" != "${WORKSPACE_DIR}"* ]] && [[ "${ABSOLUTE_PATH}" != "${HOME_DIR}"* ]]; then
+          echo "Error: Path must be within workspace or home directory"
+          echo "valid-path=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        echo "valid-path=true" >> $GITHUB_OUTPUT
+        echo "normalized-path=${ABSOLUTE_PATH}" >> $GITHUB_OUTPUT
+
     - name: Setup local cache directory
-      if: steps.detect-runner.outputs.is-self-hosted == 'true'
+      if: steps.validate-path.outputs.valid-path == 'true' && steps.detect-runner.outputs.is-self-hosted == 'true'
       shell: bash
       run: |
         mkdir -p "${{ inputs.cache-dir }}"
@@ -62,6 +92,7 @@ runs:
 
     - name: Generate cache paths
       id: cache-paths
+      if: steps.validate-path.outputs.valid-path == 'true'
       shell: bash
       run: |
         # 为本地缓存生成路径
@@ -72,7 +103,7 @@ runs:
         echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT
 
     - name: Check local cache
-      if: steps.detect-runner.outputs.is-self-hosted == 'true'
+      if: steps.validate-path.outputs.valid-path == 'true' && steps.detect-runner.outputs.is-self-hosted == 'true'
       id: local-cache-check
       shell: bash
       run: |
@@ -83,12 +114,12 @@ runs:
           echo "Local cache found: ${CACHE_PATH}.tar.gz"
 
           # 检查目标目录是否已存在且有内容
-          if [[ -d "${{ inputs.path }}" ]] && [[ "$(ls -A "${{ inputs.path }}" 2>/dev/null)" ]]; then
+          if [[ -d "${{ steps.validate-path.outputs.normalized-path }}" ]] && [[ "$(ls -A "${{ steps.validate-path.outputs.normalized-path }}" 2>/dev/null)" ]]; then
             echo "Cache directory already exists and has content, skipping extraction"
             CACHE_HIT="true"
           else
             echo "Extracting cache..."
-            TARGET_DIR="$(dirname "${{ inputs.path }}")"
+            TARGET_DIR="$(dirname "${{ steps.validate-path.outputs.normalized-path }}")"
             cd "$TARGET_DIR"
 
             # 解压缓存
@@ -98,7 +129,7 @@ runs:
             else
               echo "Cache extraction failed, but cache file exists"
               # 即使解压失败，如果目标目录存在，也认为是缓存命中
-              if [[ -d "$(basename "${{ inputs.path }}")" ]]; then
+              if [[ -d "$(basename "${{ steps.validate-path.outputs.normalized-path }}")" ]]; then
                 echo "Target directory exists, treating as cache hit"
                 CACHE_HIT="true"
               else
@@ -113,11 +144,11 @@ runs:
         echo "cache-hit=${CACHE_HIT}" >> $GITHUB_OUTPUT
 
     - name: GitHub Actions Cache (for hosted runners)
-      if: steps.detect-runner.outputs.is-self-hosted == 'false'
+      if: steps.validate-path.outputs.valid-path == 'true' && steps.detect-runner.outputs.is-self-hosted == 'false'
       id: github-cache
       uses: actions/cache@v4
       with:
-        path: ${{ inputs.path }}
+        path: ${{ steps.validate-path.outputs.normalized-path }}
         key: ${{ inputs.key }}
         restore-keys: ${{ inputs.restore-keys }}
 
@@ -135,18 +166,18 @@ runs:
         echo "Final cache result: ${CACHE_HIT}"
 
     - name: Save local cache (post-job)
-      if: steps.detect-runner.outputs.is-self-hosted == 'true' && always()
+      if: steps.validate-path.outputs.valid-path == 'true' && steps.detect-runner.outputs.is-self-hosted == 'true' && always()
       shell: bash
       run: |
         # 这个步骤在 post-job 中运行，保存缓存
         CACHE_PATH="${{ steps.cache-paths.outputs.local-cache-path }}"
 
-        if [[ -d "${{ inputs.path }}" ]] && [[ "${{ steps.local-cache-check.outputs.cache-hit }}" != "true" ]]; then
+        if [[ -d "${{ steps.validate-path.outputs.normalized-path }}" ]] && [[ "${{ steps.local-cache-check.outputs.cache-hit }}" != "true" ]]; then
           echo "Saving local cache..."
           mkdir -p "$(dirname "${CACHE_PATH}")"
 
-          cd "$(dirname "${{ inputs.path }}")"
-          tar -czf "${CACHE_PATH}.tar.gz" "$(basename "${{ inputs.path }}")"
+          cd "$(dirname "${{ steps.validate-path.outputs.normalized-path }}")"
+          tar -czf "${CACHE_PATH}.tar.gz" "$(basename "${{ steps.validate-path.outputs.normalized-path }}")"
 
           if [[ $? -eq 0 ]]; then
             echo "Cache saved successfully: ${CACHE_PATH}.tar.gz"
