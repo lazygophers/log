@@ -1,6 +1,7 @@
 ---
 titleSuffix: " | LazyGophers Log"
 ---
+
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
@@ -8,38 +9,38 @@ titleSuffix: " | LazyGophers Log"
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance, flexible Go logging library built on zap, providing rich features and a simple API.
+Une bibliothèque de journalisation Go performante et flexible, construite sur zap, offrant des fonctionnalités riches et une API simple.
 
-## 📖 Documentation Languages
+## 📖 Langues de documentation
 
 -   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](../zh-CN/README.md)
--   [🇹🇼 繁體中文](../zh-TW/README.md)
--   [🇫🇷 Français](../README_fr.md)
--   [🇷🇺 Русский](../README_ru.md)
--   [🇪🇸 Español](../README_es.md)
--   [🇸🇦 العربية](../README_ar.md)
+-   [🇨🇳 简体中文](README_zh-CN.md)
+-   [🇹🇼 繁體中文](README_zh-TW.md)
+-   [🇫🇷 Français](README_fr.md)
+-   [🇷🇺 Русский](README_ru.md)
+-   [🇪🇸 Español](README_es.md)
+-   [🇸🇦 العربية](README_ar.md)
 
-## 🚀 Online Documentation
+## 🚀 Documentation en ligne
 
-Visit our [GitHub Pages documentation](https://lazygophers.github.io/log/) for a better reading experience.
+Visitez notre [documentation GitHub Pages](https://lazygophers.github.io/log/) pour une meilleure expérience de lecture.
 
-## ✨ Features
+## ✨ Fonctionnalités
 
--   **🚀 High Performance**: Built on zap with object pooling and conditional field recording
--   **📊 Rich Log Levels**: Trace, Debug, Info, Warn, Error, Fatal, Panic levels
--   **⚙️ Flexible Configuration**:
-    -   Log level control
-    -   Caller information recording
-    -   Trace information (including goroutine ID)
-    -   Custom log prefixes and suffixes
-    -   Custom output targets (console, files, etc.)
-    -   Log formatting options
--   **🔄 File Rotation**: Hourly log file rotation support
--   **🔌 Zap Compatibility**: Seamless integration with zap WriteSyncer
--   **🎯 Simple API**: Clean API similar to standard log library, easy to use
+-   **🚀 Haute performance** : Construit sur zap avec réutilisation d'objets Entry via un pool, réduisant l'allocation mémoire
+-   **📊 Niveaux de journalisation riches** : Niveaux Trace, Debug, Info, Warn, Error, Fatal, Panic
+-   **⚙️ Configuration flexible** :
+    -   Contrôle du niveau de journalisation
+    -   Enregistrement des informations de l'appelant
+    -   Informations de trace (y compris l'ID de goroutine)
+    -   Préfixes et suffixes de journalisation personnalisés
+    -   Cibles de sortie personnalisées (console, fichiers, etc.)
+    -   Options de formatage de journalisation
+-   **🔄 Rotation de fichiers** : Support de la rotation horaire des fichiers journaux
+-   **🔌 Compatibilité Zap** : Intégration transparente avec zap WriteSyncer
+-   **🎯 API simple** : API claire similaire à la bibliothèque de journalisation standard, facile à utiliser
 
-## 🚀 Quick Start
+## 🚀 Démarrage rapide
 
 ### Installation
 
@@ -47,7 +48,7 @@ Visit our [GitHub Pages documentation](https://lazygophers.github.io/log/) for a
 go get github.com/lazygophers/log
 ```
 
-### Basic Usage
+### Utilisation de base
 
 ```go
 package main
@@ -57,28 +58,28 @@ import (
 )
 
 func main() {
-    // Use default global logger
-    log.Debug("Debug message")
-    log.Info("Info message")
-    log.Warn("Warning message")
-    log.Error("Error message")
+    // Utiliser le logger global par défaut
+    log.Debug("Message de débogage")
+    log.Info("Message d'information")
+    log.Warn("Message d'avertissement")
+    log.Error("Message d'erreur")
 
-    // Use formatted output
-    log.Infof("User %s logged in successfully", "admin")
+    // Utiliser la sortie formatée
+    log.Infof("L'utilisateur %s s'est connecté avec succès", "admin")
 
-    // Custom configuration
+    // Configuration personnalisée
     customLogger := log.New().
         SetLevel(log.InfoLevel).
         EnableCaller(false).
         SetPrefixMsg("[MyApp]")
 
-    customLogger.Info("This is a log from custom logger")
+    customLogger.Info("Ceci est un journal du logger personnalisé")
 }
 ```
 
-## 📚 Advanced Usage
+## 📚 Utilisation avancée
 
-### Custom Logger with File Output
+### Logger personnalisé avec sortie fichier
 
 ```go
 package main
@@ -89,19 +90,19 @@ import (
 )
 
 func main() {
-    // Create logger with file output
+    // Créer un logger avec sortie fichier
     logger := log.New().
         SetLevel(log.DebugLevel).
         EnableCaller(true).
         EnableTrace(true).
         SetOutput(os.Stdout, log.GetOutputWriterHourly("/var/log/myapp.log"))
 
-    logger.Debug("Debug message with caller info")
-    logger.Info("Info message with trace info")
+    logger.Debug("Message de débogage avec informations de l'appelant")
+    logger.Info("Message d'information avec informations de trace")
 }
 ```
 
-### Log Level Control
+### Contrôle du niveau de journalisation
 
 ```go
 package main
@@ -111,100 +112,88 @@ import "github.com/lazygophers/log"
 func main() {
     logger := log.New().SetLevel(log.WarnLevel)
 
-    // Only warn and above will be logged
-    logger.Debug("This won't be logged")  // Ignored
-    logger.Info("This won't be logged")   // Ignored
-    logger.Warn("This will be logged")    // Logged
-    logger.Error("This will be logged")   // Logged
+    // Seuls les messages warn et supérieurs seront journalisés
+    logger.Debug("Ceci ne sera pas journalisé")  // Ignoré
+    logger.Info("Ceci ne sera pas journalisé")   // Ignoré
+    logger.Warn("Ceci sera journalisé")    // Journalisé
+    logger.Error("Ceci sera journalisé")   // Journalisé
 }
 ```
 
-## 🔧 Configuration Options
+## 🔧 Options de configuration
 
-### Logger Configuration
+### Configuration du Logger
 
-| Method                  | Description                | Default      |
-| ----------------------- | -------------------------- | ------------ |
-| `SetLevel(level)`       | Set minimum log level      | `DebugLevel` |
-| `EnableCaller(enable)`  | Enable/disable caller info | `false`      |
-| `EnableTrace(enable)`   | Enable/disable trace info  | `false`      |
-| `SetCallerDepth(depth)` | Set caller depth           | `2`          |
-| `SetPrefixMsg(prefix)`  | Set log prefix             | `""`         |
-| `SetSuffixMsg(suffix)`  | Set log suffix             | `""`         |
-| `SetOutput(writers...)` | Set output targets         | `os.Stdout`  |
+| Méthode                 | Description                                       | Valeur par défaut |
+| ----------------------- | ------------------------------------------------- | ----------------- |
+| `SetLevel(level)`       | Définir le niveau minimum de journalisation       | `DebugLevel`      |
+| `EnableCaller(enable)`  | Activer/désactiver les informations de l'appelant | `false`           |
+| `EnableTrace(enable)`   | Activer/désactiver les informations de trace      | `false`           |
+| `SetCallerDepth(depth)` | Définir la profondeur de l'appelant               | `2`               |
+| `SetPrefixMsg(prefix)`  | Définir le préfixe du journal                     | `""`              |
+| `SetSuffixMsg(suffix)`  | Définir le suffixe du journal                     | `""`              |
+| `SetOutput(writers...)` | Définir les cibles de sortie                      | `os.Stdout`       |
 
-### Log Levels
+### Niveaux de journalisation
 
-| Level        | Description                        |
-| ------------ | ---------------------------------- |
-| `TraceLevel` | Most verbose, for detailed tracing |
-| `DebugLevel` | Debug information                  |
-| `InfoLevel`  | General information                |
-| `WarnLevel`  | Warning messages                   |
-| `ErrorLevel` | Error messages                     |
-| `FatalLevel` | Fatal errors (calls os.Exit(1))    |
-| `PanicLevel` | Panic errors (calls panic())       |
+| Niveau       | Description                             |
+| ------------ | --------------------------------------- |
+| `TraceLevel` | Le plus verbeux, pour le suivi détaillé |
+| `DebugLevel` | Informations de débogage                |
+| `InfoLevel`  | Informations générales                  |
+| `WarnLevel`  | Messages d'avertissement                |
+| `ErrorLevel` | Messages d'erreur                       |
+| `FatalLevel` | Erreurs fatales (appelle os.Exit(1))    |
+| `PanicLevel` | Erreurs de panique (appelle panic())    |
 
 ## 🏗️ Architecture
 
-### Core Components
+### Composants principaux
 
--   **Logger**: Main logging structure with configurable options
--   **Entry**: Individual log record with comprehensive field support
--   **Level**: Log level definitions and utility functions
--   **Format**: Log formatting interface and implementations
+-   **Logger** : Structure de journalisation principale avec niveaux, sorties, formateurs et profondeur d'appelant configurables
+-   **Entry** : Enregistrement de journal unique avec support complet de métadonnées
+-   **Level** : Définitions de niveaux de journalisation et fonctions utilitaires
+-   **Format** : Interface et implémentations de formatage de journalisation
 
-### Performance Optimization
+### Optimisations de performance
 
--   **Object Pooling**: Reuses Entry objects to reduce memory allocation
--   **Conditional Recording**: Only records expensive fields when needed
--   **Fast Level Checking**: Checks log level at the outermost layer
--   **Lock-Free Design**: Most operations don't require locks
+-   **Pool d'objets** : Réutilisation des objets Entry pour réduire l'allocation mémoire
+-   **Enregistrement conditionnel** : Enregistrement des champs coûteux uniquement lorsque nécessaire
+-   **Vérification rapide du niveau** : Vérification du niveau de journalisation à la couche la plus externe
+-   **Conception sans verrou** : La plupart des opérations ne nécessitent pas de verrou
 
-## 📊 Performance Comparison
+## 📊 Comparaison des performances
 
-| Feature          | lazygophers/log | zap    | logrus | standard log |
-| ---------------- | --------------- | ------ | ------ | ------------ |
-| Performance      | High            | High   | Medium | Low          |
-| API Simplicity   | High            | Medium | High   | High         |
-| Feature Richness | Medium          | High   | High   | Low          |
-| Flexibility      | Medium          | High   | High   | Low          |
-| Learning Curve   | Low             | Medium | Medium | Low          |
+| Caractéristique             | lazygophers/log | zap     | logrus  | journalisation standard |
+| --------------------------- | --------------- | ------- | ------- | ----------------------- |
+| Performance                 | Haute           | Haute   | Moyenne | Basse                   |
+| Simplicité de l'API         | Haute           | Moyenne | Haute   | Haute                   |
+| Richesse de fonctionnalités | Moyenne         | Haute   | Haute   | Basse                   |
+| Flexibilité                 | Moyenne         | Haute   | Haute   | Basse                   |
+| Courbe d'apprentissage      | Basse           | Moyenne | Moyenne | Basse                   |
 
-## 🔗 Related Documentation
+## 🔗 Documentation associée
 
--   [📚 API Documentation](docs/API.md) - Complete API reference
--   [🤝 Contributing Guide](docs/CONTRIBUTING.md) - How to contribute
--   [📋 Changelog](CHANGELOG.md) - Version history
--   [🔒 Security Policy](docs/SECURITY.md) - Security guidelines
--   [📜 Code of Conduct](docs/CODE_OF_CONDUCT.md) - Community guidelines
+-   [📚 Documentation API](API.md) - Référence API complète
+-   [🤝 Guide de contribution](CONTRIBUTING.md) - Comment contribuer
+-   [📋 Journal des modifications](CHANGELOG.md) - Historique des versions
+-   [🔒 Politique de sécurité](SECURITY.md) - Directives de sécurité
+-   [📜 Code de conduite](CODE_OF_CONDUCT.md) - Directives de communauté
 
-## 🚀 Getting Help
+## 🚀 Obtenir de l'aide
 
--   **GitHub Issues**: [Report bugs or request features](https://github.com/lazygophers/log/issues)
--   **GoDoc**: [API Documentation](https://pkg.go.dev/github.com/lazygophers/log)
--   **Examples**: [Usage examples](https://github.com/lazygophers/log/tree/main/examples)
+-   **GitHub Issues** : [Signaler des bugs ou demander des fonctionnalités](https://github.com/lazygophers/log/issues)
+-   **GoDoc** : [Documentation API](https://pkg.go.dev/github.com/lazygophers/log)
+-   **Exemples** : [Exemples d'utilisation](https://github.com/lazygophers/log/tree/main/examples)
 
-## 📄 License
+## 📄 Licence
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-## 🌍 Multilingual Documentation
+## 🤝 Contribution
 
-This document is available in multiple languages:
-
--   [🇺🇸 English](README.md) (Current)
--   [🇨🇳 简体中文](docs/README_zh-CN.md)
--   [🇹🇼 繁體中文](docs/README_zh-TW.md)
--   [🇫🇷 Français](docs/README_fr.md)
--   [🇷🇺 Русский](docs/README_ru.md)
--   [🇪🇸 Español](docs/README_es.md)
--   [🇸🇦 العربية](docs/README_ar.md)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+Nous accueillons les contributions ! Veuillez consulter notre [Guide de contribution](CONTRIBUTING.md) pour plus de détails.
 
 ---
 
-**lazygophers/log** is designed to be the go-to logging solution for Go developers who value both performance and simplicity. Whether you're building a small utility or a large-scale distributed system, this library provides the right balance of features and ease of use.
+**lazygophers/log** est conçu pour être la solution de journalisation de choix pour les développeurs Go qui valorisent à la fois la performance et la simplicité. Que vous construisiez un petit utilitaire ou un système distribué à grande échelle, cette bibliothèque offre le bon équilibre entre fonctionnalités et facilité d'utilisation.

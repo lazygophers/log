@@ -1,273 +1,280 @@
 ---
 titleSuffix: " | LazyGophers Log"
 ---
-# 🤝 Contributing to LazyGophers Log
 
-We welcome your contributions! We want to make contributing to LazyGophers Log as simple and transparent as possible, whether it's:
+# 🤝 Contribution à LazyGophers Log
 
--   🐛 Reporting a bug
--   💬 Discussing the current state of the code
--   ✨ Submitting a feature request
--   🔧 Proposing a fix
--   🚀 Implementing new features
+Nous accueillons vos contributions ! Nous voulons rendre la contribution à LazyGophers Log aussi simple et transparente que possible, que ce soit :
 
-## 📋 Table of Contents
+-   🐛 Signalement de bugs
+-   💬 Discussion de l'état actuel du code
+-   ✨ Demande de fonctionnalités
+-   🔧 Proposition de correctifs
+-   🚀 Implémentation de nouvelles fonctionnalités
 
--   [Code of Conduct](#-code-of-conduct)
--   [Development Process](#-development-process)
--   [Getting Started](#-getting-started)
--   [Pull Request Process](#-pull-request-process)
--   [Coding Standards](#-coding-standards)
--   [Testing Guidelines](#-testing-guidelines)
--   [Build Tag Requirements](#-build-tag-requirements)
+## 📋 Table des matières
+
+-   [Code de conduite](#-code-de-conduite)
+-   [Processus de développement](#-processus-de-développement)
+-   [Démarrage rapide](#-démarrage-rapide)
+-   [Processus de Pull Request](#-processus-de-pull-request)
+-   [Normes de codage](#-normes-de-codage)
+-   [Directives de tests](#-directives-de-tests)
+-   [Balises de construction](#-balises-de-construction)
 -   [Documentation](#-documentation)
--   [Issue Guidelines](#-issue-guidelines)
--   [Performance Considerations](#-performance-considerations)
--   [Security Guidelines](#-security-guidelines)
--   [Community](#-community)
+-   [Directives d'issues](#-directives-dissues)
+-   [Considérations de performance](#-considérations-de-performance)
+-   [Directives de sécurité](#-directives-de-sécurité)
+-   [Communauté](#-communauté)
 
-## 📜 Code of Conduct
+## 📜 Code de conduite
 
-This project and all participants are governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by this code.
+Ce projet et tous les participants sont régis par notre [Code de conduite](CODE_OF_CONDUCT.md). En participant, vous acceptez de vous conformer à ce code.
 
-## 🔄 Development Process
+## 🔄 Processus de développement
 
-We use GitHub to host code, track issues and feature requests, and accept pull requests.
+Nous utilisons GitHub pour héberger le code, suivre les issues et les demandes de fonctionnalités, et accepter les pull requests.
 
 ### Workflow
 
-1. **Fork** the repository
-2. **Clone** your fork locally
-3. **Create** a feature branch from `master`
-4. **Make** your changes
-5. **Test** thoroughly under all build tags
-6. **Submit** a pull request
+1. **Fork** le dépôt
+2. **Clone** votre fork localement
+3. **Créer** une branche de fonctionnalité à partir de `master`
+4. **Apporter** vos modifications
+5. **Tester** soigneusement sous toutes les balises de construction
+6. **Soumettre** une pull request
 
-## 🚀 Getting Started
+## 🚀 Démarrage rapide
 
-### Prerequisites
+### Prérequis
 
--   **Go 1.21+** - [Install Go](https://golang.org/doc/install)
--   **Git** - [Install Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
--   **Make** (optional but recommended)
+-   **Go 1.21+** - [Installer Go](https://golang.org/doc/install)
 
-### Local Development Setup
+### Installation
 
 ```bash
-# 1. Fork the repository on GitHub
-# 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/log.git
+# Cloner le dépôt
+git clone https://github.com/lazygophers/log.git
 cd log
 
-# 3. Add upstream remote
-git remote add upstream https://github.com/lazygophers/log.git
-
-# 4. Install dependencies
-go mod tidy
-
-# 5. Verify installation
-make test-quick
+# Installer les dépendances
+go mod download
 ```
 
-### Environment Setup
+### Exécution des tests
 
 ```bash
-# Set Go environment (if not already set)
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
+# Exécuter tous les tests
+go test ./...
 
-# Optional: Install useful tools
-go install golang.org/x/tools/cmd/goimports@latest
-go install honnef.co/go/tools/cmd/staticcheck@latest
+# Exécuter les tests avec une balise de construction spécifique
+go test -tags=debug ./...
+
+# Exécuter les tests de performance
+go test -bench=. -benchmem ./...
 ```
 
-## 📨 Pull Request Process
+## � Processus de Pull Request
 
-### Before Submitting
+### Avant de soumettre
 
-1. **Search** for existing PRs to avoid duplicates
-2. **Test** your changes under all build configurations
-3. **Document** any breaking changes
-4. **Update** related documentation
-5. **Add** tests for new features
+1. Vérifiez que vos tests passent sous toutes les balises de construction
+2. Exécutez `go fmt` sur vos modifications
+3. Assurez-vous que votre code est propre et bien documenté
+4. Mettez à jour la documentation si nécessaire
+5. Ajoutez des tests pour les nouvelles fonctionnalités
 
-### PR Checklist
+### Vérifications des balises de construction
 
--   [ ] **Code Quality**
-
-    -   [ ] Code follows project style guide
-    -   [ ] No new lint warnings
-    -   [ ] Proper error handling
-    -   [ ] Efficient algorithms and data structures
-
--   [ ] **Testing**
-
-    -   [ ] All existing tests pass: `make test`
-    -   [ ] New tests added for new functionality
-    -   [ ] Tests cover edge cases
-    -   [ ] Performance tests (if applicable)
-
--   [ ] **Documentation**
-
-    -   [ ] Code comments updated
-    -   [ ] API documentation updated
-    -   [ ] README/guide updates (if applicable)
-
--   [ ] **Build**
-    -   [ ] Builds under all supported Go versions
-    -   [ ] Builds under all build tags
-    -   [ ] No new dependencies added unnecessarily
-
-### Submitting
-
-1. Push your changes to your fork
-2. Create a pull request to the `master` branch
-3. Fill out the PR template completely
-4. Link any related issues
-
-## 💻 Coding Standards
-
-### General Guidelines
-
--   Follow Go best practices: [Effective Go](https://go.dev/doc/effective_go)
--   Use meaningful variable and function names
--   Keep functions small and focused
--   Write self-documenting code
-
-### Specific Standards
-
--   **Code Style**: Use `gofmt` and `goimports` for formatting
--   **Error Handling**: Use proper error wrapping and context
--   **Logging**: Use the project's logging package appropriately
--   **Concurrency**: Follow Go concurrency patterns safely
-
-### Build Tags
-
-Some features may be conditionally compiled using build tags:
-
--   `dev`: Development features
--   `test`: Testing utilities
--   `bench`: Benchmarking tools
-
-## 🧪 Testing Guidelines
-
-### Running Tests
+LazyGophers Log prend en charge les balises de construction pour optimiser les performances dans différents environnements. Assurez-vous de tester avec toutes les balises :
 
 ```bash
-# Run all tests
-make test
+# Tester avec la balise par défaut
+go test ./...
 
-# Run tests quickly (without race detection)
-make test-quick
+# Tester avec la balise de débogage
+go test -tags=debug ./...
 
-# Run tests with race detection
-make test-race
+# Tester avec la balise de publication
+go test -tags=release ./...
 
-# Run tests for a specific package
-make test-pkg pkg=github.com/lazygophers/log
+# Tester avec la balise d'abandon
+go test -tags=discard ./...
 ```
 
-### Writing Tests
+### Format du titre de la PR
 
--   Write unit tests for all new functionality
--   Use table-driven tests for multiple test cases
--   Follow the existing test patterns
--   Test both success and failure cases
+Utilisez un titre clair et descriptif pour votre Pull Request :
 
-### Coverage
+-   `feat: Ajouter la fonctionnalité X`
+-   `fix: Corriger le bug Y`
+-   `docs: Mettre à jour la documentation`
+-   `perf: Améliorer les performances`
+-   `refactor: Refactoriser le code`
+
+## 📝 Normes de codage
+
+### Formatage du code
+
+Exécutez `go fmt` avant de soumettre :
 
 ```bash
-# Generate test coverage
-make test-coverage
-
-# View coverage report
-make test-coverage-view
+go fmt ./...
 ```
 
-## 🏷️ Build Tag Requirements
+### Linting
 
-When adding features that should be conditionally compiled:
+Nous utilisons golangci-lint pour assurer la qualité du code :
 
-1. Use descriptive build tag names
-2. Document build tags in the README
-3. Ensure backward compatibility
-4. Test with and without the build tag
+```bash
+# Installer golangci-lint si nécessaire
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Exécuter le linting
+golangci-lint run
+```
+
+## 🧪 Directives de tests
+
+### Couverture des tests
+
+Visez une couverture de tests élevée. Les nouvelles fonctionnalités doivent inclure des tests.
+
+```bash
+# Exécuter les tests avec couverture
+go test -coverprofile=coverage.out ./...
+
+# Vérifier la couverture
+go tool cover -func=coverage.out
+```
+
+### Tests de performance
+
+Les modifications de performance doivent inclure des benchmarks :
+
+```go
+func BenchmarkLogger(b *testing.B) {
+    logger := log.New()
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        logger.Info("Message de test")
+    }
+}
+```
+
+## 🔧 Balises de construction
+
+LazyGophers Log utilise des balises de construction pour optimiser les performances dans différents environnements :
+
+| Balise    | Description                                                      | Utilisation           |
+| --------- | ---------------------------------------------------------------- | --------------------- |
+| (défaut)  | Fonctionnalité complète avec messages de débogage                | Développement général |
+| `debug`   | Informations de débogage améliorées et détails de l'appelant     | Débogage approfondi   |
+| `release` | Optimisé pour la production avec messages de débogage désactivés | Production            |
+| `discard` | Performance maximale avec opérations de journalisation no-op     | Tests de performance  |
+
+### Test avec des balises de construction
+
+```bash
+# Développement (par défaut)
+go build
+
+# Débogage approfondi
+go build -tags=debug
+
+# Production
+go build -tags=release
+
+# Tests de performance
+go build -tags=discard
+```
 
 ## 📚 Documentation
 
-### API Documentation
+### Mises à jour requises
 
-Update GoDoc comments for any public API changes:
+-   Mettre à jour les commentaires de code pour les nouvelles fonctions
+-   Mettre à jour la documentation API si nécessaire
+-   Mettre à jour les exemples si nécessaire
 
-```go
-// LogLevel represents the severity level of a log message
-// Example:
-//     logger.SetLevel(log.InfoLevel)
-type LogLevel int
-```
+### Normes de documentation
 
-### User Documentation
+-   Utiliser des descriptions claires et concises
+-   Inclure des exemples d'utilisation
+-   Documenter les paramètres et les valeurs de retour
 
-Update the appropriate documentation files for:
+## 🐛 Directives d'issues
 
--   New features
--   API changes
--   Configuration options
--   Usage examples
+### Signalement de bugs
 
-## ❓ Issue Guidelines
+Lorsque vous signalez un bug, incluez :
 
-### Reporting Bugs
+-   Version de Go utilisée
+-   Version de lazygophers/log
+-   Balises de construction utilisées
+-   Description détaillée du problème
+-   Exemple de code minimal pour reproduire
+-   Sortie attendue vs sortie réelle
 
-When reporting bugs, please include:
+### Demandes de fonctionnalités
 
--   **Go version**: Output of `go version`
--   **Package version**: Which version of the package you're using
--   **Description**: A clear and concise description of the bug
--   **Steps to reproduce**: Minimum steps to reproduce the issue
--   **Expected behavior**: What you expected to happen
--   **Actual behavior**: What actually happened
--   **Logs**: Any relevant log output
--   **Code example**: Minimal, complete, and verifiable example
+Pour les demandes de fonctionnalités, incluez :
 
-### Feature Requests
+-   Description claire de la fonctionnalité souhaitée
+-   Cas d'utilisation proposés
+-   Avantages de cette fonctionnalité
+-   Solutions alternatives considérées
 
-When requesting features, please include:
+## ⚡ Considérations de performance
 
--   **Description**: A clear and concise description of the feature
--   **Use case**: Why this feature would be useful
--   **Proposal**: A suggested implementation (optional)
--   **Alternatives**: Any alternative solutions you've considered
+### Optimisations à éviter
 
-## ⚡ Performance Considerations
+-   Évitez les allocations inutiles dans les chemins chauds
+-   Utilisez les chaînes de caractères au lieu de la concaténation excessive
+-   Réutilisez les objets Entry via le pool interne
+-   Évitez les conversions de type inutiles
 
--   **Benchmark**: Add benchmarks for performance-sensitive code
--   **Profile**: Use Go's profiling tools to identify bottlenecks
--   **Optimize**: Focus on hot paths and critical sections
--   **Document**: Note any performance considerations in the code
+### Bonnes pratiques
 
-## 🔒 Security Guidelines
+-   Utilisez les niveaux de journalisation appropriés
+-   Évitez la journalisation dans les boucles serrées
+-   Utilisez le journalisation conditionnelle pour les champs coûteux
+-   Testez les modifications de performance avec des benchmarks
 
-If you discover a security vulnerability, please follow our [Security Policy](SECURITY.md) to report it responsibly.
+## 🔒 Directives de sécurité
 
-## 👥 Community
+### Signalement des vulnérabilités
 
--   **GitHub Discussions**: For questions and discussions
--   **Issue Tracker**: For bug reports and feature requests
--   **Slack**: Join our community Slack channel
+Pour les vulnérabilités de sécurité, veuillez consulter notre [Politique de sécurité](SECURITY.md) pour :
 
-## 📄 License
+-   Versions supportées
+-   Procédures de signalement
+-   Chronologie de réponse
+-   Bonnes pratiques de sécurité
 
-By contributing to LazyGophers Log, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+### Bonnes pratiques
 
-## 🌍 Multilingual Documentation
+-   Validez toutes les entrées externes
+-   Évitez l'injection de données dans les messages de journalisation
+-   Utilisez les niveaux de journalisation appropriés
+-   Ne journalisez jamais de mots de passe ou de données sensibles
 
-This document is available in multiple languages:
+## 👥 Communauté
 
--   🇺🇸 [English](CONTRIBUTING.md) (current)
--   🇨🇳 [简体中文](docs/CONTRIBUTING_zh-CN.md)
--   🇹🇼 [繁體中文](docs/CONTRIBUTING_zh-TW.md)
--   🇫🇷 [Français](docs/CONTRIBUTING_fr.md)
--   🇷🇺 [Русский](docs/CONTRIBUTING_ru.md)
--   🇪🇸 [Español](docs/CONTRIBUTING_es.md)
--   🇸🇦 [العربية](docs/CONTRIBUTING_ar.md)
+### Canaux de communication
+
+-   📖 [Documentation](/)
+-   � [Suivi des problèmes](https://github.com/lazygophers/log/issues)
+-   💬 [Discussions](https://github.com/lazygophers/log/discussions)
+
+### Reconnaissance
+
+Nous reconnaissons et apprécions toutes les contributions. Les contributeurs seront crédités dans les notes de version.
+
+## 📄 Licence
+
+En contribuant, vous acceptez que vos contributions seront sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+Merci de contribuer à LazyGophers Log ! �
