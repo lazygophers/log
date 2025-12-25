@@ -144,8 +144,17 @@ get_cache_stats() {
     local total_size_gb
 
     total_files=$(find "$CACHE_DIR" -name "*.tar.gz" -type f | wc -l)
-    total_size_bytes=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -exec stat -f%z {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
-    total_size_gb=$(echo "scale=2; $total_size_bytes / 1024 / 1024 / 1024" | bc)
+    
+    # 兼容 Linux 和 macOS 的 stat 命令
+    if stat -c%s /dev/null >/dev/null 2>&1; then
+        # Linux
+        total_size_bytes=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -exec stat -c%s {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+    else
+        # macOS
+        total_size_bytes=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -exec stat -f%z {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+    fi
+    
+    total_size_gb=$(echo "scale=2; $total_size_bytes / 1024 / 1024 / 1024" | bc 2>/dev/null || echo "0.00")
 
     log "Current cache stats:"
     log "  Files: $total_files"
@@ -194,7 +203,15 @@ cleanup_by_count() {
 
     local excess_count=$((current_files - MAX_FILES))
     local old_files
-    old_files=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %p\n' | sort -n | head -n $excess_count | cut -d' ' -f2-)
+
+    # 兼容 Linux 和 macOS 的 find 命令
+    if find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %p\n' >/dev/null 2>&1; then
+        # Linux 支持 -printf
+        old_files=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %p\n' | sort -n | head -n $excess_count | cut -d' ' -f2-)
+    else
+        # macOS 不支持 -printf，使用 stat 命令
+        old_files=$(find "$CACHE_DIR" -name "*.tar.gz" -type f -exec stat -f "%m %N" {} \; | sort -n | head -n $excess_count | cut -d' ' -f2-)
+    fi
 
     local count=0
     while IFS= read -r file; do
@@ -215,7 +232,7 @@ cleanup_by_size() {
     local current_size_gb
     current_size_gb=$(get_cache_stats | cut -d: -f2)
 
-    if (( $(echo "$current_size_gb <= $MAX_SIZE_GB" | bc -l) )); then
+    if (( $(echo "$current_size_gb <= $MAX_SIZE_GB" | bc -l 2>/dev/null || echo "1") )); then
         verbose "Cache size (${current_size_gb}GB) is within limit (${MAX_SIZE_GB}GB)"
         return 0
     fi
@@ -224,7 +241,7 @@ cleanup_by_size() {
 
     # 计算需要删除的大小
     local excess_gb
-    excess_gb=$(echo "scale=2; $current_size_gb - $MAX_SIZE_GB" | bc)
+    excess_gb=$(echo "scale=2; $current_size_gb - $MAX_SIZE_GB" | bc 2>/dev/null || echo "0")
 
     log "Need to free approximately ${excess_gb}GB"
 
@@ -232,19 +249,44 @@ cleanup_by_size() {
     local deleted_size=0
     local count=0
 
-    find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %s %p\n' | sort -n | while read timestamp size file; do
-        if (( $(echo "$deleted_size >= $excess_gb * 1024 * 1024 * 1024" | bc -l) )); then
-            break
-        fi
+    # 兼容 Linux 和 macOS 的 find 命令
+    if find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %s %p\n' >/dev/null 2>&1; then
+        # Linux 支持 -printf
+        find "$CACHE_DIR" -name "*.tar.gz" -type f -printf '%T@ %s %p\n' | sort -n | while read timestamp size file; do
+            if (( $(echo "$deleted_size >= $excess_gb * 1024 * 1024 * 1024" | bc -l 2>/dev/null || echo "1") )); then
+                break
+            fi
 
-        verbose "Deleting large cache file: $file ($(echo "scale=2; $size / 1024 / 1024" | bc)MB)"
-        if [[ "$DRY_RUN" == "false" ]]; then
-            rm -f "$file"
-        fi
+            verbose "Deleting large cache file: $file ($(echo "scale=2; $size / 1024 / 1024" | bc 2>/dev/null || echo "0")MB)"
+            if [[ "$DRY_RUN" == "false" ]]; then
+                rm -f "$file"
+            fi
 
-        deleted_size=$((deleted_size + size))
-        ((count++))
-    done
+            deleted_size=$((deleted_size + size))
+            ((count++))
+        done
+    else
+        # macOS 不支持 -printf，使用 stat 命令
+        find "$CACHE_DIR" -name "*.tar.gz" -type f | while read file; do
+            local timestamp
+            local size
+            timestamp=$(stat -f "%m" "$file")
+            size=$(stat -f "%z" "$file")
+            echo "${timestamp} ${size} ${file}"
+        done | sort -n | while read timestamp size file; do
+            if (( $(echo "$deleted_size >= $excess_gb * 1024 * 1024 * 1024" | bc -l 2>/dev/null || echo "1") )); then
+                break
+            fi
+
+            verbose "Deleting large cache file: $file ($(echo "scale=2; $size / 1024 / 1024" | bc 2>/dev/null || echo "0")MB)"
+            if [[ "$DRY_RUN" == "false" ]]; then
+                rm -f "$file"
+            fi
+
+            deleted_size=$((deleted_size + size))
+            ((count++))
+        done
+    fi
 
     success "Cleaned $count cache files to free space"
 }
