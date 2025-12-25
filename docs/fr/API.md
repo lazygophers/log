@@ -2,78 +2,78 @@
 titleSuffix: " | LazyGophers Log"
 ---
 
-# 📚 API Documentation
+# 📚 Documentation API
 
-## Overview
+## Vue d'ensemble
 
-LazyGophers Log provides a comprehensive logging API that supports multiple log levels, custom formatting, asynchronous writing, and build tag optimization. This document covers all public APIs, configuration options, and usage patterns.
+LazyGophers Log fournit une API de journalisation complète qui supporte plusieurs niveaux de journalisation, un formatage personnalisé, l'écriture asynchrone et l'optimisation des balises de construction. Ce document couvre toutes les API publiques, les options de configuration et les modèles d'utilisation.
 
-## Table of Contents
+## Table des matières
 
--   [Core Types](#core-types)
--   [Logger API](#logger-api)
--   [Global Functions](#global-functions)
--   [Log Levels](#log-levels)
--   [Formatters](#formatters)
--   [Output Writers](#output-writers)
--   [Contextual Logging](#contextual-logging)
--   [Build Tags](#build-tags)
--   [Performance Optimization](#performance-optimization)
--   [Examples](#examples)
+-   [Types de base](#types-de-base)
+-   [API Logger](#api-logger)
+-   [Fonctions globales](#fonctions-globales)
+-   [Niveaux de journalisation](#niveaux-de-journalisation)
+-   [Formateurs](#formateurs)
+-   [Rédacteurs de sortie](#redacteurs-de-sortie)
+-   [Journalisation contextuelle](#journalisation-contextuelle)
+-   [Balises de construction](#balises-de-construction)
+-   [Optimisation des performances](#optimisation-des-performances)
+-   [Exemples](#exemples)
 
-## Core Types
+## Types de base
 
 ### Logger
 
-The main logger struct that provides all logging functionality.
+La structure de journalisation principale qui fournit toutes les fonctionnalités de journalisation.
 
 ```go
 type Logger struct {
-    // Contains private fields for thread-safe operations
+    // Contient des champs privés pour les opérations thread-safe
 }
 ```
 
-#### Constructor
+#### Constructeur
 
 ```go
 func New() *Logger
 ```
 
-Creates a new logger instance with default configuration:
+Crée une nouvelle instance de journalisation avec la configuration par défaut :
 
--   Level: `DebugLevel`
--   Output: `os.Stdout`
--   Formatter: Default text formatter
--   Caller tracking: Disabled
+-   Niveau : `DebugLevel`
+-   Sortie : `os.Stdout`
+-   Formateur : Formateur de texte par défaut
+-   Suivi de l'appelant : Désactivé
 
-**Example:**
+**Exemple :**
 
 ```go
 logger := log.New()
-logger.Info("New logger created")
+logger.Info("Nouveau journalisation créé")
 ```
 
 ### Entry
 
-Represents a single log entry with all associated metadata.
+Représente une seule entrée de journal avec toutes les métadonnées associées.
 
 ```go
 type Entry struct {
-    Time       time.Time     // Timestamp when the entry was created
-    Level      Level         // Log level
-    Message    string        // Log message
-    Pid        int          // Process ID
-    Gid        uint64       // Goroutine ID
-    TraceID    string       // Trace ID for distributed tracing
-    CallerName string       // Caller function name
-    CallerFile string       // Caller file path
-    CallerLine int          // Caller line number
+    Time       time.Time     // Horodatage lors de la création de l'entrée
+    Level      Level         // Niveau de journalisation
+    Message    string        // Message de journalisation
+    Pid        int          // ID de processus
+    Gid        uint64       // ID de goroutine
+    TraceID    string       // ID de trace pour le traçage distribué
+    CallerName string       // Nom de la fonction de l'appelant
+    CallerFile string       // Chemin du fichier de l'appelant
+    CallerLine int          // Numéro de ligne de l'appelant
 }
 ```
 
-## Logger API
+## API Logger
 
-### Configuration Methods
+### Méthodes de configuration
 
 #### SetLevel
 
@@ -81,94 +81,68 @@ type Entry struct {
 func (l *Logger) SetLevel(level Level) *Logger
 ```
 
-Sets the minimum log level. Messages below this level will be ignored.
+Définit le niveau minimum de journalisation. Les messages en dessous de ce niveau seront ignorés.
 
-**Parameters:**
+**Paramètres :**
 
--   `level`：The minimum log level to process
+-   `level` : Le niveau minimum de journalisation à traiter
 
-**Return:**
+**Retour :**
 
--   `*Logger`：Returns itself to support method chaining
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
 
-**Example:**
+**Exemple :**
 
 ```go
 logger.SetLevel(log.InfoLevel)
-logger.Debug("This won't be displayed")  // Ignored
-logger.Info("This will be displayed")    // Processed
-```
-
-#### SetOutput
-
-```go
-func (l *Logger) SetOutput(writers ...io.Writer) *Logger
-```
-
-Sets one or more output destinations for log messages.
-
-**Parameters:**
-
--   `writers`：One or more `io.Writer` output destinations
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
-
-**Example:**
-
-```go
-// Single output
-logger.SetOutput(os.Stdout)
-
-// Multiple outputs
-file, _ := os.Create("app.log")
-logger.SetOutput(os.Stdout, file)
-```
-
-#### SetFormatter
-
-```go
-func (l *Logger) SetFormatter(formatter Format) *Logger
-```
-
-Sets a custom formatter for log output.
-
-**Parameters:**
-
--   `formatter`：A formatter that implements the `Format` interface
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
-
-**Example:**
-
-```go
-logger.SetFormatter(&JSONFormatter{})
+logger.Debug("Ceci ne sera pas affiché")  // Ignoré
+logger.Info("Ceci sera affiché")    // Traité
 ```
 
 #### EnableCaller
 
 ```go
-func (l *Logger) EnableCaller(enabled bool) *Logger
+func (l *Logger) EnableCaller(enable bool) *Logger
 ```
 
-Enables or disables caller information in log entries.
+Active ou désactive l'enregistrement des informations de l'appelant.
 
-**Parameters:**
+**Paramètres :**
 
--   `enabled`：Whether to include caller information
+-   `enable` : `true` pour activer, `false` pour désactiver
 
-**Return:**
+**Retour :**
 
--   `*Logger`：Returns itself to support method chaining
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
 
-**Example:**
+**Exemple :**
 
 ```go
 logger.EnableCaller(true)
-logger.Info("This will include file:line information")
+logger.Info("Ceci inclura les informations de l'appelant")
+```
+
+#### EnableTrace
+
+```go
+func (l *Logger) EnableTrace(enable bool) *Logger
+```
+
+Active ou désactive l'enregistrement des informations de trace (y compris l'ID de goroutine).
+
+**Paramètres :**
+
+-   `enable` : `true` pour activer, `false` pour désactiver
+
+**Retour :**
+
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
+
+**Exemple :**
+
+```go
+logger.EnableTrace(true)
+logger.Info("Ceci inclura les informations de trace")
 ```
 
 #### SetCallerDepth
@@ -177,537 +151,228 @@ logger.Info("This will include file:line information")
 func (l *Logger) SetCallerDepth(depth int) *Logger
 ```
 
-Sets the stack depth for caller information when wrapping loggers.
+Définit la profondeur de la pile d'appels pour l'enregistrement de l'appelant.
 
-**Parameters:**
+**Paramètres :**
 
--   `depth`：Number of stack frames to skip
+-   `depth` : La profondeur de la pile d'appels (défaut : 2)
 
-**Return:**
+**Retour :**
 
--   `*Logger`：Returns itself to support method chaining
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
 
-**Example:**
+**Exemple :**
 
 ```go
-func logWrapper(msg string) {
-    logger.SetCallerDepth(1).Info(msg)  // Skip the wrapper function
-}
+logger.SetCallerDepth(3)
+logger.Info("Ceci utilisera une profondeur de 3")
 ```
 
-#### SetPrefixMsg / SetSuffixMsg
+#### SetPrefixMsg
 
 ```go
 func (l *Logger) SetPrefixMsg(prefix string) *Logger
+```
+
+Définit le préfixe pour tous les messages de journalisation.
+
+**Paramètres :**
+
+-   `prefix` : Le préfixe à ajouter avant chaque message
+
+**Retour :**
+
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
+
+**Exemple :**
+
+```go
+logger.SetPrefixMsg("[MyApp] ")
+logger.Info("Ceci aura un préfixe")
+```
+
+#### SetSuffixMsg
+
+```go
 func (l *Logger) SetSuffixMsg(suffix string) *Logger
 ```
 
-Sets prefix or suffix text for all log messages.
+Définit le suffixe pour tous les messages de journalisation.
 
-**Parameters:**
+**Paramètres :**
 
--   `prefix/suffix`：Text to prepend/append to messages
+-   `suffix` : Le suffixe à ajouter après chaque message
 
-**Return:**
+**Retour :**
 
--   `*Logger`：Returns itself to support method chaining
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
 
-**Example:**
-
-```go
-logger.SetPrefixMsg("[APP] ").SetSuffixMsg(" [END]")
-logger.Info("Hello")  // Output: [APP] Hello [END]
-```
-
-### Logging Methods
-
-All logging methods have two variants: simple and formatted versions.
-
-#### Trace Level
+**Exemple :**
 
 ```go
-func (l *Logger) Trace(v ...any)
-func (l *Logger) Tracef(format string, v ...any)
+logger.SetSuffixMsg(" [END]")
+logger.Info("Ceci aura un suffixe")
 ```
 
-Logs at trace level (most detailed).
-
-**Example:**
+#### SetOutput
 
 ```go
-logger.Trace("Detailed execution trace")
-logger.Tracef("Processing item %d of %d", i, total)
+func (l *Logger) SetOutput(writers ...io.Writer) *Logger
 ```
 
-#### Debug Level
+Définit les cibles de sortie pour la journalisation.
+
+**Paramètres :**
+
+-   `writers` : Une ou plusieurs cibles de sortie (par exemple, `os.Stdout`, fichiers)
+
+**Retour :**
+
+-   `*Logger` : Renvoie lui-même pour supporter le chaînage de méthodes
+
+**Exemple :**
 
 ```go
-func (l *Logger) Debug(v ...any)
-func (l *Logger) Debugf(format string, v ...any)
+// Sortie vers stdout et un fichier
+file, _ := os.Create("app.log")
+logger.SetOutput(os.Stdout, file)
 ```
 
-Logs development information at debug level.
+## Fonctions globales
 
-**Example:**
+Les fonctions globales fournissent un accès rapide à une instance de journalisation par défaut.
 
-```go
-logger.Debug("Variable state:", variable)
-logger.Debugf("User %s authenticated successfully", username)
-```
-
-#### Info Level
-
-```go
-func (l *Logger) Info(v ...any)
-func (l *Logger) Infof(format string, v ...any)
-```
-
-Logs informational messages.
-
-**Example:**
-
-```go
-logger.Info("Application started")
-logger.Infof("Server listening on port %d", port)
-```
-
-#### Warn Level
-
-```go
-func (l *Logger) Warn(v ...any)
-func (l *Logger) Warnf(format string, v ...any)
-```
-
-Logs warning messages for potential issue situations.
-
-**Example:**
-
-```go
-logger.Warn("Deprecated function called")
-logger.Warnf("High memory usage: %d%%", memoryPercent)
-```
-
-#### Error Level
-
-```go
-func (l *Logger) Error(v ...any)
-func (l *Logger) Errorf(format string, v ...any)
-```
-
-Logs error messages.
-
-**Example:**
-
-```go
-logger.Error("Database connection failed")
-logger.Errorf("Request processing failed: %v", err)
-```
-
-#### Fatal Level
-
-```go
-func (l *Logger) Fatal(v ...any)
-func (l *Logger) Fatalf(format string, v ...any)
-```
-
-Logs a fatal error and calls `os.Exit(1)`.
-
-**Example:**
-
-```go
-logger.Fatal("Critical system error")
-logger.Fatalf("Failed to start server: %v", err)
-```
-
-#### Panic Level
-
-```go
-func (l *Logger) Panic(v ...any)
-func (l *Logger) Panicf(format string, v ...any)
-```
-
-Logs an error message and calls `panic()`.
-
-**Example:**
-
-```go
-logger.Panic("Unrecoverable error occurred")
-logger.Panicf("Invalid state: %v", state)
-```
-
-### Utility Methods
-
-#### Clone
-
-```go
-func (l *Logger) Clone() *Logger
-```
-
-Creates a copy of the logger with identical configuration.
-
-**Return:**
-
--   `*Logger`：New logger instance with copied settings
-
-**Example:**
-
-```go
-dbLogger := logger.Clone()
-dbLogger.SetPrefixMsg("[DB] ")
-```
-
-#### CloneToCtx
-
-```go
-func (l *Logger) CloneToCtx() LoggerWithCtx
-```
-
-Creates a context-aware logger that accepts `context.Context` as the first parameter.
-
-**Return:**
-
--   `LoggerWithCtx`：Context-aware logger instance
-
-**Example:**
-
-```go
-ctxLogger := logger.CloneToCtx()
-ctxLogger.Info(ctx, "Context-aware message")
-```
-
-## Global Functions
-
-Package-level functions that use the default global logger.
-
-```go
-func SetLevel(level Level)
-func SetOutput(writers ...io.Writer)
-func SetFormatter(formatter Format)
-func EnableCaller(enabled bool)
-
-func Trace(v ...any)
-func Tracef(format string, v ...any)
-func Debug(v ...any)
-func Debugf(format string, v ...any)
-func Info(v ...any)
-func Infof(format string, v ...any)
-func Warn(v ...any)
-func Warnf(format string, v ...any)
-func Error(v ...any)
-func Errorf(format string, v ...any)
-func Fatal(v ...any)
-func Fatalf(format string, v ...any)
-func Panic(v ...any)
-func Panicf(format string, v ...any)
-```
-
-**Example:**
-
-```go
-import "github.com/lazygophers/log"
-
-log.SetLevel(log.InfoLevel)
-log.Info("Using global logger")
-```
-
-## Log Levels
-
-### Level Type
-
-```go
-type Level int8
-```
-
-### Available Levels
+### Niveaux de journalisation
 
 ```go
 const (
-    PanicLevel Level = iota  // 0 - Panic and exit
-    FatalLevel              // 1 - Fatal error and exit
-    ErrorLevel              // 2 - Error conditions
-    WarnLevel               // 3 - Warning conditions
-    InfoLevel               // 4 - Informational messages
-    DebugLevel              // 5 - Debug messages
-    TraceLevel              // 6 - Most detailed tracing
+    PanicLevel Level = iota
+    FatalLevel
+    ErrorLevel
+    WarnLevel
+    InfoLevel
+    DebugLevel
+    TraceLevel
 )
 ```
 
-### Level Methods
+| Niveau       | Description                      | Utilisation                                               |
+| ------------ | -------------------------------- | --------------------------------------------------------- |
+| `PanicLevel` | Le plus élevé, appelle `panic()` | Erreurs critiques qui arrêtent l'application              |
+| `FatalLevel` | Élevé, appelle `os.Exit(1)`      | Erreurs fatales qui nécessitent une terminaison immédiate |
+| `ErrorLevel` | Élevé                            | Erreurs générales                                         |
+| `WarnLevel`  | Moyen                            | Messages d'avertissement                                  |
+| `InfoLevel`  | Normal                           | Messages d'information généraux                           |
+| `DebugLevel` | Bas                              | Informations de débogage                                  |
+| `TraceLevel` | Le plus bas                      | Informations de trace détaillées                          |
+
+### Méthodes de journalisation
 
 ```go
-func (l Level) String() string
+func Trace(args ...interface{})
+func Debug(args ...interface{})
+func Info(args ...interface{})
+func Warn(args ...interface{})
+func Error(args ...interface{})
+func Fatal(args ...interface{})
+func Panic(args ...interface{})
 ```
 
-Returns the string representation of the level.
-
-**Example:**
+**Exemple :**
 
 ```go
-fmt.Println(log.InfoLevel.String())  // "INFO"
+log.Trace("Message de trace")
+log.Debug("Message de débogage")
+log.Info("Message d'information")
+log.Warn("Message d'avertissement")
+log.Error("Message d'erreur")
+log.Fatal("Message fatal")  // Appelle os.Exit(1)
+log.Panic("Message de panique")  // Appelle panic()
 ```
 
-## Formatters
-
-### Format Interface
+### Méthodes formatées
 
 ```go
-type Format interface {
-    Format(entry *Entry) []byte
-}
+func Tracef(format string, args ...interface{})
+func Debugf(format string, args ...interface{})
+func Infof(format string, args ...interface{})
+func Warnf(format string, args ...interface{})
+func Errorf(format string, args ...interface{})
+func Fatalf(format string, args ...interface{})
+func Panicf(format string, args ...interface{})
 ```
 
-Custom formatters must implement this interface.
-
-### Default Formatter
-
-Built-in text formatter with customizable options.
+**Exemple :**
 
 ```go
-type Formatter struct {
-    // Configuration options
-}
+log.Infof("L'utilisateur %s s'est connecté", "admin")
+log.Errorf("Échec de la connexion : %v", err)
 ```
 
-### JSON Formatter Example
+## Balises de construction
 
-```go
-type JSONFormatter struct{}
+LazyGophers Log prend en charge les balises de construction pour optimiser les performances dans différents environnements.
 
-func (f *JSONFormatter) Format(entry *Entry) []byte {
-    data := map[string]interface{}{
-        "timestamp": entry.Time.Format(time.RFC3339),
-        "level":     entry.Level.String(),
-        "message":   entry.Message,
-        "caller":    fmt.Sprintf("%s:%d", entry.CallerFile, entry.CallerLine),
-    }
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
-    }
+### Balises disponibles
 
-    jsonData, _ := json.Marshal(data)
-    return append(jsonData, '\n')
-}
+| Balise    | Description                                                      | Utilisation           |
+| --------- | ---------------------------------------------------------------- | --------------------- |
+| (défaut)  | Fonctionnalité complète avec messages de débogage                | Développement général |
+| `debug`   | Informations de débogage améliorées et détails de l'appelant     | Débogage approfondi   |
+| `release` | Optimisé pour la production avec messages de débogage désactivés | Production            |
+| `discard` | Performance maximale avec opérations de journalisation no-op     | Tests de performance  |
 
-// Usage
-logger.SetFormatter(&JSONFormatter{})
-```
-
-## Output Writers
-
-### File Output and Rotation
-
-```go
-func GetOutputWriterHourly(filename string) io.Writer
-```
-
-Creates a writer that rotates log files hourly.
-
-**Parameters:**
-
--   `filename`：Base filename for log files
-
-**Return:**
-
--   `io.Writer`：Rotating file writer
-
-**Example:**
-
-```go
-writer := log.GetOutputWriterHourly("./logs/app.log")
-logger.SetOutput(writer)
-// Creates files like: app-2024010115.log, app-2024010116.log, etc.
-```
-
-### Async Writer
-
-```go
-func NewAsyncWriter(writer io.Writer, bufferSize int) *AsyncWriter
-```
-
-Creates an asynchronous writer for high-performance logging.
-
-**Parameters:**
-
--   `writer`：Underlying writer
--   `bufferSize`：Internal buffer size
-
-**Return:**
-
--   `*AsyncWriter`：Async writer instance
-
-**Methods:**
-
-```go
-func (aw *AsyncWriter) Write(data []byte) (int, error)
-func (aw *AsyncWriter) Close() error
-```
-
-**Example:**
-
-```go
-file, _ := os.Create("app.log")
-asyncWriter := log.NewAsyncWriter(file, 1000)
-defer asyncWriter.Close()
-
-logger.SetOutput(asyncWriter)
-```
-
-## Contextual Logging
-
-### LoggerWithCtx Interface
-
-```go
-type LoggerWithCtx interface {
-    Trace(ctx context.Context, v ...any)
-    Tracef(ctx context.Context, format string, v ...any)
-    Debug(ctx context.Context, v ...any)
-    Debugf(ctx context.Context, format string, v ...any)
-    Info(ctx context.Context, v ...any)
-    Infof(ctx context.Context, format string, v ...any)
-    Warn(ctx context.Context, v ...any)
-    Warnf(ctx context.Context, format string, v ...any)
-    Error(ctx context.Context, v ...any)
-    Errorf(ctx context.Context, format string, v ...any)
-    Fatal(ctx context.Context, v ...any)
-    Fatalf(ctx context.Context, format string, v ...any)
-    Panic(ctx context.Context, v ...any)
-    Panicf(ctx context.Context, format string, v ...any)
-}
-```
-
-### Context Functions
-
-```go
-func SetTrace(traceID string)
-func GetTrace() string
-```
-
-Sets and gets the trace ID for the current goroutine.
-
-**Example:**
-
-```go
-log.SetTrace("trace-123-456")
-log.Info("This message will include trace ID")
-
-traceID := log.GetTrace()
-fmt.Println("Current trace ID:", traceID)
-```
-
-## Build Tags
-
-The library supports conditional compilation using build tags:
-
-### Default Mode
+**Utilisation :**
 
 ```bash
+# Développement (par défaut)
 go build
+
+# Débogage approfondi
+go build -tags=debug
+
+# Production
+go build -tags=release
+
+# Tests de performance
+go build -tags=discard
 ```
 
--   Full functionality enabled
--   Debug messages included
--   Standard performance
+## Optimisation des performances
 
-### Debug Mode
+### Pool d'objets
 
-```bash
-go build -tags debug
-```
+LazyGophers Log utilise `sync.Pool` pour réutiliser les objets `Entry` et les tampons, réduisant l'allocation mémoire et la pression sur le ramasse-miettes.
 
--   Enhanced debugging information
--   Additional runtime checks
--   Detailed caller information
+### Enregistrement conditionnel
 
-### Release Mode
+Les champs coûteux (comme les informations de l'appelant et de trace) ne sont enregistrés que si le niveau de journalisation le permet, évitant les calculs inutiles.
 
-```bash
-go build -tags release
-```
+### Vérification rapide du niveau
 
--   Optimized for production
--   Debug messages disabled
--   Automatic log rotation enabled
+Le niveau de journalisation est vérifié à la couche la plus externe, permettant un retour rapide sans allocation mémoire pour les messages qui seront ignorés.
 
-### Discard Mode
+### Conception sans verrou
 
-```bash
-go build -tags discard
-```
+La plupart des opérations de journalisation ne nécessitent pas de verrou, offrant une meilleure performance en environnement concurrent.
 
--   Maximum performance
--   All logging operations are no-ops
--   Zero overhead
+## Exemples
 
-### Combined Modes
-
-```bash
-go build -tags "debug,discard"    # Debug with discard
-go build -tags "release,discard"  # Release with discard
-```
-
-## Performance Optimization
-
-### Object Pooling
-
-The library internally uses `sync.Pool` to manage:
-
--   Log entry objects
--   Byte buffers
--   Formatter buffers
-
-This reduces garbage collection pressure in high-throughput scenarios.
-
-### Level Checking
-
-Log level checks occur before expensive operations:
-
-```go
-// Efficient - message formatting only happens if level is enabled
-logger.Debugf("Expensive operation result: %+v", expensiveCall())
-
-// Less efficient when debug is disabled in production
-result := expensiveCall()
-logger.Debug("Result:", result)
-```
-
-### Asynchronous Writing
-
-For high-throughput applications:
-
-```go
-asyncWriter := log.NewAsyncWriter(file, 10000)  // Large buffer
-logger.SetOutput(asyncWriter)
-defer asyncWriter.Close()
-```
-
-### Build Tag Optimization
-
-Use appropriate build tags based on environment:
-
--   Development: Default or debug tag
--   Production: Release tag
--   Performance-critical: Discard tag
-
-## Examples
-
-### Basic Usage
+### Journalisation simple
 
 ```go
 package main
 
-import (
-    "github.com/lazygophers/log"
-)
+import "github.com/lazygophers/log"
 
 func main() {
-    log.SetLevel(log.InfoLevel)
-    log.Info("Application starting")
-    log.Warn("This is a warning")
-    log.Error("This is an error")
+    log.Info("Application démarrée")
+    log.Warn("Ceci est un avertissement")
+    log.Error("Ceci est une erreur")
 }
 ```
 
-### Custom Logger
+### Journalisation avec sortie fichier
 
 ```go
 package main
@@ -718,165 +383,87 @@ import (
 )
 
 func main() {
-    logger := log.New()
+    // Créer un journalisation avec sortie fichier
+    logger := log.New().
+        SetLevel(log.InfoLevel).
+        EnableCaller(true).
+        EnableTrace(true).
+        SetOutput(log.GetOutputWriterHourly("/var/log/myapp.log"))
 
-    // Configure the logger
-    logger.SetLevel(log.DebugLevel)
-    logger.EnableCaller(true)
-    logger.SetPrefixMsg("[MyApp] ")
-
-    // Set output to file
-    file, err := os.Create("app.log")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-
-    logger.SetOutput(file)
-
-    logger.Info("Custom logger configured")
-    logger.Debug("Debug info with caller")
+    logger.Debug("Message de débogage avec informations de l'appelant")
+    logger.Info("Message d'information avec informations de trace")
 }
 ```
 
-### High Performance Logging
+### Journalisation conditionnelle
+
+```go
+package main
+
+import "github.com/lazygophers/log"
+
+func main() {
+    logger := log.New().SetLevel(log.WarnLevel)
+
+    // Seuls les messages warn et supérieurs seront journalisés
+    logger.Debug("Ceci ne sera pas journalisé")  // Ignoré
+    logger.Info("Ceci ne sera pas journalisé")   // Ignoré
+    logger.Warn("Ceci sera journalisé")    // Journalisé
+    logger.Error("Ceci sera journalisé")   // Journalisé
+}
+```
+
+### Journalisation avec préfixe personnalisé
+
+```go
+package main
+
+import "github.com/lazygophers/log"
+
+func main() {
+    logger := log.New().
+        SetLevel(log.InfoLevel).
+        SetPrefixMsg("[MyApp] ").
+        SetSuffixMsg(" [DONE]")
+
+    logger.Info("Ceci aura un préfixe et un suffixe")
+}
+```
+
+## Intégration Zap
+
+LazyGophers Log peut être utilisé comme `zap.WriteSyncer` pour une intégration transparente avec les applications existantes.
 
 ```go
 package main
 
 import (
-    "os"
+    "go.uber.org/zap"
     "github.com/lazygophers/log"
 )
 
 func main() {
-    // Create hourly rotating file writer
-    writer := log.GetOutputWriterHourly("./logs/app.log")
+    // Créer un logger zap
+    zapLogger, _ := zap.NewProduction()
 
-    // Wrap with async writer for performance
-    asyncWriter := log.NewAsyncWriter(writer, 5000)
-    defer asyncWriter.Close()
+    // Utiliser lazygophers/log comme WriteSyncer
+    logger := log.New().SetOutput(zapLogger)
 
-    logger := log.New()
-    logger.SetOutput(asyncWriter)
-    logger.SetLevel(log.InfoLevel)  // Skip debug in production
-
-    // High-throughput logging
-    for i := 0; i < 10000; i++ {
-        logger.Infof("Processing request %d", i)
-    }
+    logger.Info("Ceci sera écrit via zap")
 }
 ```
 
-### Context-aware Logging
+## Support
 
-```go
-package main
+-   📖 [Documentation](/)
+-   🐛 [Suivi des problèmes](https://github.com/lazygophers/log/issues)
+-   💬 [Discussions](https://github.com/lazygophers/log/discussions)
+-   📧 Email: support@lazygophers.com
 
-import (
-    "context"
-    "github.com/lazygophers/log"
-)
+## Licence
 
-func main() {
-    logger := log.New()
-    ctxLogger := logger.CloneToCtx()
-
-    ctx := context.Background()
-    log.SetTrace("trace-123-456")
-
-    ctxLogger.Info(ctx, "Processing user request")
-    ctxLogger.Debug(ctx, "Validation completed")
-}
-```
-
-### Custom JSON Formatter
-
-```go
-package main
-
-import (
-    "encoding/json"
-    "os"
-    "time"
-    "github.com/lazygophers/log"
-)
-
-type JSONFormatter struct{}
-
-func (f *JSONFormatter) Format(entry *log.Entry) []byte {
-    data := map[string]interface{}{
-        "timestamp": entry.Time.Format(time.RFC3339Nano),
-        "level":     entry.Level.String(),
-        "message":   entry.Message,
-        "pid":       entry.Pid,
-        "gid":       entry.Gid,
-    }
-
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
-    }
-
-    if entry.CallerName != "" {
-        data["caller"] = map[string]interface{}{
-            "function": entry.CallerName,
-            "file":     entry.CallerFile,
-            "line":     entry.CallerLine,
-        }
-    }
-
-    jsonData, _ := json.MarshalIndent(data, "", "  ")
-    return append(jsonData, '\n')
-}
-
-func main() {
-    logger := log.New()
-    logger.SetFormatter(&JSONFormatter{})
-    logger.EnableCaller(true)
-    logger.SetOutput(os.Stdout)
-
-    log.SetTrace("request-456")
-    logger.Info("JSON formatted message")
-}
-```
-
-## Error Handling
-
-For performance reasons, most logger methods do not return errors. If you need error handling for output operations, implement a custom writer:
-
-```go
-type ErrorCapturingWriter struct {
-    writer io.Writer
-    lastError error
-}
-
-func (w *ErrorCapturingWriter) Write(data []byte) (int, error) {
-    n, err := w.writer.Write(data)
-    if err != nil {
-        w.lastError = err
-    }
-    return n, err
-}
-
-func (w *ErrorCapturingWriter) LastError() error {
-    return w.lastError
-}
-```
-
-## Thread Safety
-
-All logger operations are thread-safe and can be used concurrently across multiple goroutines without additional synchronization mechanisms.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-## 🌍 Multilingual Documentation
-
-This document is available in multiple languages:
-
--   [🇺🇸 English](API.md) (current)
--   [🇨🇳 Simplified Chinese](API_zh-CN.md)
--   [🇹🇼 Traditional Chinese](API_zh-TW.md)
-
----
-
-**LazyGophers Log Complete API Reference - Build Better Applications with Exceptional Logging! 🚀**
+**Pour plus d'informations, consultez la [documentation complète](https://lazygophers.github.io/log/).**
