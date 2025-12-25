@@ -26,9 +26,14 @@ jobs:
         go-version: 1.21
 
     - name: Cache Go modules and build cache
-      uses: ./.github/actions/go-cache
+      uses: actions/cache@v4
       with:
-        go-version: 1.21
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Run go fmt check
       run: |
@@ -50,10 +55,11 @@ jobs:
         go tool cover -html=coverage.out -o coverage.html
 
     - name: Upload coverage artifact
-      uses: ./.github/actions/cache
+      uses: actions/upload-artifact@v4
       with:
+        name: coverage-report
         path: coverage.html
-        key: coverage-${{ github.sha }}
+        retention-days: 30
 
   build:
     runs-on: lazy
@@ -69,9 +75,14 @@ jobs:
         go-version: 1.21
 
     - name: Cache Go modules and build cache
-      uses: ./.github/actions/go-cache
+      uses: actions/cache@v4
       with:
-        go-version: 1.21
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Build
       run: go build ./...
@@ -98,12 +109,17 @@ jobs:
         go-version: 1.21
 
     - name: Cache Go modules
-      uses: ./.github/actions/go-cache
+      uses: actions/cache@v4
       with:
-        go-version: 1.21
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Cache golangci-lint
-      uses: ./.github/actions/cache
+      uses: actions/cache@v4
       with:
         path: ~/.cache/golangci-lint
         key: golangci-lint-${{ runner.os }}-${{ hashFiles('.golangci.yml') }}
@@ -130,12 +146,17 @@ jobs:
         go-version: 1.21
 
     - name: Cache Go modules
-      uses: ./.github/actions/go-cache
+      uses: actions/cache@v4
       with:
-        go-version: 1.21
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Cache gosec
-      uses: ./.github/actions/cache
+      uses: actions/cache@v4
       with:
         path: ~/.cache/gosec
         key: gosec-${{ runner.os }}-${{ github.sha }}
