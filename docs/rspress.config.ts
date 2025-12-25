@@ -6,69 +6,35 @@ export default defineConfig({
   description: 'A comprehensive logging library for Go',
   base: '/log/',
   root: '.',
+  ssg: false,
   builderConfig: {
     output: {
       distPath: {
         root: 'doc_build',
       },
     },
-  },
-  themeConfig: {
-    nav: [
-      {
-        text: 'nav.home',
-        link: '/',
-      },
-      {
-        text: 'nav.api',
-        link: '/API',
-      },
-      {
-        text: 'nav.changelog',
-        link: '/CHANGELOG',
-      },
-      {
-        text: 'nav.contributing',
-        link: '/CONTRIBUTING',
-      },
-      {
-        text: 'nav.community',
-        items: [
-          {
-            text: 'nav.codeOfConduct',
-            link: '/CODE_OF_CONDUCT',
+    html: {
+      tags: [
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'viewport',
+            content: 'width=device-width, initial-scale=1.0',
           },
-          {
-            text: 'nav.securityPolicy',
-            link: '/SECURITY',
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'description',
+            content: 'A comprehensive logging library for Go',
           },
-        ],
-      },
-    ],
-    socialLinks: [
-      {
-        icon: 'github',
-        link: 'https://github.com/lazygophers/log',
-      },
-    ],
-    search: {
-      provider: 'local',
+        },
+      ],
     },
-    returnToTop: true,
-    locales: [
-      {
-        lang: 'en',
-        outlineTitle: 'ON THIS PAGE',
-      },
-      {
-        lang: 'zh-CN',
-        outlineTitle: '大纲',
-      },
-      {
-        lang: 'zh-TW',
-        outlineTitle: '大綱',
-      },
-    ],
+  },
+  languageParity: {
+    enabled: true,
+    exclude: [],
   },
   locales: [
     {
@@ -90,7 +56,30 @@ export default defineConfig({
       description: '一個全面的 Go 語言日誌庫',
     },
   ],
-  i18n: {
-    path: './i18n.json',
+  themeConfig: {
+    enableContentAnimation: true,
+    enableAppearanceAnimation: true,
+    darkMode: true,
+    search: true,
+    locales: [
+      {
+        lang: 'en',
+        label: 'English',
+        outlineTitle: 'ON THIS PAGE',
+        lastUpdatedText: 'Last Updated',
+      },
+      {
+        lang: 'zh-CN',
+        label: '简体中文',
+        outlineTitle: '大纲',
+        lastUpdatedText: '最后更新',
+      },
+      {
+        lang: 'zh-TW',
+        label: '繁體中文',
+        outlineTitle: '大綱',
+        lastUpdatedText: '最後更新',
+      },
+    ],
   },
 });
