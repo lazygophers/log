@@ -38,6 +38,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
         working-directory: ./docs
+      - name: Clean build cache
+        run: |
+          rm -rf doc_build
+          rm -rf node_modules/.rspress
+          rm -rf node_modules/.cache
+        working-directory: ./docs
       - name: Build with Rspress
         run: |
           pnpm build
