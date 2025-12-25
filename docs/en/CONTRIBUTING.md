@@ -1,5 +1,6 @@
 ---
 pageType: custom
+titleSuffix: ' | LazyGophers Log'
 ---
 # 🤝 Contributing to LazyGophers Log
 

@@ -1,3 +1,7 @@
+---
+pageType: custom
+titleSuffix: ' | LazyGophers Log'
+---
 # 📚 API Documentation
 
 ## 概述

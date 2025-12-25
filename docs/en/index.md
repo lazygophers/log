@@ -1,28 +1,30 @@
 ---
 pageType: custom
+titleSuffix: " | LazyGophers Log"
 ---
+
 import { HomeHero } from '@theme';
 
 <HomeHero
-  name="hero.name"
-  text="hero.text"
-  tagline="hero.tagline"
-  image={{
+name="hero.name"
+text="hero.text"
+tagline="hero.tagline"
+image={{
     src: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
     alt: 'LazyGophers Log Logo'
   }}
-  actions={[
-    {
-      text: 'hero.gettingStarted',
-      link: '#quick-start',
-      theme: 'brand'
-    },
-    {
-      text: 'hero.apiReference',
-      link: '/API',
-      theme: 'alt'
-    }
-  ]}
+actions={[
+{
+text: 'hero.gettingStarted',
+link: '#quick-start',
+theme: 'brand'
+},
+{
+text: 'hero.apiReference',
+link: '/API',
+theme: 'alt'
+}
+]}
 />
 
 <div align="center" style={{ margin: '2rem 0' }}>
@@ -37,44 +39,44 @@ import { HomeFeature } from '@theme';
 ## ✨ 核心特性
 
 <HomeFeature
-  features={[
-    {
-      title: 'feature.highPerformance',
-      details: 'feature.highPerformance.desc',
-      icon: '🚀',
-      span: 3
-    },
-    {
-      title: 'feature.richLevels',
-      details: 'feature.richLevels.desc',
-      icon: '📊',
-      span: 3
-    },
-    {
-      title: 'feature.flexibleConfig',
-      details: 'feature.flexibleConfig.desc',
-      icon: '⚙️',
-      span: 3
-    },
-    {
-      title: 'feature.fileRotation',
-      details: 'feature.fileRotation.desc',
-      icon: '🔄',
-      span: 3
-    },
-    {
-      title: 'feature.zapCompatibility',
-      details: 'feature.zapCompatibility.desc',
-      icon: '🔌',
-      span: 3
-    },
-    {
-      title: 'feature.simpleAPI',
-      details: 'feature.simpleAPI.desc',
-      icon: '🎯',
-      span: 3
-    }
-  ]}
+features={[
+{
+title: 'feature.highPerformance',
+details: 'feature.highPerformance.desc',
+icon: '🚀',
+span: 3
+},
+{
+title: 'feature.richLevels',
+details: 'feature.richLevels.desc',
+icon: '📊',
+span: 3
+},
+{
+title: 'feature.flexibleConfig',
+details: 'feature.flexibleConfig.desc',
+icon: '⚙️',
+span: 3
+},
+{
+title: 'feature.fileRotation',
+details: 'feature.fileRotation.desc',
+icon: '🔄',
+span: 3
+},
+{
+title: 'feature.zapCompatibility',
+details: 'feature.zapCompatibility.desc',
+icon: '🔌',
+span: 3
+},
+{
+title: 'feature.simpleAPI',
+details: 'feature.simpleAPI.desc',
+icon: '🎯',
+span: 3
+}
+]}
 />
 
 ## 🚀 快速开始

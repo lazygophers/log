@@ -29,6 +29,70 @@ export default defineConfig({
             content: 'A comprehensive logging library for Go',
           },
         },
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'icon',
+            href: '/log/public/logo.svg',
+            type: 'image/svg+xml',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:title',
+            content: 'LazyGophers Log Documentation',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:description',
+            content: 'A comprehensive logging library for Go',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:type',
+            content: 'website',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:image',
+            content: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:card',
+            content: 'summary',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:title',
+            content: 'LazyGophers Log Documentation',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:description',
+            content: 'A comprehensive logging library for Go',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:image',
+            content: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
+          },
+        },
       ],
     },
   },

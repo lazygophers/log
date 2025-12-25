@@ -1,6 +1,8 @@
 ---
 pageType: custom
+titleSuffix: " | LazyGophers Log"
 ---
+
 import { HomeHero } from '@theme';
 
 <HomeHero
