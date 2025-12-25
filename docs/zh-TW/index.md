@@ -8,21 +8,14 @@ titleSuffix: " | LazyGophers Log"
 
 簡潔的 API、卓越的性能和靈活的配置
 
-<div align="center" style="margin: 2rem 0">
-  <img src="/log/public/logo.svg" alt="LazyGophers Log Logo" style="width: 200px; margin-bottom: 1rem">
-  
-  <div style="margin: 1rem 0; display: flex; align-items: center; gap: 10px">
-    <a href="https://github.com/lazygophers/log/actions/workflows/ci.yml"><img src="https://github.com/lazygophers/log/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
-    <a href="https://goreportcard.com/report/github.com/lazygophers/log"><img src="https://goreportcard.com/badge/github.com/lazygophers/log" alt="Go Report Card"></a>
-    <a href="https://pkg.go.dev/github.com/lazygophers/log"><img src="https://pkg.go.dev/badge/github.com/lazygophers/log.svg" alt="Go Reference"></a>
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
-  </div>
-  
-  <div style={{ margin: '2rem 0' }}>
-    <a href="#quick-start" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">快速開始</a>
-    <a href="/zh-TW/API" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px">API 參考</a>
-  </div>
-</div>
+![LazyGophers Log Logo](/log/public/logo.svg)
+
+[![CI Status](https://github.com/lazygophers/log/actions/workflows/ci.yml/badge.svg)](https://github.com/lazygophers/log/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
+[![Go Reference](https://pkg.go.dev/badge/github.com/lazygophers/log.svg)](https://pkg.go.dev/github.com/lazygophers/log)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[快速開始](#quick-start) | [API 參考](/zh-TW/API)
 
 ## ✨ 核心特性
 
@@ -93,9 +86,9 @@ func main() {
 
 ## 🌍 多語言文檔
 
-- [🇺🇸 English](/)
-- [🇨🇳 簡體中文](/zh-CN/)
-- [🇹🇼 繁體中文](/zh-TW/)
+-   [🇺🇸 English](/)
+-   [🇨🇳 簡體中文](/zh-CN/)
+-   [🇹🇼 繁體中文](/zh-TW/)
 
 ## 📄 許可證
 
@@ -107,9 +100,6 @@ func main() {
 
 ---
 
-<div align="center">
-  <p><strong>LazyGophers Log</strong> 旨在成為 Go 開發者的首選日誌解決方案，既注重性能又注重易用性。無論您是構建小型工具還是大型分布式系統，這個庫都能提供恰到好處的功能和易用性平衡。</p>
-  <a href="https://github.com/lazygophers/log" style="display: inline-block; padding: 12px 24px; background-color: #24292e; color: white; text-decoration: none; border-radius: 6px; margin: 1rem 0">
-    <span style="margin-right: 8px">⭐</span>Star on GitHub
-  </a>
-</div>
+**LazyGophers Log** 旨在成為 Go 開發者的首選日誌解決方案，既注重性能又注重易用性。無論您是構建小型工具還是大型分布式系統，這個庫都能提供恰到好處的功能和易用性平衡。
+
+[⭐ Star on GitHub](https://github.com/lazygophers/log)
