@@ -37,3 +37,4 @@ tmp/
 temp/
 
 *.prof
+build-log.zip
