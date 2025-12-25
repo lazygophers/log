@@ -3,6 +3,8 @@ pageType: custom
 titleSuffix: ' | LazyGophers Log'
 ---
 import { HomeHero } from '@theme';
+import { HomeFeature } from '@theme';
+import { LinkCard } from '@theme';
 
 <HomeHero
   name="hero.name"
@@ -32,8 +34,6 @@ import { HomeHero } from '@theme';
   <a href="https://pkg.go.dev/github.com/lazygophers/log"><img src="https://pkg.go.dev/badge/github.com/lazygophers/log.svg" alt="Go Reference" style={{ margin: '0 10px' }}></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
 </div>
-
-import { HomeFeature } from '@theme';
 
 ## ✨ 核心特性
 
@@ -114,8 +114,6 @@ func main() {
     customLogger.Info("这是来自自定义日志器的消息")
 }
 ```
-
-import { LinkCard } from '@theme';
 
 ## 📚 文档导航
 

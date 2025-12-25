@@ -4,27 +4,29 @@ titleSuffix: " | LazyGophers Log"
 ---
 
 import { HomeHero } from '@theme';
+import { HomeFeature } from '@theme';
+import { LinkCard } from '@theme';
 
 <HomeHero
-name="hero.name"
-text="hero.text"
-tagline="hero.tagline"
-image={{
+  name="hero.name"
+  text="hero.text"
+  tagline="hero.tagline"
+  image={{
     src: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
     alt: 'LazyGophers Log Logo'
   }}
-actions={[
-{
-text: 'hero.gettingStarted',
-link: '#quick-start',
-theme: 'brand'
-},
-{
-text: 'hero.apiReference',
-link: '/zh-TW/API',
-theme: 'alt'
-}
-]}
+  actions={[
+    {
+      text: 'hero.gettingStarted',
+      link: '#quick-start',
+      theme: 'brand'
+    },
+    {
+      text: 'hero.apiReference',
+      link: '/zh-TW/API',
+      theme: 'alt'
+    }
+  ]}
 />
 
 <div align="center" style={{ margin: '2rem 0' }}>
@@ -36,47 +38,45 @@ theme: 'alt'
 
 ## ✨ 核心特性
 
-import { HomeFeature } from '@theme';
-
 <HomeFeature
-features={[
-{
-title: 'feature.highPerformance',
-details: 'feature.highPerformance.desc',
-icon: '🚀',
-span: 3
-},
-{
-title: 'feature.richLevels',
-details: 'feature.richLevels.desc',
-icon: '📊',
-span: 3
-},
-{
-title: 'feature.flexibleConfig',
-details: 'feature.flexibleConfig.desc',
-icon: '⚙️',
-span: 3
-},
-{
-title: 'feature.fileRotation',
-details: 'feature.fileRotation.desc',
-icon: '🔄',
-span: 3
-},
-{
-title: 'feature.zapCompatibility',
-details: 'feature.zapCompatibility.desc',
-icon: '🔌',
-span: 3
-},
-{
-title: 'feature.simpleAPI',
-details: 'feature.simpleAPI.desc',
-icon: '🎯',
-span: 3
-}
-]}
+  features={[
+    {
+      title: 'feature.highPerformance',
+      details: 'feature.highPerformance.desc',
+      icon: '🚀',
+      span: 3
+    },
+    {
+      title: 'feature.richLevels',
+      details: 'feature.richLevels.desc',
+      icon: '📊',
+      span: 3
+    },
+    {
+      title: 'feature.flexibleConfig',
+      details: 'feature.flexibleConfig.desc',
+      icon: '⚙️',
+      span: 3
+    },
+    {
+      title: 'feature.fileRotation',
+      details: 'feature.fileRotation.desc',
+      icon: '🔄',
+      span: 3
+    },
+    {
+      title: 'feature.zapCompatibility',
+      details: 'feature.zapCompatibility.desc',
+      icon: '🔌',
+      span: 3
+    },
+    {
+      title: 'feature.simpleAPI',
+      details: 'feature.simpleAPI.desc',
+      icon: '🎯',
+      span: 3
+    }
+  ]}
 />
 
 ## 🚀 快速開始
@@ -117,8 +117,6 @@ func main() {
 ```
 
 ## 📚 文檔導航
-
-import { LinkCard } from '@theme';
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', margin: '2rem 0' }}>
   <LinkCard
