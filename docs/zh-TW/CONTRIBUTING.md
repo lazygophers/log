@@ -1,5 +1,4 @@
 ---
-pageType: custom
 titleSuffix: ' | LazyGophers Log'
 ---
 # 🤝 为 LazyGophers Log 贡献代码

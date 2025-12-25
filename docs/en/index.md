@@ -9,7 +9,7 @@ A High-Performance Logging Library for Go
 Simple API, excellent performance, and flexible configuration
 
 <div align="center" style="margin: 2rem 0">
-  <img src="https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg" alt="LazyGophers Log Logo" style="width: 200px; margin-bottom: 1rem">
+  <img src="/log/public/logo.svg" alt="LazyGophers Log Logo" style="width: 200px; margin-bottom: 1rem">
   
   <div style="margin: 1rem 0; display: flex; align-items: center; gap: 10px">
     <a href="https://github.com/lazygophers/log/actions/workflows/ci.yml"><img src="https://github.com/lazygophers/log/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>

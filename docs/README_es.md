@@ -1,5 +1,4 @@
 ---
-pageType: custom
 ---
 
 # lazygophers/log

@@ -8,10 +8,10 @@ titleSuffix: ' | LazyGophers Log'
 
 简洁的 API、卓越的性能和灵活的配置
 
-<div align="center" style={{ margin: '2rem 0' }}>
-  <img src="https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg" alt="LazyGophers Log Logo" style="width: 200px; margin-bottom: 1rem">
+<div align="center" style="margin: 2rem 0">
+  <img src="/log/public/logo.svg" alt="LazyGophers Log Logo" style="width: 200px; margin-bottom: 1rem">
   
-  <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <div style="margin: 1rem 0; display: flex; align-items: center; gap: 10px">
     <a href="https://github.com/lazygophers/log/actions/workflows/ci.yml"><img src="https://github.com/lazygophers/log/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
     <a href="https://goreportcard.com/report/github.com/lazygophers/log"><img src="https://goreportcard.com/badge/github.com/lazygophers/log" alt="Go Report Card"></a>
     <a href="https://pkg.go.dev/github.com/lazygophers/log"><img src="https://pkg.go.dev/badge/github.com/lazygophers/log.svg" alt="Go Reference"></a>

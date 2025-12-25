@@ -1,5 +1,4 @@
 ---
-pageType: custom
 titleSuffix: ' | LazyGophers Log'
 ---
 # 📋 Changelog

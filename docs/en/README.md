@@ -1,6 +1,5 @@
 ---
-pageType: custom
-titleSuffix: ' | LazyGophers Log'
+titleSuffix: " | LazyGophers Log"
 ---
 # lazygophers/log
 
@@ -14,12 +13,12 @@ A high-performance, flexible Go logging library built on zap, providing rich fea
 ## 📖 Documentation Languages
 
 -   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](docs/README_zh-CN.md)
--   [🇹🇼 繁體中文](docs/README_zh-TW.md)
--   [🇫🇷 Français](docs/README_fr.md)
--   [🇷🇺 Русский](docs/README_ru.md)
--   [🇪🇸 Español](docs/README_es.md)
--   [🇸🇦 العربية](docs/README_ar.md)
+-   [🇨🇳 简体中文](../zh-CN/README.md)
+-   [🇹🇼 繁體中文](../zh-TW/README.md)
+-   [🇫🇷 Français](../README_fr.md)
+-   [🇷🇺 Русский](../README_ru.md)
+-   [🇪🇸 Español](../README_es.md)
+-   [🇸🇦 العربية](../README_ar.md)
 
 ## 🚀 Online Documentation
 

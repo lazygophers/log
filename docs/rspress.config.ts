@@ -6,7 +6,9 @@ export default defineConfig({
   description: 'A comprehensive logging library for Go',
   base: '/log/',
   root: '.',
-  ssg: false,
+  ssg: {
+    experimentalExcludeRoutePaths: ['/rspress.config'],
+  },
   builderConfig: {
     output: {
       distPath: {
@@ -62,7 +64,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             property: 'og:image',
-            content: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
+            content: '/log/public/logo.svg',
           },
         },
         {
@@ -90,7 +92,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             name: 'twitter:image',
-            content: 'https://raw.githubusercontent.com/lazygophers/log/main/docs/public/logo.svg',
+            content: '/log/public/logo.svg',
           },
         },
       ],

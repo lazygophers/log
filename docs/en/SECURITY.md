@@ -1,113 +1,112 @@
 ---
-pageType: custom
-titleSuffix: ' | LazyGophers Log'
+titleSuffix: " | LazyGophers Log"
 ---
-# 🔒 安全策略
+# 🔒 Security Policy
 
-## 我们的安全承诺
+## Our Security Commitment
 
-LazyGophers Log 高度重视安全性。我们致力于为我们的日志库维护最高的安全标准，保护用户应用程序的安全。我们感谢您负责任地披露安全漏洞的努力，并将尽一切努力认可您对安全社区的贡献。
+LazyGophers Log takes security very seriously. We are committed to maintaining the highest security standards for our logging library to protect the security of user applications. We appreciate your efforts in responsibly disclosing security vulnerabilities and will make every effort to recognize your contributions to the security community.
 
-### 安全原则
+### Security Principles
 
--   **设计即安全**：安全考虑融入开发流程的每个方面
--   **透明度**：我们保持关于安全问题和修复的开放沟通
--   **社区合作**：我们与安全研究人员和用户协作
--   **持续改进**：我们定期审查和增强安全实践
+-   **Security by Design**: Security considerations are integrated into every aspect of the development process
+-   **Transparency**: We maintain open communication about security issues and fixes
+-   **Community Collaboration**: We collaborate with security researchers and users
+-   **Continuous Improvement**: We regularly review and enhance security practices
 
-## 支持的版本
+## Supported Versions
 
-我们积极为以下 LazyGophers Log 版本提供安全更新：
+We actively provide security updates for the following LazyGophers Log versions:
 
-| 版本  | 支持状态 | 状态   | 生命周期结束 | 说明           |
-| ----- | -------- | ------ | ------------ | -------------- |
-| 1.x.x | ✅ 是    | 活跃   | 待定         | 完整安全支持   |
-| 0.9.x | ✅ 是    | 维护   | 2024-06-01   | 仅关键安全修复 |
-| 0.8.x | ⚠️ 有限  | 遗留   | 2024-03-01   | 仅紧急修复     |
-| 0.7.x | ❌ 否    | 已弃用 | 2024-01-01   | 无安全支持     |
-| < 0.7 | ❌ 否    | 已弃用 | 2023-12-01   | 无安全支持     |
+| Version | Supported | Status | End of Life | Description |
+| ------- | --------- | ------ | ----------- | ----------- |
+| 1.x.x   | ✅ Yes    | Active | TBD         | Full security support |
+| 0.9.x   | ✅ Yes    | Maintenance | 2024-06-01 | Critical security fixes only |
+| 0.8.x   | ⚠️ Limited | Legacy | 2024-03-01 | Emergency fixes only |
+| 0.7.x   | ❌ No     | Deprecated | 2024-01-01 | No security support |
+| < 0.7   | ❌ No     | Deprecated | 2023-12-01 | No security support |
 
-### 支持策略详情
+### Support Policy Details
 
--   **活跃**：完整的安全更新、定期补丁、主动监控
--   **维护**：仅关键和高严重性安全问题
--   **遗留**：仅关键漏洞的紧急安全修复
--   **已弃用**：无安全支持 - 用户应立即升级
+-   **Active**: Full security updates, regular patches, proactive monitoring
+-   **Maintenance**: Critical and high severity security issues only
+-   **Legacy**: Emergency security fixes for critical vulnerabilities only
+-   **Deprecated**: No security support - users should upgrade immediately
 
-### 升级建议
+### Upgrade Recommendations
 
--   **立即行动**：使用版本 < 0.8.x 的用户应立即升级到 1.x.x
--   **计划迁移**：使用 0.8.x - 0.9.x 版本的用户应在生命周期结束日期前计划迁移到 1.x.x
--   **保持最新**：始终使用最新的稳定版本以获得最佳安全性
+-   **Immediate Action**: Users on versions < 0.8.x should upgrade to 1.x.x immediately
+-   **Planned Migration**: Users on versions 0.8.x - 0.9.x should plan migration to 1.x.x before end of life dates
+-   **Stay Updated**: Always use the latest stable version for best security
 
-## 🐛 报告安全漏洞
+## 🐛 Reporting Security Vulnerabilities
 
-### 请勿通过公共渠道报告安全漏洞
+### Do NOT Report Security Vulnerabilities Through Public Channels
 
-请**不要**通过以下渠道报告安全漏洞：
+Please **do not** report security vulnerabilities through the following channels:
 
--   公开的 GitHub issues
--   公开讨论
--   社交媒体
--   邮件列表
--   社区论坛
+-   Public GitHub issues
+-   Public discussions
+-   Social media
+-   Mailing lists
+-   Community forums
 
-### 安全报告渠道
+### Security Reporting Channels
 
-要报告安全漏洞，请使用以下安全渠道之一：
+To report a security vulnerability, please use one of the following secure channels:
 
-#### 主要联系方式
+#### Primary Contact
 
--   **邮箱**: security@lazygophers.com
--   **PGP 密钥**: 可应要求提供
--   **邮件主题**: `[SECURITY] Vulnerability Report - LazyGophers Log`
+-   **Email**: security@lazygophers.com
+-   **PGP Keys**: Available upon request
+-   **Subject**: `[SECURITY] Vulnerability Report - LazyGophers Log`
 
-#### GitHub 安全公告
+#### GitHub Security Advisory
 
--   访问我们的 [GitHub 安全公告](https://github.com/lazygophers/log/security/advisories)
--   点击 "New draft security advisory"
--   提供有关漏洞的详细信息
+-   Visit our [GitHub Security Advisories](https://github.com/lazygophers/log/security/advisories)
+-   Click "New draft security advisory"
+-   Provide detailed information about the vulnerability
 
-#### 备用联系方式
+#### Backup Contact
 
--   **邮箱**: support@lazygophers.com (标记为 CONFIDENTIAL SECURITY ISSUE)
+-   **Email**: support@lazygophers.com (mark as CONFIDENTIAL SECURITY ISSUE)
 
-### 报告中应包含的内容
+### What to Include in Your Report
 
-请在安全漏洞报告中包含以下信息：
+Please include the following information in your security vulnerability report:
 
-#### 基本信息
+#### Basic Information
 
--   **摘要**：漏洞的简要描述
--   **影响**：潜在影响和严重性评估
--   **重现步骤**：重现问题的详细步骤
--   **概念验证**：证明漏洞的代码或步骤
--   **受影响版本**：受影响的特定版本或版本范围
--   **环境**：操作系统、Go 版本、使用的构建标签
+-   **Summary**: Brief description of the vulnerability
+-   **Impact**: Potential impact and severity assessment
+-   **Steps to Reproduce**: Detailed steps to reproduce the issue
+-   **Proof of Concept**: Code or steps demonstrating the vulnerability
+-   **Affected Versions**: Specific versions or version ranges affected
+-   **Environment**: Operating system, Go version, build tags used
 
-#### 可选但有用的信息
+#### Optional but Useful Information
 
--   **CVSS 评分**：如果您能计算一个
--   **CWE 参考**：常见弱点枚举参考
--   **建议修复**：如果您有修复想法
--   **时间线**：您的披露时间线偏好
+-   **CVSS Score**: If you can calculate one
+-   **CWE Reference**: Common Weakness Enumeration reference
+-   **Suggested Fix**: If you have ideas for a fix
+-   **Timeline**: Your preferred disclosure timeline
 
-### 示例报告模板
+### Example Report Template
 
 ```
-主题: [SECURITY] 日志格式化器中的缓冲区溢出
+Subject: [SECURITY] Buffer Overflow in Log Formatter
 
-摘要:
-在处理极长日志消息时，日志格式化器中存在缓冲区溢出漏洞。
+Summary:
+A buffer overflow vulnerability exists in the log formatter when processing extremely long log messages.
 
-影响:
-- 潜在的任意代码执行
-- 内存损坏
-- 拒绝服务
+Impact:
+- Potential arbitrary code execution
+- Memory corruption
+- Denial of service
 
-重现步骤:
-1. 创建日志记录器实例
-2. 记录超过10,000个字符的消息
+Steps to Reproduce:
+1. Create a logger instance
+2. Log a message with over 10,000 characters
 3. Observe memory corruption
 
 Affected Versions:
@@ -122,114 +121,114 @@ Proof of Concept:
 [Include minimal code example]
 ```
 
-## 📋 安全响应流程
+## 📋 Security Response Process
 
-### 我们的响应时间线
+### Our Response Timeline
 
-| 时间范围 | 行动           |
-| -------- | -------------- |
-| 24 小时  | 初步确认报告   |
-| 72 小时  | 初步评估和分类 |
-| 1 周     | 开始详细调查   |
-| 2-4 周   | 修复开发和测试 |
-| 4-6 周   | 协调披露和发布 |
+| Timeframe | Action |
+| --------- | ------ |
+| 24 hours  | Initial acknowledgment of report |
+| 72 hours  | Initial assessment and classification |
+| 1 week    | Start detailed investigation |
+| 2-4 weeks | Fix development and testing |
+| 4-6 weeks | Coordinated disclosure and release |
 
-### 响应流程步骤
+### Response Process Steps
 
-#### 1. 确认 (24 小时)
+#### 1. Acknowledgment (24 hours)
 
--   确认收到漏洞报告
--   分配跟踪编号
--   请求任何缺失的信息
+-   Confirm receipt of vulnerability report
+-   Assign tracking number
+-   Request any missing information
 
-#### 2. 评估 (72 小时)
+#### 2. Assessment (72 hours)
 
--   初步严重性评估
--   受影响版本识别
--   影响分析
--   分配 CVSS 评分
+-   Initial severity assessment
+-   Identification of affected versions
+-   Impact analysis
+-   Assign CVSS score
 
-#### 3. 调查 (1 周)
+#### 3. Investigation (1 week)
 
--   详细技术分析
--   根本原因识别
--   利用场景开发
--   修复策略规划
+-   Detailed technical analysis
+-   Root cause identification
+-   Exploitation scenario development
+-   Fix strategy planning
 
-#### 4. 开发 (2-4 周)
+#### 4. Development (2-4 weeks)
 
--   安全补丁开发
--   内部测试
--   跨支持版本的回归测试
--   文档更新
+-   Security patch development
+-   Internal testing
+-   Regression testing across supported versions
+-   Documentation updates
 
-#### 5. 披露 (4-6 周)
+#### 5. Disclosure (4-6 weeks)
 
--   与报告者协调披露时间线
--   准备安全公告
--   发布修补版本
--   公开披露
+-   Coordinate disclosure timeline with reporter
+-   Prepare security advisory
+-   Release patched versions
+-   Public disclosure
 
-### 严重性分类
+### Severity Classification
 
-我们使用以下严重性分类：
+We use the following severity classifications:
 
-#### 🔴 严重 (CVSS 9.0-10.0)
+#### 🔴 Critical (CVSS 9.0-10.0)
 
--   对机密性、完整性或可用性的即时威胁
--   远程代码执行
--   完全系统妥协
--   **响应**: 72 小时内紧急补丁
+-   Immediate threat to confidentiality, integrity, or availability
+-   Remote code execution
+-   Complete system compromise
+-   **Response**: Emergency patch within 72 hours
 
-#### 🟠 高 (CVSS 7.0-8.9)
+#### 🟠 High (CVSS 7.0-8.9)
 
--   对安全的重大影响
--   权限提升
--   数据暴露
--   **响应**: 1-2 周内补丁
+-   Significant security impact
+-   Privilege escalation
+-   Data exposure
+-   **Response**: Patch within 1-2 weeks
 
-#### 🟡 中 (CVSS 4.0-6.9)
+#### 🟡 Medium (CVSS 4.0-6.9)
 
--   对安全的中等影响
--   有限的数据暴露
--   部分系统妥协
--   **响应**: 1 个月内补丁
+-   Moderate security impact
+-   Limited data exposure
+-   Partial system compromise
+-   **Response**: Patch within 1 month
 
-#### 🟢 低 (CVSS 0.1-3.9)
+#### 🟢 Low (CVSS 0.1-3.9)
 
--   对安全的轻微影响
--   信息泄露
--   有限范围的漏洞
--   **响应**: 下次常规发布中补丁
+-   Minor security impact
+-   Information leakage
+-   Limited scope vulnerability
+-   **Response**: Patch in next regular release
 
-### 沟通偏好
+### Communication Preferences
 
-#### 我们需要您提供的
+#### What We Need From You
 
--   **负责任披露**：给我们合理的时间来修复问题
--   **沟通**：回应我们的问题和澄清请求
--   **协调**：与我们合作确定披露时间
--   **测试**：在可能的情况下帮助验证我们的修复
+-   **Responsible Disclosure**: Give us reasonable time to fix the issue
+-   **Communication**: Respond to our questions and clarification requests
+-   **Coordination**: Work with us to determine disclosure timing
+-   **Testing**: Help verify our fix if possible
 
-#### 您可以期待的
+#### What You Can Expect
 
--   **确认**：及时确认您的报告
--   **更新**：在整个过程中定期状态更新
--   **致谢**：公开致谢您的发现（除非您希望匿名）
--   **尊重**：专业和尊重的沟通
+-   **Acknowledgment**: Timely confirmation of your report
+-   **Updates**: Regular status updates throughout the process
+-   **Recognition**: Public acknowledgment of your discovery (unless you prefer anonymity)
+-   **Respect**: Professional and respectful communication
 
-## 🛡️ 安全最佳实践
+## 🛡️ Security Best Practices
 
-### 面向应用程序开发者
+### For Application Developers
 
-#### 部署安全
+#### Deployment Security
 
--   **使用最新版本**：始终使用带有安全补丁的最新支持版本
--   **监控公告**：订阅我们的安全邮件列表和 GitHub 安全公告
--   **安全配置**：遵循我们的安全加固指南
--   **定期更新**：关键问题发布后 48 小时内应用安全更新
--   **版本固定**：在生产环境中使用特定版本号，而不是版本范围
--   **安全扫描**：定期扫描您的应用程序和依赖项以查找漏洞
+-   **Use Latest Versions**: Always use the latest supported versions with security patches
+-   **Monitor Announcements**: Subscribe to our security mailing list and GitHub security advisories
+-   **Secure Configuration**: Follow our security hardening guidelines
+-   **Regular Updates**: Apply security updates within 48 hours of critical issues being released
+-   **Version Pinning**: Use specific version numbers in production, not version ranges
+-   **Security Scanning**: Regularly scan your application and dependencies for vulnerabilities
 
 #### Log Security & Data Protection
 
@@ -296,99 +295,99 @@ Proof of Concept:
 -   **Release Management**: Follow secure release processes with proper approvals
 -   **Vulnerability Disclosure**: Maintain coordinated vulnerability disclosure process
 
-## 📚 安全资源
+## 📚 Security Resources
 
-### 内部文档
+### Internal Documentation
 
--   [贡献指南](CONTRIBUTING.md) - 贡献者的安全考虑
--   [行为准则](CODE_OF_CONDUCT.md) - 社区安全与安全
--   [API 文档](API.md) - 安全使用模式和示例
--   [构建配置指南](README.md#build-tags) - 构建标签的安全影响
+-   [Contributing Guide](CONTRIBUTING.md) - Security considerations for contributors
+-   [Code of Conduct](CODE_OF_CONDUCT.md) - Community security and safety
+-   [API Documentation](API.md) - Secure usage patterns and examples
+-   [Build Configuration Guide](README.md#build-tags) - Security implications of build tags
 
-### 外部安全标准与框架
+### External Security Standards & Frameworks
 
--   [NIST 网络安全框架](https://www.nist.gov/cyberframework) - 全面的安全框架
--   [OWASP Top 10](https://owasp.org/www-project-top-ten/) - 最关键的 Web 应用程序安全风险
--   [OWASP 日志记录备忘单](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) - 日志记录安全最佳实践
--   [Go 安全检查清单](https://github.com/Checkmarx/Go-SCP) - Go 特定安全指南
--   [CIS 控制](https://www.cisecurity.org/controls/) - 关键安全控制
--   [ISO 27001](https://www.iso.org/isoiec-27001-information-security.html) - 信息安全管理
+-   [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework) - Comprehensive security framework
+-   [OWASP Top 10](https://owasp.org/www-project-top-ten/) - Most critical web application security risks
+-   [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) - Logging security best practices
+-   [Go Security Checklist](https://github.com/Checkmarx/Go-SCP) - Go-specific security guide
+-   [CIS Controls](https://www.cisecurity.org/controls/) - Critical security controls
+-   [ISO 27001](https://www.iso.org/isoiec-27001-information-security.html) - Information security management
 
-### 漏洞数据库与情报
+### Vulnerability Databases & Intelligence
 
--   [常见漏洞和暴露 (CVE)](https://cve.mitre.org/) - 漏洞数据库
--   [国家漏洞数据库 (NVD)](https://nvd.nist.gov/) - 美国政府漏洞数据库
--   [Go 漏洞数据库](https://pkg.go.dev/vuln/) - Go 特定漏洞
--   [GitHub 安全公告](https://github.com/advisories) - 开源安全公告
--   [Snyk 漏洞数据库](https://snyk.io/vuln/) - 商业漏洞情报
+-   [Common Vulnerabilities and Exposures (CVE)](https://cve.mitre.org/) - Vulnerability database
+-   [National Vulnerability Database (NVD)](https://nvd.nist.gov/) - US government vulnerability database
+-   [Go Vulnerability Database](https://pkg.go.dev/vuln/) - Go-specific vulnerabilities
+-   [GitHub Security Advisories](https://github.com/advisories) - Open source security advisories
+-   [Snyk Vulnerability Database](https://snyk.io/vuln/) - Commercial vulnerability intelligence
 
-### 安全工具与扫描器
+### Security Tools & Scanners
 
-#### 静态分析工具
+#### Static Analysis Tools
 
--   **`gosec`**: Go 安全检查器 - 检测 Go 代码中的安全缺陷
--   **`staticcheck`**: 带有安全检查的高级 Go 代码检查器
--   **`semgrep`**: 具有自定义安全规则的多语言静态分析
--   **`CodeQL`**: GitHub 的语义代码分析，用于安全漏洞
--   **`nancy`**: 检查 Go 依赖项中的已知漏洞
+-   **`gosec`**: Go security checker - Detects security issues in Go code
+-   **`staticcheck`**: Advanced Go code checker with security checks
+-   **`semgrep`**: Multi-language static analysis with custom security rules
+-   **`CodeQL`**: GitHub's semantic code analysis for security vulnerabilities
+-   **`nancy`**: Checks known vulnerabilities in Go dependencies
 
-#### 动态分析与测试
+#### Dynamic Analysis & Testing
 
--   **`govulncheck`**: 官方 Go 漏洞检查器
--   **Go 内置模糊测试**: `go test -fuzz` 用于发现安全问题
--   **`dlv` (Delve)**: 用于安全测试的 Go 调试器
--   **负载测试工具**: 用于识别 DoS 漏洞
+-   **`govulncheck`**: Official Go vulnerability checker
+-   **Go Built-in Fuzzing**: `go test -fuzz` for discovering security issues
+-   **`dlv` (Delve)**: Go debugger for security testing
+-   **Load Testing Tools**: For identifying DoS vulnerabilities
 
-#### 依赖项与供应链安全
+#### Dependency & Supply Chain Security
 
--   **`go mod verify`**: 验证依赖项未被篡改
--   **Dependabot**: 自动化依赖项更新和安全警报
--   **Snyk**: 商业依赖项扫描和监控
--   **FOSSA**: 许可证合规性和漏洞扫描
+-   **`go mod verify`**: Verifies dependencies haven't been tampered with
+-   **Dependabot**: Automated dependency updates and security alerts
+-   **Snyk**: Commercial dependency scanning and monitoring
+-   **FOSSA**: License compliance and vulnerability scanning
 
-#### 代码质量与安全
+#### Code Quality & Security
 
--   **`golangci-lint`**: 具有多个安全检查器的快速 Go 代码检查器
--   **`goreportcard`**: Go 代码质量评估
--   **`gocyclo`**: 圈复杂度分析
--   **`ineffassign`**: 检测无效赋值
+-   **`golangci-lint`**: Fast Go code checker with multiple security checkers
+-   **`goreportcard`**: Go code quality assessment
+-   **`gocyclo`**: Cyclomatic complexity analysis
+-   **`ineffassign`**: Detects ineffective assignments
 
-### 安全社区与资源
+### Security Communities & Resources
 
-#### Go 安全社区
+#### Go Security Community
 
--   [Go 安全策略](https://golang.org/security) - 官方 Go 安全策略
--   [Go 开发安全](https://groups.google.com/g/golang-dev) - Go 开发讨论
--   [Golang 安全](https://github.com/golang/go/wiki/Security) - Go 安全 Wiki
+-   [Go Security Policy](https://golang.org/security) - Official Go security policy
+-   [Go Development Security](https://groups.google.com/g/golang-dev) - Go development discussions
+-   [Golang Security](https://github.com/golang/go/wiki/Security) - Go security wiki
 
-#### 通用安全社区
+#### General Security Communities
 
--   [OWASP 社区](https://owasp.org/membership/) - 开放 Web 应用安全项目
--   [SANS 研究所](https://www.sans.org/) - 安全培训和认证
--   [FIRST](https://www.first.org/) - 事件响应和安全团队论坛
--   [CVE 计划](https://cve.mitre.org/about/index.html) - 漏洞披露计划
+-   [OWASP Community](https://owasp.org/membership/) - Open Web Application Security Project
+-   [SANS Institute](https://www.sans.org/) - Security training and certification
+-   [FIRST](https://www.first.org/) - Forum of Incident Response and Security Teams
+-   [CVE Program](https://cve.mitre.org/about/index.html) - Vulnerability disclosure program
 
-### 培训与认证
+### Training & Certification
 
--   **安全代码培训**: 平台特定的安全编码课程
--   **CISSP**: 注册信息系统安全专家
--   **GSEC**: GIAC 安全基础认证
--   **CEH**: 注册道德黑客
--   **Go 安全课程**: 专门的 Go 安全培训项目
+-   **Secure Coding Training**: Platform-specific secure coding courses
+-   **CISSP**: Certified Information Systems Security Professional
+-   **GSEC**: GIAC Security Essentials Certification
+-   **CEH**: Certified Ethical Hacker
+-   **Go Security Courses**: Specialized Go security training programs
 
-## 🏆 安全荣誉榜
+## 🏆 Security Hall of Fame
 
-我们维护一个安全荣誉榜，以表彰帮助改进我们项目安全性的安全研究人员：
+We maintain a security hall of fame to recognize security researchers who have helped improve the security of our project:
 
-### 贡献者
+### Contributors
 
-_我们将在此列出负责任地披露漏洞的安全研究人员（经他们许可）_
+_We will list security researchers who have responsibly disclosed vulnerabilities here (with their permission)_
 
-### 表彰标准
+### Recognition Criteria
 
--   负责任地披露有效的安全漏洞
--   在修复过程中进行建设性合作
--   对整体项目安全的贡献
+-   Responsible disclosure of valid security vulnerabilities
+-   Constructive collaboration during the fix process
+-   Contributions to overall project security
 
 ## 📞 Contact Information
 
@@ -418,17 +417,17 @@ Last updated: 2024-01-01
 
 ---
 
-## 🌍 多语言文档
+## 🌍 Multilingual Documentation
 
-本文档提供多种语言版本：
+This document is available in multiple languages:
 
--   [🇺🇸 English](SECURITY.md) (当前)
--   [🇨🇳 简体中文](docs/SECURITY_zh-CN.md)
--   [🇹🇼 繁體中文](docs/SECURITY_zh-TW.md)
--   [🇫🇷 Français](docs/SECURITY_fr.md)
--   [🇷🇺 Русский](docs/SECURITY_ru.md)
--   [🇪🇸 Español](docs/SECURITY_es.md)
--   [🇸🇦 العربية](docs/SECURITY_ar.md)
+-   [🇺🇸 English](SECURITY.md) (current)
+-   [🇨🇳 Simplified Chinese](zh-CN/SECURITY.md)
+-   [🇹🇼 Traditional Chinese](zh-TW/SECURITY.md)
+-   [🇫🇷 Français](README_fr.md)
+-   [🇷🇺 Русский](README_ru.md)
+-   [🇪🇸 Español](README_es.md)
+-   [🇸🇦 العربية](README_ar.md)
 
 ---
 

@@ -1,6 +1,5 @@
 ---
-pageType: custom
-titleSuffix: ' | LazyGophers Log'
+titleSuffix: " | LazyGophers Log"
 ---
 # 🤝 Contributing to LazyGophers Log
 
