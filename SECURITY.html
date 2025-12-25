@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Rspress v1.47.0">
+    <title data-rh="true">🔒 安全策略 - LazyGophers Log Documentation</title><meta data-rh="true" name="description" content="A comprehensive logging library for Go"/>
+  <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const isDark = !saved || saved === 'auto' ? preferDark : saved === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script><script defer src="/log/static/js/styles.a7294f85.js"></script><script defer src="/log/static/js/lib-react.274c5fad.js"></script><script defer src="/log/static/js/lib-router.481b98ae.js"></script><script defer src="/log/static/js/134.2da30189.js"></script><script defer src="/log/static/js/index.dfbf6612.js"></script><link href="/log/static/css/styles.56b59350.css" rel="stylesheet"></head>
+
+  <body >
+    <div id="root"><div class="navContainer_d18b1 rspress-nav px-6  sticky_ddfa7"><div class="container_e4235 flex justify-between items-center h-full"><div class="navBarTitle_c5f07"><a href="/log/index.html" class="link_a7cea flex items-center w-full h-full text-base font-semibold transition-opacity duration-300 hover:opacity-60"><span>LazyGophers Log Documentation</span></a></div><div class="flex flex-1 justify-end items-center"><div class="rightNav_a2fea"><div class="flex sm:flex-1 items-center sm:pl-4 sm:pr-2"><div class="rspress-nav-search-button navSearchButton_df1fb"><button><svg width="18" height="18" viewBox="0 0 32 32"><path fill="var(--rp-c-gray)" d="m29 27.586-7.552-7.552a11.018 11.018 0 1 0-1.414 1.414L27.586 29ZM4 13a9 9 0 1 1 9 9 9.01 9.01 0 0 1-9-9"></path></svg><p class="searchWord_af2c1">Search</p><div style="opacity:0"><span></span><span>K</span></div></button></div><div class="mobileNavSearchButton_d85a9"><svg width="24" height="24" viewBox="0 0 32 32"><path fill="var(--rp-c-gray)" d="m29 27.586-7.552-7.552a11.018 11.018 0 1 0-1.414 1.414L27.586 29ZM4 13a9 9 0 1 1 9 9 9.01 9.01 0 0 1-9-9"></path></svg></div></div><div class="rspress-nav-menu menu h-14"><a href="/log/index.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154 activeItem_a28b5 text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Home</div></a><a href="/log/API.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">API Reference</div></a><a href="/log/CHANGELOG.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Changelog</div></a><a href="/log/CONTRIBUTING.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Contributing</div></a><div class="mx-3 last:mr-0"><div class="relative flex-center h-14"><button class="rspress-nav-menu-group-button flex-center items-center font-medium text-sm text-text-1 hover:text-text-2 transition-colors duration-200"><span class="text-sm font-medium flex break-keep" style="margin-right:2px">Community</span><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg></button><div class="rspress-nav-menu-group-content absolute mx-0.8 transition-opacity duration-300" style="opacity:0;visibility:hidden;right:0;top:52px"><div class="p-3 pr-2 w-full h-full max-h-100vh whitespace-nowrap" style="box-shadow:var(--rp-shadow-3);z-index:100;border:1px solid var(--rp-c-divider-light);border-radius:var(--rp-radius-large);background:var(--rp-c-bg)"><div><div class="font-medium my-1"><a href="/log/CODE_OF_CONDUCT.html" class="link_a7cea "><div class="rounded-2xl hover:bg-mute" style="padding:0.4rem 1.5rem 0.4rem 0.75rem"><div class="flex"><span>Code of Conduct</span></div></div></a></div></div><div><div class="rounded-2xl my-1 flex" style="padding:0.4rem 1.5rem 0.4rem 0.75rem"><span class="text-brand">Security Policy</span></div></div></div></div></div></div></div><div class="flex-center flex-row"><div class="translation menu-item_b8238 flex text-sm font-bold items-center px-3 py-2"><div><div class="relative flex-center h-14"><button class="rspress-nav-menu-group-button flex-center items-center font-medium text-sm text-text-1 hover:text-text-2 transition-colors duration-200"><span class="text-sm font-medium flex break-keep" style="margin-right:2px"><svg width="18" height="18" viewBox="0 0 32 32" style="width:18px;height:18px"><path fill="currentColor" d="M27.85 29H30l-6-15h-2.35l-6 15h2.15l1.6-4h6.85zm-7.65-6 2.62-6.56L25.45 23zM18 7V5h-7V2H9v3H2v2h10.74a14.7 14.7 0 0 1-3.19 6.18A13.5 13.5 0 0 1 7.26 9h-2.1a16.5 16.5 0 0 0 3 5.58A16.8 16.8 0 0 1 3 18l.75 1.86A18.5 18.5 0 0 0 9.53 16a16.9 16.9 0 0 0 5.76 3.84L16 18a14.5 14.5 0 0 1-5.12-3.37A17.64 17.64 0 0 0 14.8 7z"></path></svg></span><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg></button><div class="rspress-nav-menu-group-content absolute mx-0.8 transition-opacity duration-300" style="opacity:0;visibility:hidden;right:0;top:52px"><div class="p-3 pr-2 w-full h-full max-h-100vh whitespace-nowrap" style="box-shadow:var(--rp-shadow-3);z-index:100;border:1px solid var(--rp-c-divider-light);border-radius:var(--rp-radius-large);background:var(--rp-c-bg)"><div><div class="rounded-2xl my-1 flex" style="padding:0.4rem 1.5rem 0.4rem 0.75rem"><span class="text-brand">English</span></div></div><div><div class="font-medium my-1"><a href="/log/zh-CN/SECURITY.html" class="link_a7cea "><div class="rounded-2xl hover:bg-mute" style="padding:0.4rem 1.5rem 0.4rem 0.75rem"><div class="flex"><span>简体中文</span></div></div></a></div></div><div><div class="font-medium my-1"><a href="/log/zh-TW/SECURITY.html" class="link_a7cea "><div class="rounded-2xl hover:bg-mute" style="padding:0.4rem 1.5rem 0.4rem 0.75rem"><div class="flex"><span>繁體中文</span></div></div></a></div></div></div></div></div></div></div><div class="mx-2"><div class="md:mr-2 rspress-nav-appearance"><div class="p-1 border border-solid border-gray-300 text-gray-400  cursor-pointer rounded-md hover:border-gray-600 hover:text-gray-600 dark:hover:border-gray-200 dark:hover:text-gray-200 transition-all duration-300 w-7 h-7"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" class="dark:hidden" width="18" height="18" fill="currentColor"><path d="M12 18c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6m0-10c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4M12 4c-.6 0-1-.4-1-1V1c0-.6.4-1 1-1s1 .4 1 1v2c0 .6-.4 1-1 1M12 24c-.6 0-1-.4-1-1v-2c0-.6.4-1 1-1s1 .4 1 1v2c0 .6-.4 1-1 1M5.6 6.6c-.3 0-.5-.1-.7-.3L3.5 4.9c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l1.4 1.4c.4.4.4 1 0 1.4-.1.2-.4.3-.7.3M19.8 20.8c-.3 0-.5-.1-.7-.3l-1.4-1.4c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l1.4 1.4c.4.4.4 1 0 1.4-.2.2-.5.3-.7.3M3 13H1c-.6 0-1-.4-1-1s.4-1 1-1h2c.6 0 1 .4 1 1s-.4 1-1 1M23 13h-2c-.6 0-1-.4-1-1s.4-1 1-1h2c.6 0 1 .4 1 1s-.4 1-1 1M4.2 20.8c-.3 0-.5-.1-.7-.3-.4-.4-.4-1 0-1.4l1.4-1.4c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-1.4 1.4c-.2.2-.4.3-.7.3M18.4 6.6c-.3 0-.5-.1-.7-.3-.4-.4-.4-1 0-1.4l1.4-1.4c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-1.4 1.4c-.2.2-.5.3-.7.3"></path></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" class="hidden dark:block" width="18" height="18" fill="currentColor"><path d="M12.1 22h-.9c-5.5-.5-9.5-5.4-9-10.9.4-4.8 4.2-8.6 9-9 .4 0 .8.2 1 .5s.2.8-.1 1.1c-2 2.7-1.4 6.4 1.3 8.4 2.1 1.6 5 1.6 7.1 0 .3-.2.7-.3 1.1-.1.3.2.5.6.5 1-.2 2.7-1.5 5.1-3.6 6.8-1.9 1.4-4.1 2.2-6.4 2.2M9.3 4.4c-2.9 1-5 3.6-5.2 6.8-.4 4.4 2.8 8.3 7.2 8.7 2.1.2 4.2-.4 5.8-1.8 1.1-.9 1.9-2.1 2.4-3.4-2.5.9-5.3.5-7.5-1.1-2.8-2.2-3.9-5.9-2.7-9.2"></path></svg></div></div></div><div class="social-links menu-item_e90a6 flex-center relative"><div class="flex-center h-full gap-x-4 transition-colors duration-300 md:mr-2"><a target="_blank" rel="noopener noreferrer" class="social-links"><div class="social-links-icon_a4ad0"><div><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a></div></div></div></div><div class="mobileNavMenu_e7045"><div class="navScreen_ec30c  rspress-nav-screen" id="navScreen"><div class="container_c935d"><div class="navMenu_b887b"><div class="navMenuItem_e7978 w-full"><a href="/log/index.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154 activeItem_a28b5 text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Home</div></a></div><div class="navMenuItem_e7978 w-full"><a href="/log/API.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">API Reference</div></a></div><div class="navMenuItem_e7978 w-full"><a href="/log/CHANGELOG.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Changelog</div></a></div><div class="navMenuItem_e7978 w-full"><a href="/log/CONTRIBUTING.html" class="link_a7cea "><div class="rspress-nav-menu-item singleItem_c1154  text-sm font-medium mx-1.5 px-3 py-2 flex items-center break-keep">Contributing</div></a></div><div class="navMenuItem_e7978 w-full"><div class="mx-3 last:mr-0"><div class=" navScreenMenuGroup_e771d relative"><button class="button_ea41e"><span class="buttonSpan_f4b8f">Community</span><svg width="1em" height="1em" viewBox="0 0 32 32" class=" down_f631a "><path fill="currentColor" d="M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg></button><div><div class="items_dd149"><div><div class="py-1 font-medium"><a href="/log/CODE_OF_CONDUCT.html" class="link_a7cea "><div><div class="flex justify-center"><span>Code of Conduct</span></div></div></a></div></div><div><div class="py-1 font-medium"><a href="/log/SECURITY.html" class="link_a7cea "><div><div class="flex justify-center"><span>Security Policy</span></div></div></a></div></div></div></div></div></div></div></div><div class="flex-center flex-col gap-2"><div class="mt-2 navAppearance_bf893 flex justify-center"></div><div class="flex text-sm font-bold justify-center"><div class="mx-1.5 my-1"><div class=" navScreenMenuGroup_e771d relative"><button class="button_ea41e"><span class="buttonSpan_f4b8f"><svg width="18" height="18" viewBox="0 0 32 32" style="width:18px;height:18px"><path fill="currentColor" d="M27.85 29H30l-6-15h-2.35l-6 15h2.15l1.6-4h6.85zm-7.65-6 2.62-6.56L25.45 23zM18 7V5h-7V2H9v3H2v2h10.74a14.7 14.7 0 0 1-3.19 6.18A13.5 13.5 0 0 1 7.26 9h-2.1a16.5 16.5 0 0 0 3 5.58A16.8 16.8 0 0 1 3 18l.75 1.86A18.5 18.5 0 0 0 9.53 16a16.9 16.9 0 0 0 5.76 3.84L16 18a14.5 14.5 0 0 1-5.12-3.37A17.64 17.64 0 0 0 14.8 7z"></path></svg></span><svg width="1em" height="1em" viewBox="0 0 32 32" class=" down_f631a "><path fill="currentColor" d="M16 22 6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg></button><div><div class="items_dd149"><div><div class="p-1 text-center"><span class="text-brand">English</span></div></div><div><div class="py-1 font-medium"><a href="/log/zh-CN/SECURITY.html" class="link_a7cea "><div><div class="flex justify-center"><span>简体中文</span></div></div></a></div></div><div><div class="py-1 font-medium"><a href="/log/zh-TW/SECURITY.html" class="link_a7cea "><div><div class="flex justify-center"><span>繁體中文</span></div></div></a></div></div></div></div></div></div></div><div class="social-links menu-item_e90a6 flex-center relative"><div class="flex-center h-full gap-x-4 transition-colors duration-300 md:mr-2"><a target="_blank" rel="noopener noreferrer" class="social-links"><div class="social-links-icon_a4ad0"><div><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a></div></div></div></div></div><button aria-label="mobile hamburger" class=" rspress-mobile-hamburger navHamburger_ac64c text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="currentColor"><circle cx="8" cy="16" r="2" fill="currentColor"></circle><circle cx="16" cy="16" r="2" fill="currentColor"></circle><circle cx="24" cy="16" r="2" fill="currentColor"></circle></svg></button></div></div></div></div><section><div class="docLayout_af141 pt-0"><div class="flex-1 relative min-w-0"><div class="rspress-sidebar-menu-container "><div class="rspress-sidebar-menu"><button type="button" class="flex-center ml-auto"><span class="text-sm">ON THIS PAGE</span><div class="text-md mr-2" style="transform:rotate(0deg);transition:transform 0.2s ease-out;margin-top:2px"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></div></button><div class="rspress-local-toc-container "><ul><li><a href="#我们的安全承诺" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">我们的安全承诺</span></a></li><li><a href="#安全原则" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">安全原则</span></a></li><li><a href="#支持的版本" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">支持的版本</span></a></li><li><a href="#支持策略详情" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">支持策略详情</span></a></li><li><a href="#升级建议" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">升级建议</span></a></li><li><a href="#-报告安全漏洞" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">🐛 报告安全漏洞</span></a></li><li><a href="#请勿通过公共渠道报告安全漏洞" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">请勿通过公共渠道报告安全漏洞</span></a></li><li><a href="#安全报告渠道" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">安全报告渠道</span></a></li><li><a href="#主要联系方式" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">主要联系方式</span></a></li><li><a href="#github-安全公告" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">GitHub 安全公告</span></a></li><li><a href="#备用联系方式" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">备用联系方式</span></a></li><li><a href="#报告中应包含的内容" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">报告中应包含的内容</span></a></li><li><a href="#基本信息" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">基本信息</span></a></li><li><a href="#可选但有用的信息" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">可选但有用的信息</span></a></li><li><a href="#示例报告模板" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">示例报告模板</span></a></li><li><a href="#-安全响应流程" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">📋 安全响应流程</span></a></li><li><a href="#我们的响应时间线" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">我们的响应时间线</span></a></li><li><a href="#响应流程步骤" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">响应流程步骤</span></a></li><li><a href="#1-确认-24-小时" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">1. 确认 (24 小时)</span></a></li><li><a href="#2-评估-72-小时" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">2. 评估 (72 小时)</span></a></li><li><a href="#3-调查-1-周" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">3. 调查 (1 周)</span></a></li><li><a href="#4-开发-2-4-周" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">4. 开发 (2-4 周)</span></a></li><li><a href="#5-披露-4-6-周" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">5. 披露 (4-6 周)</span></a></li><li><a href="#严重性分类" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">严重性分类</span></a></li><li><a href="#-严重-cvss-90-100" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">🔴 严重 (CVSS 9.0-10.0)</span></a></li><li><a href="#-高-cvss-70-89" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">🟠 高 (CVSS 7.0-8.9)</span></a></li><li><a href="#-中-cvss-40-69" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">🟡 中 (CVSS 4.0-6.9)</span></a></li><li><a href="#-低-cvss-01-39" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">🟢 低 (CVSS 0.1-3.9)</span></a></li><li><a href="#沟通偏好" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">沟通偏好</span></a></li><li><a href="#我们需要您提供的" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">我们需要您提供的</span></a></li><li><a href="#您可以期待的" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">您可以期待的</span></a></li><li><a href="#️-安全最佳实践" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">🛡️ 安全最佳实践</span></a></li><li><a href="#面向应用程序开发者" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">面向应用程序开发者</span></a></li><li><a href="#部署安全" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">部署安全</span></a></li><li><a href="#log-security--data-protection" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Log Security &amp; Data Protection</span></a></li><li><a href="#build--deployment-security" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Build &amp; Deployment Security</span></a></li><li><a href="#infrastructure-security" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Infrastructure Security</span></a></li><li><a href="#for-contributors--maintainers" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">For Contributors &amp; Maintainers</span></a></li><li><a href="#secure-development-lifecycle" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Secure Development Lifecycle</span></a></li><li><a href="#development-security-practices" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Development Security Practices</span></a></li><li><a href="#supply-chain-security" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Supply Chain Security</span></a></li><li><a href="#-安全资源" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">📚 安全资源</span></a></li><li><a href="#内部文档" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">内部文档</span></a></li><li><a href="#外部安全标准与框架" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">外部安全标准与框架</span></a></li><li><a href="#漏洞数据库与情报" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">漏洞数据库与情报</span></a></li><li><a href="#安全工具与扫描器" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">安全工具与扫描器</span></a></li><li><a href="#静态分析工具" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">静态分析工具</span></a></li><li><a href="#动态分析与测试" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">动态分析与测试</span></a></li><li><a href="#依赖项与供应链安全" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">依赖项与供应链安全</span></a></li><li><a href="#代码质量与安全" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">代码质量与安全</span></a></li><li><a href="#安全社区与资源" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">安全社区与资源</span></a></li><li><a href="#go-安全社区" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">Go 安全社区</span></a></li><li><a href="#通用安全社区" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:24px"><span class="rspress-toc-link-text block">通用安全社区</span></a></li><li><a href="#培训与认证" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">培训与认证</span></a></li><li><a href="#-安全荣誉榜" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">🏆 安全荣誉榜</span></a></li><li><a href="#贡献者" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">贡献者</span></a></li><li><a href="#表彰标准" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">表彰标准</span></a></li><li><a href="#-contact-information" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">📞 Contact Information</span></a></li><li><a href="#security-team" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">Security Team</span></a></li><li><a href="#response-team" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:12px"><span class="rspress-toc-link-text block">Response Team</span></a></li><li><a href="#-policy-updates" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">🔄 Policy Updates</span></a></li><li><a href="#-多语言文档" class="link_a7cea rspress-toc-link sm:text-normal text-sm" style="margin-left:0"><span class="rspress-toc-link-text block">🌍 多语言文档</span></a></li></ul></div></div></div><div class="content_ff766 rspress-doc-container flex"><div class="flex-1 overflow-x-auto"><div class="rspress-doc"><!--$--><h1 id="-安全策略" class="rspress-doc-title text-3xl mb-10 leading-10 tracking-tight title_fb7eb">🔒 安全策略<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-安全策略">#</a></h1>
+<h2 id="我们的安全承诺" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">我们的安全承诺<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#我们的安全承诺">#</a></h2>
+<p class="my-4 leading-7">LazyGophers Log 高度重视安全性。我们致力于为我们的日志库维护最高的安全标准，保护用户应用程序的安全。我们感谢您负责任地披露安全漏洞的努力，并将尽一切努力认可您对安全社区的贡献。</p>
+<h3 id="安全原则" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">安全原则<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#安全原则">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">设计即安全</strong>：安全考虑融入开发流程的每个方面</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">透明度</strong>：我们保持关于安全问题和修复的开放沟通</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">社区合作</strong>：我们与安全研究人员和用户协作</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">持续改进</strong>：我们定期审查和增强安全实践</li>
+</ul>
+<h2 id="支持的版本" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">支持的版本<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#支持的版本">#</a></h2>
+<p class="my-4 leading-7">我们积极为以下 LazyGophers Log 版本提供安全更新：</p>
+<table class="block border-collapse text-base my-5 overflow-x-auto leading-7 border-gray-light-3 dark:border-divider">
+<thead>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">版本</th>
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">支持状态</th>
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">状态</th>
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">生命周期结束</th>
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">1.x.x</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">✅ 是</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">活跃</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">待定</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">完整安全支持</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">0.9.x</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">✅ 是</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">维护</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">2024-06-01</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">仅关键安全修复</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">0.8.x</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">⚠️ 有限</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">遗留</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">2024-03-01</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">仅紧急修复</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">0.7.x</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">❌ 否</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">已弃用</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">2024-01-01</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">无安全支持</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">&lt; 0.7</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">❌ 否</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">已弃用</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">2023-12-01</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">无安全支持</td>
+</tr>
+</tbody>
+</table>
+<h3 id="支持策略详情" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">支持策略详情<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#支持策略详情">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">活跃</strong>：完整的安全更新、定期补丁、主动监控</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">维护</strong>：仅关键和高严重性安全问题</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">遗留</strong>：仅关键漏洞的紧急安全修复</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">已弃用</strong>：无安全支持 - 用户应立即升级</li>
+</ul>
+<h3 id="升级建议" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">升级建议<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#升级建议">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">立即行动</strong>：使用版本 &lt; 0.8.x 的用户应立即升级到 1.x.x</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">计划迁移</strong>：使用 0.8.x - 0.9.x 版本的用户应在生命周期结束日期前计划迁移到 1.x.x</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">保持最新</strong>：始终使用最新的稳定版本以获得最佳安全性</li>
+</ul>
+<h2 id="-报告安全漏洞" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">🐛 报告安全漏洞<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-报告安全漏洞">#</a></h2>
+<h3 id="请勿通过公共渠道报告安全漏洞" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">请勿通过公共渠道报告安全漏洞<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#请勿通过公共渠道报告安全漏洞">#</a></h3>
+<p class="my-4 leading-7">请<strong class="font-semibold">不要</strong>通过以下渠道报告安全漏洞：</p>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">公开的 GitHub issues</li>
+<li class="[&amp;:not(:first-child)]:mt-2">公开讨论</li>
+<li class="[&amp;:not(:first-child)]:mt-2">社交媒体</li>
+<li class="[&amp;:not(:first-child)]:mt-2">邮件列表</li>
+<li class="[&amp;:not(:first-child)]:mt-2">社区论坛</li>
+</ul>
+<h3 id="安全报告渠道" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">安全报告渠道<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#安全报告渠道">#</a></h3>
+<p class="my-4 leading-7">要报告安全漏洞，请使用以下安全渠道之一：</p>
+<h4 id="主要联系方式" class="mt-8 leading-6 text-lg title_fb7eb">主要联系方式<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#主要联系方式">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">邮箱</strong>: <a href="mailto:security@lazygophers.com" class="link_a7cea  link_a9ef4 inline-link_f855c" target="_blank" rel="noopener noreferrer">security@lazygophers.com</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">PGP 密钥</strong>: 可应要求提供</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">邮件主题</strong>: <code>[SECURITY] Vulnerability Report - LazyGophers Log</code></li>
+</ul>
+<h4 id="github-安全公告" class="mt-8 leading-6 text-lg title_fb7eb">GitHub 安全公告<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#github-安全公告">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">访问我们的 <a href="https://github.com/lazygophers/log/security/advisories" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">GitHub 安全公告</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2">点击 &quot;New draft security advisory&quot;</li>
+<li class="[&amp;:not(:first-child)]:mt-2">提供有关漏洞的详细信息</li>
+</ul>
+<h4 id="备用联系方式" class="mt-8 leading-6 text-lg title_fb7eb">备用联系方式<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#备用联系方式">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">邮箱</strong>: <a href="mailto:support@lazygophers.com" class="link_a7cea  link_a9ef4 inline-link_f855c" target="_blank" rel="noopener noreferrer">support@lazygophers.com</a> (标记为 CONFIDENTIAL SECURITY ISSUE)</li>
+</ul>
+<h3 id="报告中应包含的内容" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">报告中应包含的内容<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#报告中应包含的内容">#</a></h3>
+<p class="my-4 leading-7">请在安全漏洞报告中包含以下信息：</p>
+<h4 id="基本信息" class="mt-8 leading-6 text-lg title_fb7eb">基本信息<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#基本信息">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">摘要</strong>：漏洞的简要描述</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">影响</strong>：潜在影响和严重性评估</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">重现步骤</strong>：重现问题的详细步骤</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">概念验证</strong>：证明漏洞的代码或步骤</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">受影响版本</strong>：受影响的特定版本或版本范围</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">环境</strong>：操作系统、Go 版本、使用的构建标签</li>
+</ul>
+<h4 id="可选但有用的信息" class="mt-8 leading-6 text-lg title_fb7eb">可选但有用的信息<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#可选但有用的信息">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">CVSS 评分</strong>：如果您能计算一个</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">CWE 参考</strong>：常见弱点枚举参考</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">建议修复</strong>：如果您有修复想法</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">时间线</strong>：您的披露时间线偏好</li>
+</ul>
+<h3 id="示例报告模板" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">示例报告模板<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#示例报告模板">#</a></h3>
+<div class="language-bash"><div class="rspress-code-content rspress-scrollbar"><code>主题: [SECURITY] 日志格式化器中的缓冲区溢出
+
+摘要:
+在处理极长日志消息时，日志格式化器中存在缓冲区溢出漏洞。
+
+影响:
+- 潜在的任意代码执行
+- 内存损坏
+- 拒绝服务
+
+重现步骤:
+1. 创建日志记录器实例
+2. 记录超过10,000个字符的消息
+3. Observe memory corruption
+
+Affected Versions:
+- v1.0.0 through v1.2.3
+
+Environment:
+- OS: Ubuntu 20.04
+- Go: 1.21.0
+- Build tags: release
+
+Proof of Concept:
+[Include minimal code example]
+</code></div></div>
+<h2 id="-安全响应流程" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">📋 安全响应流程<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-安全响应流程">#</a></h2>
+<h3 id="我们的响应时间线" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">我们的响应时间线<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#我们的响应时间线">#</a></h3>
+<table class="block border-collapse text-base my-5 overflow-x-auto leading-7 border-gray-light-3 dark:border-divider">
+<thead>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">时间范围</th>
+<th class="border border-solid px-4 py-2 text-text-1 text-base font-semibold border-gray-light-3 dark:border-divider">行动</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">24 小时</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">初步确认报告</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">72 小时</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">初步评估和分类</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">1 周</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">开始详细调查</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">2-4 周</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">修复开发和测试</td>
+</tr>
+<tr class="border border-solid transition-colors duration-500 even:bg-soft border-gray-light-3 dark:border-divider">
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">4-6 周</td>
+<td class="border border-solid px-4 py-2 border-gray-light-3 dark:border-divider">协调披露和发布</td>
+</tr>
+</tbody>
+</table>
+<h3 id="响应流程步骤" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">响应流程步骤<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#响应流程步骤">#</a></h3>
+<h4 id="1-确认-24-小时" class="mt-8 leading-6 text-lg title_fb7eb">1. 确认 (24 小时)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#1-确认-24-小时">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">确认收到漏洞报告</li>
+<li class="[&amp;:not(:first-child)]:mt-2">分配跟踪编号</li>
+<li class="[&amp;:not(:first-child)]:mt-2">请求任何缺失的信息</li>
+</ul>
+<h4 id="2-评估-72-小时" class="mt-8 leading-6 text-lg title_fb7eb">2. 评估 (72 小时)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#2-评估-72-小时">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">初步严重性评估</li>
+<li class="[&amp;:not(:first-child)]:mt-2">受影响版本识别</li>
+<li class="[&amp;:not(:first-child)]:mt-2">影响分析</li>
+<li class="[&amp;:not(:first-child)]:mt-2">分配 CVSS 评分</li>
+</ul>
+<h4 id="3-调查-1-周" class="mt-8 leading-6 text-lg title_fb7eb">3. 调查 (1 周)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#3-调查-1-周">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">详细技术分析</li>
+<li class="[&amp;:not(:first-child)]:mt-2">根本原因识别</li>
+<li class="[&amp;:not(:first-child)]:mt-2">利用场景开发</li>
+<li class="[&amp;:not(:first-child)]:mt-2">修复策略规划</li>
+</ul>
+<h4 id="4-开发-2-4-周" class="mt-8 leading-6 text-lg title_fb7eb">4. 开发 (2-4 周)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#4-开发-2-4-周">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">安全补丁开发</li>
+<li class="[&amp;:not(:first-child)]:mt-2">内部测试</li>
+<li class="[&amp;:not(:first-child)]:mt-2">跨支持版本的回归测试</li>
+<li class="[&amp;:not(:first-child)]:mt-2">文档更新</li>
+</ul>
+<h4 id="5-披露-4-6-周" class="mt-8 leading-6 text-lg title_fb7eb">5. 披露 (4-6 周)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#5-披露-4-6-周">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">与报告者协调披露时间线</li>
+<li class="[&amp;:not(:first-child)]:mt-2">准备安全公告</li>
+<li class="[&amp;:not(:first-child)]:mt-2">发布修补版本</li>
+<li class="[&amp;:not(:first-child)]:mt-2">公开披露</li>
+</ul>
+<h3 id="严重性分类" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">严重性分类<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#严重性分类">#</a></h3>
+<p class="my-4 leading-7">我们使用以下严重性分类：</p>
+<h4 id="-严重-cvss-90-100" class="mt-8 leading-6 text-lg title_fb7eb">🔴 严重 (CVSS 9.0-10.0)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-严重-cvss-90-100">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">对机密性、完整性或可用性的即时威胁</li>
+<li class="[&amp;:not(:first-child)]:mt-2">远程代码执行</li>
+<li class="[&amp;:not(:first-child)]:mt-2">完全系统妥协</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">响应</strong>: 72 小时内紧急补丁</li>
+</ul>
+<h4 id="-高-cvss-70-89" class="mt-8 leading-6 text-lg title_fb7eb">🟠 高 (CVSS 7.0-8.9)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-高-cvss-70-89">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">对安全的重大影响</li>
+<li class="[&amp;:not(:first-child)]:mt-2">权限提升</li>
+<li class="[&amp;:not(:first-child)]:mt-2">数据暴露</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">响应</strong>: 1-2 周内补丁</li>
+</ul>
+<h4 id="-中-cvss-40-69" class="mt-8 leading-6 text-lg title_fb7eb">🟡 中 (CVSS 4.0-6.9)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-中-cvss-40-69">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">对安全的中等影响</li>
+<li class="[&amp;:not(:first-child)]:mt-2">有限的数据暴露</li>
+<li class="[&amp;:not(:first-child)]:mt-2">部分系统妥协</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">响应</strong>: 1 个月内补丁</li>
+</ul>
+<h4 id="-低-cvss-01-39" class="mt-8 leading-6 text-lg title_fb7eb">🟢 低 (CVSS 0.1-3.9)<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-低-cvss-01-39">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">对安全的轻微影响</li>
+<li class="[&amp;:not(:first-child)]:mt-2">信息泄露</li>
+<li class="[&amp;:not(:first-child)]:mt-2">有限范围的漏洞</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">响应</strong>: 下次常规发布中补丁</li>
+</ul>
+<h3 id="沟通偏好" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">沟通偏好<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#沟通偏好">#</a></h3>
+<h4 id="我们需要您提供的" class="mt-8 leading-6 text-lg title_fb7eb">我们需要您提供的<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#我们需要您提供的">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">负责任披露</strong>：给我们合理的时间来修复问题</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">沟通</strong>：回应我们的问题和澄清请求</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">协调</strong>：与我们合作确定披露时间</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">测试</strong>：在可能的情况下帮助验证我们的修复</li>
+</ul>
+<h4 id="您可以期待的" class="mt-8 leading-6 text-lg title_fb7eb">您可以期待的<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#您可以期待的">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">确认</strong>：及时确认您的报告</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">更新</strong>：在整个过程中定期状态更新</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">致谢</strong>：公开致谢您的发现（除非您希望匿名）</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">尊重</strong>：专业和尊重的沟通</li>
+</ul>
+<h2 id="️-安全最佳实践" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">🛡️ 安全最佳实践<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#️-安全最佳实践">#</a></h2>
+<h3 id="面向应用程序开发者" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">面向应用程序开发者<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#面向应用程序开发者">#</a></h3>
+<h4 id="部署安全" class="mt-8 leading-6 text-lg title_fb7eb">部署安全<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#部署安全">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">使用最新版本</strong>：始终使用带有安全补丁的最新支持版本</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">监控公告</strong>：订阅我们的安全邮件列表和 GitHub 安全公告</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">安全配置</strong>：遵循我们的安全加固指南</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">定期更新</strong>：关键问题发布后 48 小时内应用安全更新</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">版本固定</strong>：在生产环境中使用特定版本号，而不是版本范围</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">安全扫描</strong>：定期扫描您的应用程序和依赖项以查找漏洞</li>
+</ul>
+<h4 id="log-security--data-protection" class="mt-8 leading-6 text-lg title_fb7eb">Log Security &amp; Data Protection<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#log-security--data-protection">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Sensitive Data</strong>: Never log passwords, API keys, tokens, PII, or financial information</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Data Classification</strong>: Implement data classification policies for log content</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Input Sanitization</strong>: Sanitize and validate all user input before logging</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Output Encoding</strong>: Properly encode log output to prevent injection attacks</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Access Control</strong>: Implement strict access controls for log files and directories</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Encryption</strong>: Encrypt log files containing any sensitive operational data</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Retention Policies</strong>: Implement appropriate log retention and deletion policies</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Audit Trails</strong>: Maintain audit trails for log file access and modifications</li>
+</ul>
+<h4 id="build--deployment-security" class="mt-8 leading-6 text-lg title_fb7eb">Build &amp; Deployment Security<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#build--deployment-security">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Checksum Verification</strong>: Always verify package checksums and signatures</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Official Sources</strong>: Download only from official GitHub releases or Go module proxy</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Dependency Management</strong>: Use <code>go mod verify</code> and dependency scanning tools</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Build Tags</strong>: Use appropriate build tags for your security requirements:<!-- -->
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">Production: <code>release</code> tag for optimized, secure builds</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Development: <code>debug</code> tag for enhanced debugging (never in production)</li>
+<li class="[&amp;:not(:first-child)]:mt-2">High-Security: <code>discard</code> tag for maximum performance and minimal attack surface</li>
+</ul>
+</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Supply Chain Security</strong>: Verify the integrity of the entire dependency chain</li>
+</ul>
+<h4 id="infrastructure-security" class="mt-8 leading-6 text-lg title_fb7eb">Infrastructure Security<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#infrastructure-security">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Log Aggregation</strong>: Use secure log aggregation systems with proper authentication</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Network Security</strong>: Ensure log transmission uses encrypted channels (TLS 1.3+)</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Storage Security</strong>: Store logs in secure, access-controlled storage systems</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Backup Security</strong>: Encrypt and secure log backups with appropriate retention</li>
+</ul>
+<h3 id="for-contributors--maintainers" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">For Contributors &amp; Maintainers<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#for-contributors--maintainers">#</a></h3>
+<h4 id="secure-development-lifecycle" class="mt-8 leading-6 text-lg title_fb7eb">Secure Development Lifecycle<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#secure-development-lifecycle">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Threat Modeling</strong>: Regularly review and update threat models for the logging library</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Security Requirements</strong>: Integrate security requirements into all feature development</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Secure Coding</strong>: Follow secure coding practices and OWASP guidelines</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Code Security</strong>:<!-- -->
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Input Validation</strong>: Validate all inputs thoroughly with proper bounds checking</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Buffer Management</strong>: Implement proper buffer size management and overflow protection</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Error Handling</strong>: Secure error handling without information leakage</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Memory Safety</strong>: Prevent buffer overflows, memory leaks, and use-after-free bugs</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Concurrency Safety</strong>: Ensure thread-safe operations and prevent race conditions</li>
+</ul>
+</li>
+</ul>
+<h4 id="development-security-practices" class="mt-8 leading-6 text-lg title_fb7eb">Development Security Practices<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#development-security-practices">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Security Reviews</strong>: Mandatory security code reviews for all changes</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Static Analysis</strong>: Use multiple static analysis tools (<code>gosec</code>, <code>staticcheck</code>, <code>semgrep</code>)</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Dynamic Testing</strong>: Include security-focused dynamic testing and fuzzing</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Dependency Security</strong>:<!-- -->
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">Keep all dependencies updated to latest secure versions</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Regular dependency vulnerability scanning with <code>govulncheck</code> and <code>nancy</code></li>
+<li class="[&amp;:not(:first-child)]:mt-2">Minimize dependency footprint and avoid unnecessary dependencies</li>
+</ul>
+</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Testing</strong>:<!-- -->
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">Include comprehensive security test cases</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Test across all supported build tags and configurations</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Perform boundary testing and input validation testing</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Conduct performance testing to identify DoS vulnerabilities</li>
+</ul>
+</li>
+</ul>
+<h4 id="supply-chain-security" class="mt-8 leading-6 text-lg title_fb7eb">Supply Chain Security<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#supply-chain-security">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Code Signing</strong>: Sign all releases with verified signatures</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Build Process</strong>: Use reproducible builds and secure build environments</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Release Management</strong>: Follow secure release processes with proper approvals</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Vulnerability Disclosure</strong>: Maintain coordinated vulnerability disclosure process</li>
+</ul>
+<h2 id="-安全资源" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">📚 安全资源<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-安全资源">#</a></h2>
+<h3 id="内部文档" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">内部文档<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#内部文档">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/CONTRIBUTING.html" class="link_a7cea  link_a9ef4 inline-link_f855c">贡献指南</a> - 贡献者的安全考虑</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/CODE_OF_CONDUCT.html" class="link_a7cea  link_a9ef4 inline-link_f855c">行为准则</a> - 社区安全与安全</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/API.html" class="link_a7cea  link_a9ef4 inline-link_f855c">API 文档</a> - 安全使用模式和示例</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/README.html#build-tags" class="link_a7cea  link_a9ef4 inline-link_f855c">构建配置指南</a> - 构建标签的安全影响</li>
+</ul>
+<h3 id="外部安全标准与框架" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">外部安全标准与框架<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#外部安全标准与框架">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://www.nist.gov/cyberframework" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">NIST 网络安全框架</a> - 全面的安全框架</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">OWASP Top 10</a> - 最关键的 Web 应用程序安全风险</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">OWASP 日志记录备忘单</a> - 日志记录安全最佳实践</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://github.com/Checkmarx/Go-SCP" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Go 安全检查清单</a> - Go 特定安全指南</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://www.cisecurity.org/controls/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">CIS 控制</a> - 关键安全控制</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://www.iso.org/isoiec-27001-information-security.html" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">ISO 27001</a> - 信息安全管理</li>
+</ul>
+<h3 id="漏洞数据库与情报" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">漏洞数据库与情报<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#漏洞数据库与情报">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://cve.mitre.org/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">常见漏洞和暴露 (CVE)</a> - 漏洞数据库</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://nvd.nist.gov/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">国家漏洞数据库 (NVD)</a> - 美国政府漏洞数据库</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://pkg.go.dev/vuln/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Go 漏洞数据库</a> - Go 特定漏洞</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://github.com/advisories" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">GitHub 安全公告</a> - 开源安全公告</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://snyk.io/vuln/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Snyk 漏洞数据库</a> - 商业漏洞情报</li>
+</ul>
+<h3 id="安全工具与扫描器" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">安全工具与扫描器<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#安全工具与扫描器">#</a></h3>
+<h4 id="静态分析工具" class="mt-8 leading-6 text-lg title_fb7eb">静态分析工具<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#静态分析工具">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>gosec</code></strong>: Go 安全检查器 - 检测 Go 代码中的安全缺陷</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>staticcheck</code></strong>: 带有安全检查的高级 Go 代码检查器</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>semgrep</code></strong>: 具有自定义安全规则的多语言静态分析</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>CodeQL</code></strong>: GitHub 的语义代码分析，用于安全漏洞</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>nancy</code></strong>: 检查 Go 依赖项中的已知漏洞</li>
+</ul>
+<h4 id="动态分析与测试" class="mt-8 leading-6 text-lg title_fb7eb">动态分析与测试<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#动态分析与测试">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>govulncheck</code></strong>: 官方 Go 漏洞检查器</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Go 内置模糊测试</strong>: <code>go test -fuzz</code> 用于发现安全问题</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>dlv</code> (Delve)</strong>: 用于安全测试的 Go 调试器</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">负载测试工具</strong>: 用于识别 DoS 漏洞</li>
+</ul>
+<h4 id="依赖项与供应链安全" class="mt-8 leading-6 text-lg title_fb7eb">依赖项与供应链安全<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#依赖项与供应链安全">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>go mod verify</code></strong>: 验证依赖项未被篡改</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Dependabot</strong>: 自动化依赖项更新和安全警报</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Snyk</strong>: 商业依赖项扫描和监控</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">FOSSA</strong>: 许可证合规性和漏洞扫描</li>
+</ul>
+<h4 id="代码质量与安全" class="mt-8 leading-6 text-lg title_fb7eb">代码质量与安全<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#代码质量与安全">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>golangci-lint</code></strong>: 具有多个安全检查器的快速 Go 代码检查器</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>goreportcard</code></strong>: Go 代码质量评估</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>gocyclo</code></strong>: 圈复杂度分析</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold"><code>ineffassign</code></strong>: 检测无效赋值</li>
+</ul>
+<h3 id="安全社区与资源" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">安全社区与资源<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#安全社区与资源">#</a></h3>
+<h4 id="go-安全社区" class="mt-8 leading-6 text-lg title_fb7eb">Go 安全社区<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#go-安全社区">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://golang.org/security" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Go 安全策略</a> - 官方 Go 安全策略</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://groups.google.com/g/golang-dev" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Go 开发安全</a> - Go 开发讨论</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://github.com/golang/go/wiki/Security" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">Golang 安全</a> - Go 安全 Wiki</li>
+</ul>
+<h4 id="通用安全社区" class="mt-8 leading-6 text-lg title_fb7eb">通用安全社区<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#通用安全社区">#</a></h4>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://owasp.org/membership/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">OWASP 社区</a> - 开放 Web 应用安全项目</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://www.sans.org/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">SANS 研究所</a> - 安全培训和认证</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://www.first.org/" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">FIRST</a> - 事件响应和安全团队论坛</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="https://cve.mitre.org/about/index.html" target="_blank" rel="noopener noreferrer" class="link_a7cea  link_a9ef4 inline-link_f855c">CVE 计划</a> - 漏洞披露计划</li>
+</ul>
+<h3 id="培训与认证" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">培训与认证<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#培训与认证">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">安全代码培训</strong>: 平台特定的安全编码课程</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">CISSP</strong>: 注册信息系统安全专家</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">GSEC</strong>: GIAC 安全基础认证</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">CEH</strong>: 注册道德黑客</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Go 安全课程</strong>: 专门的 Go 安全培训项目</li>
+</ul>
+<h2 id="-安全荣誉榜" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">🏆 安全荣誉榜<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-安全荣誉榜">#</a></h2>
+<p class="my-4 leading-7">我们维护一个安全荣誉榜，以表彰帮助改进我们项目安全性的安全研究人员：</p>
+<h3 id="贡献者" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">贡献者<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#贡献者">#</a></h3>
+<p class="my-4 leading-7"><em>我们将在此列出负责任地披露漏洞的安全研究人员（经他们许可）</em></p>
+<h3 id="表彰标准" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">表彰标准<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#表彰标准">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">负责任地披露有效的安全漏洞</li>
+<li class="[&amp;:not(:first-child)]:mt-2">在修复过程中进行建设性合作</li>
+<li class="[&amp;:not(:first-child)]:mt-2">对整体项目安全的贡献</li>
+</ul>
+<h2 id="-contact-information" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">📞 Contact Information<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-contact-information">#</a></h2>
+<h3 id="security-team" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">Security Team<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#security-team">#</a></h3>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Primary</strong>: <a href="mailto:security@lazygophers.com" class="link_a7cea  link_a9ef4 inline-link_f855c" target="_blank" rel="noopener noreferrer">security@lazygophers.com</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Backup</strong>: <a href="mailto:support@lazygophers.com" class="link_a7cea  link_a9ef4 inline-link_f855c" target="_blank" rel="noopener noreferrer">support@lazygophers.com</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">PGP Keys</strong>: Available upon request</li>
+</ul>
+<h3 id="response-team" class="mt-10 mb-2 leading-7 text-xl title_fb7eb">Response Team<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#response-team">#</a></h3>
+<p class="my-4 leading-7">Our security response team includes:</p>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2">Lead maintainers</li>
+<li class="[&amp;:not(:first-child)]:mt-2">Security-focused contributors</li>
+<li class="[&amp;:not(:first-child)]:mt-2">External security advisors (when needed)</li>
+</ul>
+<h2 id="-policy-updates" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">🔄 Policy Updates<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-policy-updates">#</a></h2>
+<p class="my-4 leading-7">This security policy is reviewed and updated regularly:</p>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Quarterly reviews</strong> for process improvements</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Immediate updates</strong> for security incidents</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><strong class="font-semibold">Annual reviews</strong> for comprehensive policy updates</li>
+</ul>
+<p class="my-4 leading-7">Last updated: 2024-01-01</p>
+<hr class="my-12 border-t border-solid border-divider-light"/>
+<h2 id="-多语言文档" class="mt-12 mb-6 pt-8 text-2xl tracking-tight border-t-[1px] border-divider-light title_fb7eb">🌍 多语言文档<a class="link_a7cea header-anchor link_a9ef4 inline-link_f855c" aria-hidden="true" href="#-多语言文档">#</a></h2>
+<p class="my-4 leading-7">本文档提供多种语言版本：</p>
+<ul class="list-disc pl-5 my-4 leading-7">
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/SECURITY.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇺🇸 English</a> (当前)</li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_zh-CN.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇨🇳 简体中文</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_zh-TW.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇹🇼 繁體中文</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_fr.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇫🇷 Français</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_ru.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇷🇺 Русский</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_es.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇪🇸 Español</a></li>
+<li class="[&amp;:not(:first-child)]:mt-2"><a href="/log/docs/SECURITY_ar.html" class="link_a7cea  link_a9ef4 inline-link_f855c">🇸🇦 العربية</a></li>
+</ul>
+<hr class="my-12 border-t border-solid border-divider-light"/>
+<p class="my-4 leading-7"><strong class="font-semibold">Security is a shared responsibility. Thank you for helping keep LazyGophers Log secure! 🔒</strong></p><!--/$--></div><div class="rspress-doc-footer"><footer class="mt-8"><div class="xs:flex pb-5 px-2 justify-end items-center"></div><div class="flex flex-col"></div><div class="flex flex-col sm:flex-row sm:justify-around gap-4 pt-6"><div class="prev_c92d1 flex flex-col"></div><div class="next_c11be flex flex-col"></div></div></footer></div></div><div class="aside-container_bc5fa"><div class="flex flex-col"><div id="aside-container" class="relative text-sm font-medium"><div class="leading-7 block text-sm font-semibold pl-3">ON THIS PAGE</div><nav class="mt-1"><ul class="relative"><li><a href="#我们的安全承诺" title="我们的安全承诺" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">我们的安全承诺</span></a></li><li><a href="#安全原则" title="安全原则" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">安全原则</span></a></li><li><a href="#支持的版本" title="支持的版本" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">支持的版本</span></a></li><li><a href="#支持策略详情" title="支持策略详情" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">支持策略详情</span></a></li><li><a href="#升级建议" title="升级建议" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">升级建议</span></a></li><li><a href="#-报告安全漏洞" title="🐛 报告安全漏洞" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">🐛 报告安全漏洞</span></a></li><li><a href="#请勿通过公共渠道报告安全漏洞" title="请勿通过公共渠道报告安全漏洞" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">请勿通过公共渠道报告安全漏洞</span></a></li><li><a href="#安全报告渠道" title="安全报告渠道" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">安全报告渠道</span></a></li><li><a href="#主要联系方式" title="主要联系方式" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">主要联系方式</span></a></li><li><a href="#github-安全公告" title="GitHub 安全公告" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">GitHub 安全公告</span></a></li><li><a href="#备用联系方式" title="备用联系方式" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">备用联系方式</span></a></li><li><a href="#报告中应包含的内容" title="报告中应包含的内容" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">报告中应包含的内容</span></a></li><li><a href="#基本信息" title="基本信息" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">基本信息</span></a></li><li><a href="#可选但有用的信息" title="可选但有用的信息" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">可选但有用的信息</span></a></li><li><a href="#示例报告模板" title="示例报告模板" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">示例报告模板</span></a></li><li><a href="#-安全响应流程" title="📋 安全响应流程" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">📋 安全响应流程</span></a></li><li><a href="#我们的响应时间线" title="我们的响应时间线" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">我们的响应时间线</span></a></li><li><a href="#响应流程步骤" title="响应流程步骤" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">响应流程步骤</span></a></li><li><a href="#1-确认-24-小时" title="1. 确认 (24 小时)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">1. 确认 (24 小时)</span></a></li><li><a href="#2-评估-72-小时" title="2. 评估 (72 小时)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">2. 评估 (72 小时)</span></a></li><li><a href="#3-调查-1-周" title="3. 调查 (1 周)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">3. 调查 (1 周)</span></a></li><li><a href="#4-开发-2-4-周" title="4. 开发 (2-4 周)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">4. 开发 (2-4 周)</span></a></li><li><a href="#5-披露-4-6-周" title="5. 披露 (4-6 周)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">5. 披露 (4-6 周)</span></a></li><li><a href="#严重性分类" title="严重性分类" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">严重性分类</span></a></li><li><a href="#-严重-cvss-90-100" title="🔴 严重 (CVSS 9.0-10.0)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">🔴 严重 (CVSS 9.0-10.0)</span></a></li><li><a href="#-高-cvss-70-89" title="🟠 高 (CVSS 7.0-8.9)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">🟠 高 (CVSS 7.0-8.9)</span></a></li><li><a href="#-中-cvss-40-69" title="🟡 中 (CVSS 4.0-6.9)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">🟡 中 (CVSS 4.0-6.9)</span></a></li><li><a href="#-低-cvss-01-39" title="🟢 低 (CVSS 0.1-3.9)" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">🟢 低 (CVSS 0.1-3.9)</span></a></li><li><a href="#沟通偏好" title="沟通偏好" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">沟通偏好</span></a></li><li><a href="#我们需要您提供的" title="我们需要您提供的" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">我们需要您提供的</span></a></li><li><a href="#您可以期待的" title="您可以期待的" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">您可以期待的</span></a></li><li><a href="#️-安全最佳实践" title="🛡️ 安全最佳实践" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">🛡️ 安全最佳实践</span></a></li><li><a href="#面向应用程序开发者" title="面向应用程序开发者" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">面向应用程序开发者</span></a></li><li><a href="#部署安全" title="部署安全" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">部署安全</span></a></li><li><a href="#log-security--data-protection" title="Log Security &amp; Data Protection" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Log Security &amp; Data Protection</span></a></li><li><a href="#build--deployment-security" title="Build &amp; Deployment Security" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Build &amp; Deployment Security</span></a></li><li><a href="#infrastructure-security" title="Infrastructure Security" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Infrastructure Security</span></a></li><li><a href="#for-contributors--maintainers" title="For Contributors &amp; Maintainers" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">For Contributors &amp; Maintainers</span></a></li><li><a href="#secure-development-lifecycle" title="Secure Development Lifecycle" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Secure Development Lifecycle</span></a></li><li><a href="#development-security-practices" title="Development Security Practices" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Development Security Practices</span></a></li><li><a href="#supply-chain-security" title="Supply Chain Security" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Supply Chain Security</span></a></li><li><a href="#-安全资源" title="📚 安全资源" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">📚 安全资源</span></a></li><li><a href="#内部文档" title="内部文档" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">内部文档</span></a></li><li><a href="#外部安全标准与框架" title="外部安全标准与框架" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">外部安全标准与框架</span></a></li><li><a href="#漏洞数据库与情报" title="漏洞数据库与情报" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">漏洞数据库与情报</span></a></li><li><a href="#安全工具与扫描器" title="安全工具与扫描器" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">安全工具与扫描器</span></a></li><li><a href="#静态分析工具" title="静态分析工具" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">静态分析工具</span></a></li><li><a href="#动态分析与测试" title="动态分析与测试" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">动态分析与测试</span></a></li><li><a href="#依赖项与供应链安全" title="依赖项与供应链安全" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">依赖项与供应链安全</span></a></li><li><a href="#代码质量与安全" title="代码质量与安全" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">代码质量与安全</span></a></li><li><a href="#安全社区与资源" title="安全社区与资源" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">安全社区与资源</span></a></li><li><a href="#go-安全社区" title="Go 安全社区" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">Go 安全社区</span></a></li><li><a href="#通用安全社区" title="通用安全社区" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:24px;font-weight:semibold"><span class="aside-link-text block">通用安全社区</span></a></li><li><a href="#培训与认证" title="培训与认证" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">培训与认证</span></a></li><li><a href="#-安全荣誉榜" title="🏆 安全荣誉榜" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">🏆 安全荣誉榜</span></a></li><li><a href="#贡献者" title="贡献者" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">贡献者</span></a></li><li><a href="#表彰标准" title="表彰标准" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">表彰标准</span></a></li><li><a href="#-contact-information" title="📞 Contact Information" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">📞 Contact Information</span></a></li><li><a href="#security-team" title="Security Team" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">Security Team</span></a></li><li><a href="#response-team" title="Response Team" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:12px;font-weight:semibold"><span class="aside-link-text block">Response Team</span></a></li><li><a href="#-policy-updates" title="🔄 Policy Updates" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">🔄 Policy Updates</span></a></li><li><a href="#-多语言文档" title="🌍 多语言文档" class="aside-link transition-all duration-300 hover:text-text-1 text-text-2 block" style="margin-left:0;font-weight:semibold"><span class="aside-link-text block">🌍 多语言文档</span></a></li></ul></nav></div></div></div></div></div></div></section></div>
+    <div id="search-container"></div>
+  </body>
+</html>
