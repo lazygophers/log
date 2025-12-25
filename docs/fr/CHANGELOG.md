@@ -1,317 +1,356 @@
 ---
 titleSuffix: " | LazyGophers Log"
 ---
-# 📋 Changelog
 
-All notable changes to this project will be documented in this file.
+# 📋 Journal des modifications
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
-## [Unreleased]
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Added
-- Comprehensive multilingual documentation (7 languages)
-- GitHub issue templates (Bug Report, Feature Request, Questions)
-- Pull request template with build tag compatibility checks
-- Contributing guidelines in multiple languages
-- Code of conduct with enforcement guidelines
-- Security policy with vulnerability reporting process
-- Complete API documentation with examples
-- Professional project structure and templates
+## [Non publié]
 
-### Changed
-- Enhanced README with comprehensive feature documentation
-- Improved test coverage across all build tag configurations
-- Updated project structure for better maintainability
+### Ajouté
+
+-   Documentation multilingue complète (7 langues)
+-   Modèles d'issues GitHub (Rapport de bug, Demande de fonctionnalité, Questions)
+-   Modèle de Pull Request avec vérifications de compatibilité des balises de construction
+-   Directives de contribution en plusieurs langues
+-   Code de conduite avec lignes directrices d'application
+-   Politique de sécurité avec processus de signalement des vulnérabilités
+-   Documentation API complète avec exemples
+-   Structure de projet professionnelle et modèles
+
+### Modifié
+
+-   README amélioré avec documentation complète des fonctionnalités
+-   Couverture de tests améliorée pour toutes les configurations de balises de construction
+-   Structure de projet mise à jour pour une meilleure maintenabilité
 
 ### Documentation
-- Added multilingual support for all major documentation
-- Created comprehensive API reference
-- Established contributing workflow guidelines
-- Implemented security reporting procedures
+
+-   Ajout du support multilingue pour toute la documentation principale
+-   Création d'une référence API complète
+-   Établissement des directives de workflow de contribution
+-   Mise en œuvre des procédures de signalement de sécurité
 
 ## [1.0.0] - 2024-01-01
 
-### Added
-- Core logging functionality with multiple levels (Trace, Debug, Info, Warn, Error, Fatal, Panic)
-- Thread-safe logger implementation with object pooling
-- Build tag support (default, debug, release, discard modes)
-- Custom formatter interface with default text formatter
-- Multi-writer output support
-- Async writing capabilities for high-throughput scenarios
-- Automatic hourly log file rotation
-- Context-aware logging with goroutine ID and trace ID tracking
-- Caller information with configurable stack depth
-- Global package-level convenience functions
-- Zap logger integration support
+### Ajouté
+
+-   Fonctionnalité de journalisation de base avec plusieurs niveaux (Trace, Debug, Info, Warn, Error, Fatal, Panic)
+-   Implémentation de journalisation thread-safe avec mise en pool d'objets
+-   Support des balises de construction (par défaut, débogage, publication, abandon)
+-   Interface de formateur personnalisé avec formateur de texte par défaut
+-   Support de sortie multi-rédacteur
+-   Capacités d'écriture asynchrone pour les scénarios à haut débit
+-   Rotation automatique horaire des fichiers de journalisation
+-   Journalisation contextuelle avec suivi de l'ID de goroutine et de l'ID de trace
+-   Informations de l'appelant avec profondeur de pile configurable
+-   Fonctions de commodité au niveau du package global
+-   Support d'intégration du journaliseur Zap
 
 ### Performance
-- Object pooling with `sync.Pool` for entry objects and buffers
-- Early level checking to avoid expensive operations
-- Async writer for non-blocking log writes
-- Build tag optimizations for different environments
 
-### Build Tags
-- **Default**: Full functionality with debug messages
-- **Debug**: Enhanced debug information and caller details
-- **Release**: Production-optimized with disabled debug messages
-- **Discard**: Maximum performance with no-op logging operations
+-   Mise en pool d'objets avec `sync.Pool` pour les objets d'entrée et les tampons
+-   Vérification rapide du niveau pour éviter les opérations coûteuses
+-   Rédacteur asynchrone pour les écritures de journalisation non bloquantes
+-   Optimisations des balises de construction pour différents environnements
 
-### Core Features
-- **Logger**: Main logger struct with configurable level, output, formatter
-- **Entry**: Log record structure with comprehensive metadata
-- **Levels**: Seven log levels from Panic (highest) to Trace (lowest)
-- **Formatters**: Pluggable formatting system
-- **Writers**: File rotation and async writing support
-- **Context**: Goroutine ID and distributed tracing support
+### Balises de construction
 
-### API Highlights
-- Fluent configuration API with method chaining
-- Both simple and formatted logging methods (`.Info()` and `.Infof()`)
-- Logger cloning for isolated configurations
-- Context-aware logging with `CloneToCtx()`
-- Prefix and suffix message customization
-- Caller information toggle
+-   **Par défaut** : Fonctionnalité complète avec messages de débogage
+-   **Débogage** : Informations de débogage améliorées et détails de l'appelant
+-   **Publication** : Optimisé pour la production avec messages de débogage désactivés
+-   **Abandon** : Performance maximale avec opérations de journalisation no-op
 
-### Testing
-- Comprehensive test suite with 93.5% coverage
-- Multi build-tag testing support
-- Automated testing workflows
-- Performance benchmarks
+### Fonctionnalités principales
+
+-   **Logger** : Structure de journalisation principale avec niveau, sortie et formateur configurables
+-   **Entry** : Structure d'enregistrement de journal avec métadonnées complètes
+-   **Levels** : Sept niveaux de journalisation de Panic (le plus élevé) à Trace (le plus bas)
+-   **Formatters** : Système de formatage enfichable
+-   **Writers** : Support de rotation de fichiers et d'écriture asynchrone
+-   **Context** : Support de l'ID de goroutine et du traçage distribué
+
+### Points forts de l'API
+
+-   API de configuration fluide avec chaînage de méthodes
+-   Méthodes de journalisation simples et formatées (`.Info()` et `.Infof()`)
+-   Clonage de journaliseur pour configurations isolées
+-   Journalisation contextuelle avec `CloneToCtx()`
+-   Personnalisation des messages de préfixe et de suffixe
+-   Basculement des informations de l'appelant
+
+### Tests
+
+-   Suite de tests complète avec une couverture de 93.5%
+-   Support de tests multi-balises de construction
+-   Workflows de tests automatisés
+-   Tests de performance
 
 ## [0.9.0] - 2023-12-15
 
-### Added
-- Initial project structure
-- Basic logging functionality
-- Level-based filtering
-- File output support
+### Ajouté
 
-### Changed
-- Improved performance with object pooling
-- Enhanced error handling
+-   Structure de projet initiale
+-   Fonctionnalité de journalisation de base
+-   Filtrage basé sur le niveau
+-   Support de sortie fichier
+
+### Modifié
+
+-   Performance améliorée avec mise en pool d'objets
+-   Gestion des erreurs améliorée
 
 ## [0.8.0] - 2023-12-01
 
-### Added
-- Multi-writer support
-- Custom formatter interface
-- Async writing capabilities
+### Ajouté
 
-### Fixed
-- Memory leaks in high-throughput scenarios
-- Race conditions in concurrent access
+-   Support multi-rédacteur
+-   Interface de formateur personnalisé
+-   Capacités d'écriture asynchrone
+
+### Corrigé
+
+-   Fuites de mémoire dans les scénarios à haut débit
+-   Conditions de course dans l'accès concurrent
 
 ## [0.7.0] - 2023-11-15
 
-### Added
-- Build tag support for conditional compilation
-- Trace and debug level logging
-- Caller information tracking
+### Ajouté
 
-### Changed
-- Optimized memory allocation patterns
-- Improved thread safety
+-   Support des balises de construction pour la compilation conditionnelle
+-   Journalisation de niveau Trace et débogage
+-   Suivi des informations de l'appelant
+
+### Modifié
+
+-   Modèles d'allocation mémoire optimisés
+-   Sécurité des threads améliorée
 
 ## [0.6.0] - 2023-11-01
 
-### Added
-- Log rotation functionality
-- Context-aware logging
-- Goroutine ID tracking
+### Ajouté
 
-### Deprecated
-- Old configuration methods (will be removed in v1.0.0)
+-   Fonctionnalité de rotation des fichiers de journalisation
+-   Journalisation contextuelle
+-   Suivi de l'ID de goroutine
+
+### Obsolète
+
+-   Anciennes méthodes de configuration (seront supprimées dans v1.0.0)
 
 ## [0.5.0] - 2023-10-15
 
-### Added
-- JSON formatter
-- Multiple output destinations
-- Performance benchmarks
+### Ajouté
 
-### Changed
-- Refactored core logging engine
-- Improved API consistency
+-   Formateur JSON
+-   Plusieurs destinations de sortie
+-   Tests de performance
 
-### Removed
-- Legacy logging methods
+### Modifié
+
+-   Refactorisation du moteur de journalisation principal
+-   Cohérence de l'API améliorée
+
+### Supprimé
+
+-   Anciennes méthodes de journalisation
 
 ## [0.4.0] - 2023-10-01
 
-### Added
-- Fatal and Panic level logging
-- Global package functions
-- Configuration validation
+### Ajouté
 
-### Fixed
-- Output synchronization issues
-- Memory usage optimization
+-   Journalisation de niveau Fatal et Panic
+-   Fonctions globales du package
+-   Validation de la configuration
+
+### Corrigé
+
+-   Problèmes de synchronisation de la sortie
+-   Optimisation de l'utilisation mémoire
 
 ## [0.3.0] - 2023-09-15
 
-### Added
-- Custom log levels
-- Formatter interface
-- Thread-safe operations
+### Ajouté
 
-### Changed
-- Simplified API design
-- Enhanced documentation
+-   Niveaux de journalisation personnalisés
+-   Interface de formateur
+-   Opérations thread-safe
+
+### Modifié
+
+-   Conception de l'API simplifiée
+-   Documentation améliorée
 
 ## [0.2.0] - 2023-09-01
 
-### Added
-- File output support
-- Level-based filtering
-- Basic formatting options
+### Ajouté
 
-### Fixed
-- Performance bottlenecks
-- Memory leaks
+-   Support de sortie fichier
+-   Filtrage basé sur le niveau
+-   Options de formatage de base
+
+### Corrigé
+
+-   Goulots d'étranglement de performance
+-   Fuites de mémoire
 
 ## [0.1.0] - 2023-08-15
 
-### Added
-- Initial release
-- Basic console logging
-- Simple level support (Info, Warn, Error)
-- Core logger structure
+### Ajouté
 
-## Version History Summary
+-   Publication initiale
+-   Journalisation de console de base
+-   Support de niveau simple (Info, Warn, Error)
+-   Structure de journalisation principale
 
-| Version | Release Date | Key Features |
-|---------|--------------|--------------|
-| 1.0.0   | 2024-01-01  | Complete logging system, build tags, async writing, comprehensive documentation |
-| 0.9.0   | 2023-12-15  | Performance improvements, object pooling |
-| 0.8.0   | 2023-12-01  | Multi-writer, async writing, custom formatters |
-| 0.7.0   | 2023-11-15  | Build tags, trace/debug levels, caller info |
-| 0.6.0   | 2023-11-01  | Log rotation, context logging, goroutine tracking |
-| 0.5.0   | 2023-10-15  | JSON formatter, multiple outputs, benchmarks |
-| 0.4.0   | 2023-10-01  | Fatal/Panic levels, global functions |
-| 0.3.0   | 2023-09-15  | Custom levels, formatter interface |
-| 0.2.0   | 2023-09-01  | File output, level filtering |
-| 0.1.0   | 2023-08-15  | Initial release, basic console logging |
+## Résumé de l'historique des versions
 
-## Migration Guides
+| Version | Date de publication | Fonctionnalités principales                                                                             |
+| ------- | ------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1.0.0   | 2024-01-01          | Système de journalisation complet, balises de construction, écriture asynchrone, documentation complète |
+| 0.9.0   | 2023-12-15          | Améliorations de performance, mise en pool d'objets                                                     |
+| 0.8.0   | 2023-12-01          | Multi-rédacteur, écriture asynchrone, formateurs personnalisés                                          |
+| 0.7.0   | 2023-11-15          | Balises de construction, niveaux Trace/débogage, informations de l'appelant                             |
+| 0.6.0   | 2023-11-01          | Rotation des fichiers, journalisation contextuelle, suivi de goroutine                                  |
+| 0.5.0   | 2023-10-15          | Formateur JSON, sorties multiples, tests de performance                                                 |
+| 0.4.0   | 2023-10-01          | Niveaux Fatal/Panic, fonctions globales                                                                 |
+| 0.3.0   | 2023-09-15          | Niveaux personnalisés, interface de formateur                                                           |
+| 0.2.0   | 2023-09-01          | Sortie fichier, filtrage par niveau                                                                     |
+| 0.1.0   | 2023-08-15          | Publication initiale, journalisation de console de base                                                 |
 
-### Migrating from v0.9.x to v1.0.0
+## Guides de migration
 
-#### Breaking Changes
-- None - v1.0.0 is backward compatible with v0.9.x
+### Migration de v0.9.x vers v1.0.0
 
-#### New Features Available
-- Enhanced build tag support
-- Comprehensive documentation
-- Professional project templates
-- Security reporting procedures
+#### Modifications avec rupture
 
-#### Recommended Updates
+-   Aucune - v1.0.0 est rétrocompatible avec v0.9.x
+
+#### Nouvelles fonctionnalités disponibles
+
+-   Support des balises de construction amélioré
+-   Documentation complète
+-   Modèles de projet professionnels
+-   Procédures de signalement de sécurité
+
+#### Mises à jour recommandées
+
 ```go
-// Old way (still supported)
+// Ancienne méthode (toujours supportée)
 logger := log.New()
 logger.SetLevel(log.InfoLevel)
 
-// New recommended way with method chaining
+// Nouvelle méthode recommandée avec chaînage de méthodes
 logger := log.New().
     SetLevel(log.InfoLevel).
     Caller(true).
     SetPrefixMsg("[MyApp] ")
 ```
 
-### Migrating from v0.8.x to v0.9.x
+### Migration de v0.8.x vers v0.9.x
 
-#### Breaking Changes
-- Removed deprecated configuration methods
-- Changed internal buffer management
+#### Modifications avec rupture
 
-#### Migration Steps
-1. Update import paths if needed
-2. Replace deprecated methods:
-   ```go
-   // Old (deprecated)
-   logger.SetOutputFile("app.log")
-   
-   // New
-   file, _ := os.Create("app.log")
-   logger.SetOutput(file)
-   ```
+-   Suppression des méthodes de configuration obsolètes
+-   Modification de la gestion des tampons internes
 
-### Migrating from v0.5.x and Earlier
+#### Étapes de migration
 
-#### Major Changes
-- Complete API redesign for better consistency
-- Enhanced performance with object pooling
-- New build tag system
+1. Mettre à jour les chemins d'importation si nécessaire
+2. Remplacer les méthodes obsolètes :
 
-#### Migration Required
-- Update all logging calls to new API
-- Review and update formatter implementations
-- Test with new build tag configurations
+    ```go
+    // Ancienne (obsolète)
+    logger.SetOutputFile("app.log")
 
-## Development Milestones
+    // Nouvelle
+    file, _ := os.Create("app.log")
+    logger.SetOutput(file)
+    ```
 
-### 🎯 v1.1.0 Roadmap (Planned)
-- [ ] Structured logging with key-value pairs
-- [ ] Log sampling for high-volume scenarios  
-- [ ] Plugin system for custom outputs
-- [ ] Enhanced performance metrics
-- [ ] Cloud logging integrations
+### Migration de v0.5.x et versions antérieures
 
-### 🎯 v1.2.0 Roadmap (Future)
-- [ ] Configuration file support (YAML/JSON/TOML)
-- [ ] Log aggregation and filtering
-- [ ] Real-time log streaming
-- [ ] Enhanced security features
-- [ ] Performance dashboard integration
+#### Modifications majeures
 
-## Contributing
+-   Conception complète de l'API pour une meilleure cohérence
+-   Performance améliorée avec mise en pool d'objets
+-   Nouveau système de balises de construction
 
-We welcome contributions! Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
+#### Migration requise
 
-- Reporting bugs and requesting features
-- Code submission process  
-- Development setup
-- Testing requirements
-- Documentation standards
+-   Mettre à jour tous les appels de journalisation vers la nouvelle API
+-   Réviser et mettre à jour les implémentations de formateur
+-   Tester avec les nouvelles configurations de balises de construction
 
-## Security
+## Jalons de développement
 
-For security vulnerabilities, please see our [Security Policy](docs/SECURITY.md) for:
-- Supported versions
-- Reporting procedures
-- Response timeline
-- Security best practices
+### 🎯 Feuille de route v1.1.0 (Planifié)
+
+-   [ ] Journalisation structurée avec paires clé-valeur
+-   [ ] Échantillonnage de journalisation pour les scénarios à grand volume
+-   [ ] Système de plugins pour les sorties personnalisées
+-   [ ] Métriques de performance améliorées
+-   [ ] Intégrations de journalisation cloud
+
+### 🎯 Feuille de route v1.2.0 (Futur)
+
+-   [ ] Support des fichiers de configuration (YAML/JSON/TOML)
+-   [ ] Agrégation et filtrage de journalisation
+-   [ ] Streaming de journalisation en temps réel
+-   [ ] Fonctionnalités de sécurité améliorées
+-   [ ] Intégration du tableau de bord de performance
+
+## Contribution
+
+Nous accueillons les contributions ! Veuillez consulter notre [Guide de contribution](CONTRIBUTING.md) pour plus de détails sur :
+
+-   Signalement de bugs et demandes de fonctionnalités
+-   Processus de soumission de code
+-   Configuration du développement
+-   Exigences de tests
+-   Normes de documentation
+
+## Sécurité
+
+Pour les vulnérabilités de sécurité, veuillez consulter notre [Politique de sécurité](SECURITY.md) pour :
+
+-   Versions supportées
+-   Procédures de signalement
+-   Chronologie de réponse
+-   Bonnes pratiques de sécurité
 
 ## Support
 
-- 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/lazygophers/log/issues)
-- 💬 [Discussions](https://github.com/lazygophers/log/discussions)
-- 📧 Email: support@lazygophers.com
+-   📖 [Documentation](/)
+-   🐛 [Suivi des problèmes](https://github.com/lazygophers/log/issues)
+-   💬 [Discussions](https://github.com/lazygophers/log/discussions)
+-   📧 Email: support@lazygophers.com
 
-## License
+## Licence
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🌍 Multilingual Documentation
-
-This changelog is available in multiple languages:
-
-- [🇺🇸 English](CHANGELOG.md) (Current)
-- [🇨🇳 简体中文](docs/CHANGELOG_zh-CN.md)
-- [🇹🇼 繁體中文](docs/CHANGELOG_zh-TW.md)
-- [🇫🇷 Français](docs/CHANGELOG_fr.md)
-- [🇷🇺 Русский](docs/CHANGELOG_ru.md)
-- [🇪🇸 Español](docs/CHANGELOG_es.md)
-- [🇸🇦 العربية](docs/CHANGELOG_ar.md)
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-**Track every improvement and stay updated with LazygoPHers Log evolution! 🚀**
+## 🌍 Documentation multilingue
+
+Ce journal des modifications est disponible en plusieurs langues :
+
+-   [🇺🇸 English](CHANGELOG.md)
+-   [🇨🇳 简体中文](../zh-CN/CHANGELOG.md)
+-   [🇹🇼 繁體中文](../zh-TW/CHANGELOG.md)
+-   [🇫🇷 Français](CHANGELOG.md) (Courant)
+-   [🇷🇺 Русский](../README_ru.md)
+-   [🇪🇸 Español](../README_es.md)
+-   [🇸🇦 العربية](../README_ar.md)
 
 ---
 
-*This changelog is automatically updated with each release. For the most current information, check the [GitHub Releases](https://github.com/lazygophers/log/releases) page.*
+**Suivez chaque amélioration et restez informé de l'évolution de LazygoPHers Log ! 🚀**
+
+---
+
+_Ce journal des modifications est mis à jour automatiquement avec chaque publication. Pour les informations les plus récentes, consultez la page [GitHub Releases](https://github.com/lazygophers/log/releases)._
