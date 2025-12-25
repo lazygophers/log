@@ -70,17 +70,31 @@ runs:
           exit 1
         fi
         
-        # 确保路径在允许的范围内（工作目录或用户主目录）
+        # 允许 Go 标准缓存路径（GOMODCACHE 和 GOCACHE）
+        # 这些路径通常在用户主目录或系统目录下
         WORKSPACE_DIR="${GITHUB_WORKSPACE}"
         HOME_DIR="${HOME}"
         
-        if [[ "${ABSOLUTE_PATH}" != "${WORKSPACE_DIR}"* ]] && [[ "${ABSOLUTE_PATH}" != "${HOME_DIR}"* ]]; then
+        # 检查是否为 Go 标准缓存路径
+        IS_GO_CACHE="false"
+        if [[ "${ABSOLUTE_PATH}" == *"/go/pkg/mod"* ]] || [[ "${ABSOLUTE_PATH}" == *"/go-build"* ]]; then
+          IS_GO_CACHE="true"
+        fi
+        
+        # 验证路径在允许的范围内
+        if [[ "${IS_GO_CACHE}" == "true" ]]; then
+          # Go 缓存路径允许在任何位置（通常在用户主目录下）
+          echo "Path is a Go cache directory, allowing"
+          echo "valid-path=true" >> $GITHUB_OUTPUT
+        elif [[ "${ABSOLUTE_PATH}" != "${WORKSPACE_DIR}"* ]] && [[ "${ABSOLUTE_PATH}" != "${HOME_DIR}"* ]]; then
           echo "Error: Path must be within workspace or home directory"
           echo "valid-path=false" >> $GITHUB_OUTPUT
           exit 1
+        else
+          echo "Path is within allowed directories"
+          echo "valid-path=true" >> $GITHUB_OUTPUT
         fi
         
-        echo "valid-path=true" >> $GITHUB_OUTPUT
         echo "normalized-path=${ABSOLUTE_PATH}" >> $GITHUB_OUTPUT
 
     - name: Setup local cache directory
