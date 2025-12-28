@@ -100,18 +100,22 @@ runs:
     - name: Setup local cache directory
       if: steps.validate-path.outputs.valid-path == 'true' && steps.detect-runner.outputs.is-self-hosted == 'true'
       shell: bash
+      env:
+        CACHE_DIR: ${{ inputs.cache-dir }}
       run: |
-        mkdir -p "${{ inputs.cache-dir }}"
-        echo "Local cache directory: ${{ inputs.cache-dir }}"
+        mkdir -p "$CACHE_DIR"
+        echo "Local cache directory: $CACHE_DIR"
 
     - name: Generate cache paths
       id: cache-paths
       if: steps.validate-path.outputs.valid-path == 'true'
       shell: bash
+      env:
+        CACHE_DIR: ${{ inputs.cache-dir }}
+        CACHE_KEY: ${{ inputs.key }}
       run: |
         # 为本地缓存生成路径
-        CACHE_KEY="${{ inputs.key }}"
-        CACHE_PATH="${{ inputs.cache-dir }}/${CACHE_KEY}"
+        CACHE_PATH="$CACHE_DIR/$CACHE_KEY"
 
         echo "local-cache-path=${CACHE_PATH}" >> $GITHUB_OUTPUT
         echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT
