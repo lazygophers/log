@@ -1,5 +1,6 @@
 ---
 titleSuffix: " | LazyGophers Log"
+pageType: home
 ---
 
 # LazyGophers Log
