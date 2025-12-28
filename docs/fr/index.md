@@ -45,3 +45,4 @@ features:
   - title: Prêt pour la production
     details: Testé en conditions réelles dans des environnements de production avec une couverture de tests complète
     icon: ✅
+---
