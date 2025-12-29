@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 快速開始
-      link: /zh-TW/API
+      link: /API
     - theme: alt
       text: 查看 GitHub
       link: https://github.com/lazygophers/log

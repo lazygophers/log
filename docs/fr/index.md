@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: Démarrer
-      link: /fr/API
+      link: /API
     - theme: alt
       text: Voir sur GitHub
       link: https://github.com/lazygophers/log
