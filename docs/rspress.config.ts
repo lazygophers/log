@@ -1,7 +1,7 @@
 import { defineConfig } from 'rspress/config';
 
 export default defineConfig({
-  lang: 'en',
+  lang: 'zh-CN',
   title: 'LazyGophers Log Documentation',
   description: 'A comprehensive logging library for Go',
   base: '/log/',
