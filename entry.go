@@ -71,13 +71,3 @@ func putEntry(entry *Entry) {
 		entryPool.Put(entry)
 	}
 }
-
-// FastGetEntry is kept as backup implementation
-func FastGetEntry() *Entry {
-	return getEntry()
-}
-
-// FastPutEntry is kept as backup implementation
-func FastPutEntry(entry *Entry) {
-	putEntry(entry)
-}

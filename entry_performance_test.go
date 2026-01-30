@@ -22,10 +22,10 @@ func BenchmarkEntry_Performance_Comparison(b *testing.B) {
 	b.Run("FastGetPut", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			entry := FastGetEntry()
+			entry := getEntry()
 			entry.Message = "test"
 			entry.TraceId = "trace"
-			FastPutEntry(entry)
+			putEntry(entry)
 		}
 	})
 }
@@ -83,11 +83,11 @@ func BenchmarkEntry_Concurrent_Performance(b *testing.B) {
 		b.ReportAllocs()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				entry := FastGetEntry()
+				entry := getEntry()
 				entry.Message = "concurrent test"
 				entry.TraceId = "trace-concurrent"
 				entry.Gid = 12345
-				FastPutEntry(entry)
+				putEntry(entry)
 			}
 		})
 	})
@@ -127,11 +127,11 @@ func BenchmarkEntry_Memory_Allocation(b *testing.B) {
 		b.ReportAllocs()
 
 		for i := 0; i < b.N; i++ {
-			entry := FastGetEntry()
+			entry := getEntry()
 			entry.Message = "memory test"
 			entry.TraceId = "trace-memory"
 			entry.File = "test.go"
-			FastPutEntry(entry)
+			putEntry(entry)
 		}
 
 		runtime.GC()
@@ -185,12 +185,12 @@ func BenchmarkEntry_HighLoad_Performance(b *testing.B) {
 					defer wg.Done()
 
 					for k := 0; k < entriesPerGoroutine; k++ {
-						entry := FastGetEntry()
+						entry := getEntry()
 						entry.Message = "high load test"
 						entry.TraceId = "trace-load"
 						entry.Gid = int64(id*1000 + k)
 						entry.CallerLine = k
-						FastPutEntry(entry)
+						putEntry(entry)
 					}
 				}(j)
 			}
@@ -254,7 +254,7 @@ func BenchmarkEntry_RealWorld_Scenario(b *testing.B) {
 		b.Run("Fast_"+scenario.name, func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				entry := FastGetEntry()
+				entry := getEntry()
 				entry.Message = scenario.message
 				entry.TraceId = scenario.traceId
 				entry.File = scenario.file
@@ -262,7 +262,7 @@ func BenchmarkEntry_RealWorld_Scenario(b *testing.B) {
 				entry.Level = scenario.level
 				entry.Time = time.Now()
 				entry.Gid = int64(i)
-				FastPutEntry(entry)
+				putEntry(entry)
 			}
 		})
 	}
@@ -305,7 +305,7 @@ func BenchmarkEntry_CPU_Efficiency(b *testing.B) {
 		start := time.Now()
 
 		for i := 0; i < b.N; i++ {
-			entry := FastGetEntry()
+			entry := getEntry()
 
 			// 模拟常见的日志字段设置
 			entry.Message = "CPU efficiency test message"
@@ -321,7 +321,7 @@ func BenchmarkEntry_CPU_Efficiency(b *testing.B) {
 				entry.PrefixMsg = append(entry.PrefixMsg, []byte("CPU: ")...)
 			}
 
-			FastPutEntry(entry)
+			putEntry(entry)
 		}
 
 		duration := time.Since(start)
