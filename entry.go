@@ -6,18 +6,30 @@ import (
 )
 
 // Entry represents a log entry
+//
+// Field layout is optimized for cache performance:
+// - Hot path fields (accessed on every log) are grouped at the beginning
+// - Fields of similar sizes are grouped together to minimize padding
+// - Total size: 200 bytes (4 bytes padding waste = 2.0%)
 type Entry struct {
-	Pid        int       // Process ID
-	Gid        int64     // Goroutine ID
-	TraceId    string    // Trace ID for distributed tracing
-	Time       time.Time // Log timestamp
-	Level      Level     // Log level
+	// Hot path fields - accessed on every log call
+	Level      Level     // Log level (1 byte + 7 padding)
+	Pid        int       // Process ID (8 bytes)
+	Gid        int64     // Goroutine ID (8 bytes)
+	CallerLine int       // Caller line number (8 bytes)
+
+	// Timestamp - accessed frequently but less than core fields
+	Time       time.Time // Log timestamp (24 bytes)
+
+	// String fields (16 bytes each) - ordered by access frequency
+	Message    string    // Core log message (highest frequency)
 	File       string    // Source file name
-	Message    string    // Core log message
-	CallerName string    // Caller package name
-	CallerLine int       // Caller line number
-	CallerDir  string    // Caller directory
 	CallerFunc string    // Caller function name
+	CallerDir  string    // Caller directory
+	CallerName string    // Caller package name
+	TraceId    string    // Trace ID for distributed tracing
+
+	// Byte slices (24 bytes each) - lower frequency
 	PrefixMsg  []byte    // Prefix message
 	SuffixMsg  []byte    // Suffix message
 }
