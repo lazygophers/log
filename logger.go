@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/petermattis/goid"
@@ -54,9 +53,6 @@ type Logger struct {
 	// Performance optimization fields
 	enableCaller bool
 	enableTrace  bool
-
-	// Entry cache pool
-	entryCache sync.Pool
 }
 
 // newLogger creates a new Logger instance with default values
@@ -77,10 +73,6 @@ func newLogger() *Logger {
 		callerDepth:  3,
 		enableCaller: true,
 		enableTrace:  true,
-	}
-
-	logger.entryCache.New = func() interface{} {
-		return &Entry{Pid: pid}
 	}
 
 	return logger
@@ -116,21 +108,6 @@ func (p *Logger) AppendSuffixMsg(suffixMsg string) *Logger {
 	return p
 }
 
-// fastGetEntry gets Entry from pool
-//
-//go:inline
-func (p *Logger) fastGetEntry() *Entry {
-	return p.entryCache.Get().(*Entry)
-}
-
-// fastPutEntry returns Entry to pool
-//
-//go:inline
-func (p *Logger) fastPutEntry(entry *Entry) {
-	entry.Reset()
-	p.entryCache.Put(entry)
-}
-
 // EnableCaller controls caller information
 func (p *Logger) EnableCaller(enable bool) *Logger {
 	p.enableCaller = enable
@@ -153,10 +130,6 @@ func (p *Logger) Clone() *Logger {
 		SuffixMsg:    p.SuffixMsg,
 		enableCaller: p.enableCaller,
 		enableTrace:  p.enableTrace,
-	}
-
-	l.entryCache.New = func() interface{} {
-		return &Entry{Pid: pid}
 	}
 
 	switch f := p.Format.(type) {
@@ -221,7 +194,7 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 //
 //go:noinline
 func (p *Logger) log(level Level, msg string) {
-	entry := p.fastGetEntry()
+	entry := getEntry()
 
 	// Set basic fields
 	entry.Level = level
@@ -259,7 +232,7 @@ func (p *Logger) log(level Level, msg string) {
 	formatted := p.Format.Format(entry)
 	p.write(level, formatted)
 
-	p.fastPutEntry(entry)
+	putEntry(entry)
 }
 
 // write writes formatted log bytes to output
