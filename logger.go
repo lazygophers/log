@@ -190,43 +190,66 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	p.log(level, fmt.Sprintf(format, args...))
 }
 
-// log is the internal core logging function
+// populateEntry sets basic fields on the log entry
 //
-//go:noinline
-func (p *Logger) log(level Level, msg string) {
-	entry := getEntry()
-
-	// Set basic fields
+//go:inline
+func (p *Logger) populateEntry(entry *Entry, level Level, msg string) {
 	entry.Level = level
 	entry.Message = msg
 	entry.Time = time.Now()
+}
 
-	// Set expensive fields conditionally
+// fillTraceInfo conditionally sets trace information
+//
+//go:inline
+func (p *Logger) fillTraceInfo(entry *Entry) {
 	if p.enableTrace {
 		entry.Gid = goid.Get()
 		entry.TraceId = getTrace(entry.Gid)
 	}
+}
 
-	// Get caller info conditionally
-	if p.enableCaller {
-		var pc uintptr
-		var ok bool
-		pc, entry.File, entry.CallerLine, ok = runtime.Caller(p.callerDepth)
-		if ok && pc != 0 {
-			if fn := runtime.FuncForPC(pc); fn != nil {
-				entry.CallerName = fn.Name()
-				entry.CallerDir, entry.CallerFunc = SplitPackageName(entry.CallerName)
-			}
-		}
+// fillCallerInfo conditionally sets caller information
+//
+//go:inline
+func (p *Logger) fillCallerInfo(entry *Entry) {
+	if !p.enableCaller {
+		return
 	}
 
-	// Set prefix/suffix without unnecessary copies
+	var pc uintptr
+	var ok bool
+	pc, entry.File, entry.CallerLine, ok = runtime.Caller(p.callerDepth)
+	if ok && pc != 0 {
+		if fn := runtime.FuncForPC(pc); fn != nil {
+			entry.CallerName = fn.Name()
+			entry.CallerDir, entry.CallerFunc = SplitPackageName(entry.CallerName)
+		}
+	}
+}
+
+// fillPrefixSuffix sets prefix and suffix messages
+//
+//go:inline
+func (p *Logger) fillPrefixSuffix(entry *Entry) {
 	if len(p.PrefixMsg) > 0 {
 		entry.PrefixMsg = p.PrefixMsg
 	}
 	if len(p.SuffixMsg) > 0 {
 		entry.SuffixMsg = p.SuffixMsg
 	}
+}
+
+// log is the internal core logging function
+//
+//go:noinline
+func (p *Logger) log(level Level, msg string) {
+	entry := getEntry()
+
+	p.populateEntry(entry, level, msg)
+	p.fillTraceInfo(entry)
+	p.fillCallerInfo(entry)
+	p.fillPrefixSuffix(entry)
 
 	// Format and write
 	formatted := p.Format.Format(entry)

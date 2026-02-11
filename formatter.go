@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"path"
 	"strconv"
@@ -38,51 +39,59 @@ func (p *Formatter) format(entry *Entry) []byte {
 	b := GetBuffer()
 	defer PutBuffer(b)
 
-	// Write prefix message
+	p.formatPrefix(b, entry)
+	p.formatTimestamp(b, entry)
+	p.formatLevel(b, entry)
+	b.WriteString(strings.TrimSpace(entry.Message))
+	p.formatCallerAndTrace(b, entry)
+	p.formatSuffix(b, entry)
+
+	return b.Bytes()
+}
+
+// formatPrefix writes prefix message and process/goroutine IDs
+//
+//go:inline
+func (p *Formatter) formatPrefix(b *bytes.Buffer, entry *Entry) {
 	if len(entry.PrefixMsg) > 0 {
 		b.Write(entry.PrefixMsg)
 		b.Write([]byte(" "))
 	}
-
-	// Write process and goroutine IDs
 	b.WriteString(fmt.Sprintf("(%d.%d) ", entry.Pid, entry.Gid))
-	// Write formatted timestamp
+}
+
+// formatTimestamp writes formatted timestamp
+//
+//go:inline
+func (p *Formatter) formatTimestamp(b *bytes.Buffer, entry *Entry) {
 	b.WriteString(entry.Time.Format("2006-01-02 15:04:05.999Z07:00"))
-	// Get color by log level
+}
+
+// formatLevel writes colored log level
+//
+//go:inline
+func (p *Formatter) formatLevel(b *bytes.Buffer, entry *Entry) {
 	color := getColorByLevel(entry.Level)
-	// Write color code
 	b.Write(color)
-	// Write log level
 	b.Write([]byte(" ["))
 	b.WriteString(entry.Level.String())
 	b.Write([]byte("] "))
-	// Write color end code
 	b.Write(colorEnd)
-	// Write log message
-	b.WriteString(strings.TrimSpace(entry.Message))
+}
 
-	// Write additional info if caller info enabled or TraceID exists
-	if !p.DisableCaller || entry.TraceId != "" {
-		b.Write(colorCyan)
-		b.WriteString(" [ ")
-		// Write caller info if not disabled
-		if !p.DisableCaller {
-			b.WriteString(path.Join(entry.CallerDir, path.Base(entry.File)))
-			b.Write([]byte(":"))
-			b.WriteString(strconv.Itoa(entry.CallerLine))
-			b.Write([]byte(" "))
-			b.WriteString(entry.CallerFunc)
-			b.Write([]byte(" "))
-		}
-		// Write TraceID if exists
-		if entry.TraceId != "" {
-			b.WriteString(entry.TraceId)
-			b.Write([]byte(" "))
-		}
-		b.Write([]byte("]"))
-		b.Write(colorEnd)
-	} else if !p.DisableCaller {
-		b.WriteString(" ")
+// formatCallerAndTrace writes caller and trace information
+//
+//go:inline
+func (p *Formatter) formatCallerAndTrace(b *bytes.Buffer, entry *Entry) {
+	// Skip if both disabled and no trace ID
+	if p.DisableCaller && entry.TraceId == "" {
+		return
+	}
+
+	b.Write(colorCyan)
+	b.WriteString(" [ ")
+
+	if !p.DisableCaller {
 		b.WriteString(path.Join(entry.CallerDir, path.Base(entry.File)))
 		b.Write([]byte(":"))
 		b.WriteString(strconv.Itoa(entry.CallerLine))
@@ -91,13 +100,23 @@ func (p *Formatter) format(entry *Entry) []byte {
 		b.Write([]byte(" "))
 	}
 
-	// Write suffix message
+	if entry.TraceId != "" {
+		b.WriteString(entry.TraceId)
+		b.Write([]byte(" "))
+	}
+
+	b.Write([]byte("]"))
+	b.Write(colorEnd)
+}
+
+// formatSuffix writes suffix message and newline
+//
+//go:inline
+func (p *Formatter) formatSuffix(b *bytes.Buffer, entry *Entry) {
 	if len(entry.SuffixMsg) > 0 {
 		b.Write(entry.SuffixMsg)
 	}
-	// Write newline
 	b.WriteByte('\n')
-	return b.Bytes()
 }
 
 // Format implements Format interface, handles multi-line messages
