@@ -26,12 +26,9 @@ func (p *AsyncWriter) Write(b []byte) (n int, err error) {
 	// Copy the slice to avoid buffer pool concurrency issues
 	// The input bytes typically come from formatter buffer pool and will be
 	// reused immediately after this function returns. We need our own copy.
-	buf := make([]byte, len(b))
-	copy(buf, b)
-
 	select {
-	case p.c <- buf:
-		return len(buf), nil
+	case p.c <- b:
+		return len(b), nil
 	default:
 		return 0, ErrAsyncWriterFull
 	}

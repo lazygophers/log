@@ -68,18 +68,16 @@ func TestAsyncWriter_BufferPoolSafety(t *testing.T) {
 
 // trackingWriter is a test writer that records all writes
 type trackingWriter struct {
-	mu    sync.Mutex
+	mu     sync.Mutex
 	writes [][]byte
 }
 
-func (t *trackingWriter) Write(p []byte) (n int, err error) {
+func (t *trackingWriter) Write(p []byte) (int, error) {
 	t.mu.Lock()
 	// Make a copy to store, since p will be reused
-	buf := make([]byte, len(p))
-	n = copy(buf, p)
-	t.writes = append(t.writes, buf)
+	t.writes = append(t.writes, p)
 	t.mu.Unlock()
-	return n, nil
+	return len(p), nil
 }
 
 func (t *trackingWriter) Close() error {
