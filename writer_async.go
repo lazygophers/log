@@ -17,10 +17,21 @@ type AsyncWriter struct {
 var ErrAsyncWriterFull = errors.New("async writer full")
 
 // Write asynchronously writes byte data
+//
+// CRITICAL: This method copies the input slice to avoid buffer pool data races.
+// The input bytes may come from a buffer pool that gets reused immediately
+// after the write call returns. Without copying, the async goroutine may read
+// corrupted data from a reused buffer.
 func (p *AsyncWriter) Write(b []byte) (n int, err error) {
+	// Copy the slice to avoid buffer pool concurrency issues
+	// The input bytes typically come from formatter buffer pool and will be
+	// reused immediately after this function returns. We need our own copy.
+	buf := make([]byte, len(b))
+	copy(buf, b)
+
 	select {
-	case p.c <- b:
-		return len(b), nil
+	case p.c <- buf:
+		return len(buf), nil
 	default:
 		return 0, ErrAsyncWriterFull
 	}
