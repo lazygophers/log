@@ -196,20 +196,38 @@ func getColorByLevel(level Level) []byte {
 }
 
 // SplitPackageName splits full package path into directory and function name
+// Optimized to minimize string operations and allocations
 func SplitPackageName(f string) (callDir string, callFunc string) {
-	slashIndex := strings.LastIndex(f, "/")
-	if slashIndex > 0 {
-		idx := strings.Index(f[slashIndex:], ".") + slashIndex
-		callDir, callFunc = f[:idx], f[idx+1:]
-	} else {
-		slashIndex = strings.Index(f, ".")
-		if slashIndex > 0 {
-			callDir, callFunc = f[:slashIndex], f[slashIndex+1:]
-		} else {
-			callDir, callFunc = f, ""
+	// Find last slash using IndexByte (faster than LastIndex with string)
+	lastSlash := strings.LastIndexByte(f, '/')
+	if lastSlash == -1 {
+		// No slash: look for first dot
+		dotIdx := strings.IndexByte(f, '.')
+		if dotIdx > 0 {
+			return f[:dotIdx], f[dotIdx+1:]
 		}
+		return f, ""
 	}
-	callDir = strings.TrimPrefix(callDir, "github.com/")
-	callDir = strings.TrimPrefix(callDir, "lazygophers/")
+
+	// Find first dot after the last slash
+	dotIdx := strings.IndexByte(f[lastSlash+1:], '.')
+	if dotIdx == -1 {
+		// No dot after slash
+		return f, ""
+	}
+	dotIdx += lastSlash + 1 // Adjust to absolute position
+
+	// Extract directory and function
+	callDir = f[:dotIdx]
+	callFunc = f[dotIdx+1:]
+
+	// Trim known prefixes efficiently (single pass)
+	// Check "github.com/" first (more specific)
+	if strings.HasPrefix(callDir, "github.com/") {
+		callDir = callDir[11:] // len("github.com/") = 11
+	} else if strings.HasPrefix(callDir, "lazygophers/") {
+		callDir = callDir[12:] // len("lazygophers/") = 12
+	}
+
 	return
 }
