@@ -2,7 +2,6 @@ package log
 
 import (
 	"bytes"
-	"fmt"
 	"path"
 	"strconv"
 	"strings"
@@ -55,9 +54,13 @@ func (p *Formatter) format(entry *Entry) []byte {
 func (p *Formatter) formatPrefix(b *bytes.Buffer, entry *Entry) {
 	if len(entry.PrefixMsg) > 0 {
 		b.Write(entry.PrefixMsg)
-		b.Write([]byte(" "))
+		b.WriteByte(' ')
 	}
-	b.WriteString(fmt.Sprintf("(%d.%d) ", entry.Pid, entry.Gid))
+	b.WriteByte('(')
+	b.WriteString(strconv.Itoa(entry.Pid))
+	b.WriteByte('.')
+	b.WriteString(strconv.FormatInt(entry.Gid, 10))
+	b.WriteString(") ")
 }
 
 // formatTimestamp writes formatted timestamp
