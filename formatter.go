@@ -105,10 +105,10 @@ func (p *Formatter) formatCallerAndTrace(b *bytes.Buffer, entry *Entry) {
 
 	if entry.TraceId != "" {
 		b.WriteString(entry.TraceId)
-		b.Write([]byte(" "))
+		b.WriteByte(' ')
 	}
 
-	b.Write([]byte("]"))
+	b.WriteString("]")
 	b.Write(colorEnd)
 }
 
@@ -221,12 +221,13 @@ func SplitPackageName(f string) (callDir string, callFunc string) {
 	callDir = f[:dotIdx]
 	callFunc = f[dotIdx+1:]
 
-	// Trim known prefixes efficiently (single pass)
-	// Check "github.com/" first (more specific)
-	if strings.HasPrefix(callDir, "github.com/") {
-		callDir = callDir[11:] // len("github.com/") = 11
-	} else if strings.HasPrefix(callDir, "lazygophers/") {
-		callDir = callDir[12:] // len("lazygophers/") = 12
+	// Trim known prefixes efficiently (sequential like original)
+	// First try "github.com/", then "lazygophers/"
+	if len(callDir) > 11 && callDir[:11] == "github.com/" {
+		callDir = callDir[11:]
+	}
+	if len(callDir) > 12 && callDir[:12] == "lazygophers/" {
+		callDir = callDir[12:]
 	}
 
 	return
