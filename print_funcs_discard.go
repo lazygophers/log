@@ -1,18 +1,14 @@
-//go:build canary
+//go:build discard
 
 package log
 
-import (
-	"os"
-	"path/filepath"
-)
+import "io"
 
-var ReleaseLogPath string = filepath.Join(os.TempDir(), "lazygophers", "log")
-
-// init 初始化发布模式下的日志输出。
+// init 函数在包初始化时，将标准日志记录器的输出设置为 io.Discard。
+// io.Discard 是一个特殊的 io.Writer，它会消费并丢弃所有写入的数据，
+// 从而实现零成本的日志操作。
 func init() {
-	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
-	SetLevel(DebugLevel)
+	SetOutput(io.Discard)
 }
 
 // Debug 记录调试级别的日志。

@@ -1,6 +1,11 @@
-//go:build !debug && !release && !discard && !canary
+//go:build release && !discard
 
 package log
+
+// init 初始化发布模式下的日志输出。
+func init() {
+	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
+}
 
 // Debug 记录调试级别的日志。
 //
