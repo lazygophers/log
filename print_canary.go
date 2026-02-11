@@ -1,6 +1,19 @@
-//go:build !debug && !release && !discard && !canary
+//go:build canary
 
 package log
+
+import (
+	"os"
+	"path/filepath"
+)
+
+var ReleaseLogPath string = filepath.Join(os.TempDir(), "lazygophers", "log")
+
+// init 初始化发布模式下的日志输出。
+func init() {
+	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
+	SetLevel(DebugLevel)
+}
 
 // Debug 记录调试级别的日志。
 //
