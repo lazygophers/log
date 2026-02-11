@@ -129,10 +129,28 @@ func (p *Formatter) Format(entry *Entry) []byte {
 	}
 	b := GetBuffer()
 	defer PutBuffer(b)
-	for _, msg := range strings.Split(entry.Message, "\n") {
-		entry.Message = msg
+
+	// Manual iteration to avoid strings.Split allocations
+	// This creates fewer intermediate objects compared to strings.Split
+	msg := entry.Message
+	start := 0
+	for {
+		// Find next newline in the remaining message
+		idx := strings.IndexByte(msg[start:], '\n')
+		if idx == -1 {
+			// Last line (or only line if no \n found)
+			entry.Message = msg[start:]
+			b.Write(p.format(entry))
+			break
+		}
+		// idx is relative to msg[start:], so we add start to get absolute position
+		absIdx := start + idx
+		// Extract line without the newline character
+		entry.Message = msg[start:absIdx]
 		b.Write(p.format(entry))
+		start = absIdx + 1 // Move past the newline
 	}
+
 	return b.Bytes()
 }
 
