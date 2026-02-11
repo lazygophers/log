@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -179,7 +178,7 @@ func (p *Logger) Log(level Level, args ...interface{}) {
 	if !p.levelEnabled(level) {
 		return
 	}
-	p.log(level, fmt.Sprint(args...))
+	p.log(level, fastSprint(args...))
 }
 
 // Logf records a formatted log
@@ -187,7 +186,7 @@ func (p *Logger) Logf(level Level, format string, args ...interface{}) {
 	if !p.levelEnabled(level) {
 		return
 	}
-	p.log(level, fmt.Sprintf(format, args...))
+	p.log(level, fastSprintf(format, args...))
 }
 
 // populateEntry sets basic fields on the log entry
@@ -281,7 +280,7 @@ func (p *Logger) Trace(args ...interface{}) {
 	if !p.levelEnabled(TraceLevel) {
 		return
 	}
-	p.log(TraceLevel, fmt.Sprint(args...))
+	p.log(TraceLevel, fastSprint(args...))
 }
 
 // Debug logs at DEBUG level
@@ -289,7 +288,7 @@ func (p *Logger) Debug(args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
 	}
-	p.log(DebugLevel, fmt.Sprint(args...))
+	p.log(DebugLevel, fastSprint(args...))
 }
 
 // Print logs at DEBUG level (alias for Debug)
@@ -297,7 +296,7 @@ func (p *Logger) Print(args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
 	}
-	p.log(DebugLevel, fmt.Sprint(args...))
+	p.log(DebugLevel, fastSprint(args...))
 }
 
 // Info logs at INFO level
@@ -305,7 +304,7 @@ func (p *Logger) Info(args ...interface{}) {
 	if !p.levelEnabled(InfoLevel) {
 		return
 	}
-	p.log(InfoLevel, fmt.Sprint(args...))
+	p.log(InfoLevel, fastSprint(args...))
 }
 
 // Warn logs at WARN level
@@ -313,7 +312,7 @@ func (p *Logger) Warn(args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
 	}
-	p.log(WarnLevel, fmt.Sprint(args...))
+	p.log(WarnLevel, fastSprint(args...))
 }
 
 // Warning is an alias for Warn
@@ -321,7 +320,7 @@ func (p *Logger) Warning(args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
 	}
-	p.log(WarnLevel, fmt.Sprint(args...))
+	p.log(WarnLevel, fastSprint(args...))
 }
 
 // Error logs at ERROR level
@@ -329,7 +328,7 @@ func (p *Logger) Error(args ...interface{}) {
 	if !p.levelEnabled(ErrorLevel) {
 		return
 	}
-	p.log(ErrorLevel, fmt.Sprint(args...))
+	p.log(ErrorLevel, fastSprint(args...))
 }
 
 // Panic logs at PANIC level and panics
@@ -337,7 +336,7 @@ func (p *Logger) Panic(args ...interface{}) {
 	if !p.levelEnabled(PanicLevel) {
 		return
 	}
-	p.log(PanicLevel, fmt.Sprint(args...))
+	p.log(PanicLevel, fastSprint(args...))
 }
 
 // Fatal logs at FATAL level and exits
@@ -345,7 +344,7 @@ func (p *Logger) Fatal(args ...interface{}) {
 	if !p.levelEnabled(FatalLevel) {
 		return
 	}
-	p.log(FatalLevel, fmt.Sprint(args...))
+	p.log(FatalLevel, fastSprint(args...))
 }
 
 // Tracef logs formatted TRACE level message
@@ -353,7 +352,7 @@ func (p *Logger) Tracef(format string, args ...interface{}) {
 	if !p.levelEnabled(TraceLevel) {
 		return
 	}
-	p.log(TraceLevel, fmt.Sprintf(format, args...))
+	p.log(TraceLevel, fastSprintf(format, args...))
 }
 
 // Printf logs formatted DEBUG level message (alias for Debugf)
@@ -361,7 +360,7 @@ func (p *Logger) Printf(format string, args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
 	}
-	p.log(DebugLevel, fmt.Sprintf(format, args...))
+	p.log(DebugLevel, fastSprintf(format, args...))
 }
 
 // Debugf logs formatted DEBUG level message
@@ -369,7 +368,7 @@ func (p *Logger) Debugf(format string, args ...interface{}) {
 	if !p.levelEnabled(DebugLevel) {
 		return
 	}
-	p.log(DebugLevel, fmt.Sprintf(format, args...))
+	p.log(DebugLevel, fastSprintf(format, args...))
 }
 
 // Infof logs formatted INFO level message
@@ -377,7 +376,7 @@ func (p *Logger) Infof(format string, args ...interface{}) {
 	if !p.levelEnabled(InfoLevel) {
 		return
 	}
-	p.log(InfoLevel, fmt.Sprintf(format, args...))
+	p.log(InfoLevel, fastSprintf(format, args...))
 }
 
 // Warnf logs formatted WARN level message
@@ -385,7 +384,7 @@ func (p *Logger) Warnf(format string, args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
 	}
-	p.log(WarnLevel, fmt.Sprintf(format, args...))
+	p.log(WarnLevel, fastSprintf(format, args...))
 }
 
 // Warningf is an alias for Warnf
@@ -393,7 +392,7 @@ func (p *Logger) Warningf(format string, args ...interface{}) {
 	if !p.levelEnabled(WarnLevel) {
 		return
 	}
-	p.log(WarnLevel, fmt.Sprintf(format, args...))
+	p.log(WarnLevel, fastSprintf(format, args...))
 }
 
 // Errorf logs formatted ERROR level message
@@ -401,7 +400,7 @@ func (p *Logger) Errorf(format string, args ...interface{}) {
 	if !p.levelEnabled(ErrorLevel) {
 		return
 	}
-	p.log(ErrorLevel, fmt.Sprintf(format, args...))
+	p.log(ErrorLevel, fastSprintf(format, args...))
 }
 
 // Fatalf logs formatted FATAL level message and exits
@@ -409,7 +408,7 @@ func (p *Logger) Fatalf(format string, args ...interface{}) {
 	if !p.levelEnabled(FatalLevel) {
 		return
 	}
-	p.log(FatalLevel, fmt.Sprintf(format, args...))
+	p.log(FatalLevel, fastSprintf(format, args...))
 }
 
 // Panicf logs formatted PANIC level message and panics
@@ -417,7 +416,7 @@ func (p *Logger) Panicf(format string, args ...interface{}) {
 	if !p.levelEnabled(PanicLevel) {
 		return
 	}
-	p.log(PanicLevel, fmt.Sprintf(format, args...))
+	p.log(PanicLevel, fastSprintf(format, args...))
 }
 
 // Sync flushes buffered logs to disk
