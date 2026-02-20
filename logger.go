@@ -69,7 +69,7 @@ func newLogger() *Logger {
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},
-		callerDepth:  3,
+		callerDepth:  4,
 		enableCaller: true,
 		enableTrace:  true,
 	}
