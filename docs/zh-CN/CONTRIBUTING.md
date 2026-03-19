@@ -133,7 +133,7 @@ go install honnef.co/go/tools/cmd/staticcheck@latest
 
 ### PR 模板
 
-提交拉取请求时，请使用我们的[PR 模板](.github/pull_request_template.md)。
+提交拉取请求时，请使用我们的[PR 模板](../../.github/pull_request_template.md)。
 
 ## 📏 编码标准
 
@@ -342,7 +342,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 错误报告
 
-使用[错误报告模板](.github/ISSUE_TEMPLATE/bug_report.md)并包含：
+使用[错误报告模板](../../.github/ISSUE_TEMPLATE/bug_report.md)并包含：
 
 -   **清晰的问题描述**
 -   **重现步骤**
@@ -352,7 +352,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 功能请求
 
-使用[功能请求模板](.github/ISSUE_TEMPLATE/feature_request.md)并包含：
+使用[功能请求模板](../../.github/ISSUE_TEMPLATE/feature_request.md)并包含：
 
 -   **清晰的功能动机**
 -   **建议的 API** 设计
@@ -361,7 +361,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 问题
 
-使用[问题模板](.github/ISSUE_TEMPLATE/question.md)用于：
+使用[问题模板](../../.github/ISSUE_TEMPLATE/question.md)用于：
 
 -   使用问题
 -   配置帮助
