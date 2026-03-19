@@ -376,6 +376,162 @@ func TestLogger_ErrorfLevelDisabled(t *testing.T) {
 	}
 }
 
+func TestLogger_EnableCaller(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+	logger.SetCallerDepth(1)
+
+	// Arrange: disable caller
+	logger.EnableCaller(false)
+
+	// Act
+	logger.Info("no caller")
+
+	// Assert: output should not contain .go: pattern (caller info)
+	output := buf.String()
+	if strings.Contains(output, ".go:") {
+		t.Errorf("Caller info should be disabled, got: %s", output)
+	}
+
+	// Arrange: enable caller
+	buf.Reset()
+	logger.EnableCaller(true)
+
+	// Act
+	logger.Info("with caller")
+
+	// Assert: output should contain .go: pattern
+	output = buf.String()
+	if !strings.Contains(output, ".go:") {
+		t.Errorf("Caller info should be enabled, got: %s", output)
+	}
+}
+
+func TestLogger_EnableCaller_ReturnsSelf(t *testing.T) {
+	logger := newLogger()
+	result := logger.EnableCaller(false)
+	if result != logger {
+		t.Error("EnableCaller should return the same logger instance")
+	}
+}
+
+func TestLogger_EnableTrace(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+
+	// Arrange: set trace ID and disable trace
+	SetTrace("test-trace-id-123")
+	defer DelTrace()
+	logger.EnableTrace(false)
+
+	// Act
+	logger.Info("no trace")
+
+	// Assert: output should not contain trace ID
+	output := buf.String()
+	if strings.Contains(output, "test-trace-id-123") {
+		t.Errorf("Trace info should be disabled, got: %s", output)
+	}
+
+	// Arrange: enable trace
+	buf.Reset()
+	logger.EnableTrace(true)
+
+	// Act
+	logger.Info("with trace")
+
+	// Assert: output should contain trace ID
+	output = buf.String()
+	if !strings.Contains(output, "test-trace-id-123") {
+		t.Errorf("Trace info should be enabled, got: %s", output)
+	}
+}
+
+func TestLogger_EnableTrace_ReturnsSelf(t *testing.T) {
+	logger := newLogger()
+	result := logger.EnableTrace(false)
+	if result != logger {
+		t.Error("EnableTrace should return the same logger instance")
+	}
+}
+
+func TestLogger_FillPrefixSuffix_WithSuffix(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+
+	// Arrange: set suffix
+	logger.SetSuffixMsg(" [SUFFIX-TAG]")
+
+	// Act
+	logger.Info("test message")
+
+	// Assert: output should contain suffix
+	output := buf.String()
+	if !strings.Contains(output, "[SUFFIX-TAG]") {
+		t.Errorf("Suffix not found in output: %s", output)
+	}
+}
+
+func TestLogger_FillPrefixSuffix_WithPrefix(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+
+	// Arrange: set prefix
+	logger.SetPrefixMsg("[PREFIX-TAG]")
+
+	// Act
+	logger.Info("test message")
+
+	// Assert: output should contain prefix
+	output := buf.String()
+	if !strings.Contains(output, "[PREFIX-TAG]") {
+		t.Errorf("Prefix not found in output: %s", output)
+	}
+}
+
+func TestLogger_FillPrefixSuffix_Both(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+
+	// Arrange: set both prefix and suffix
+	logger.SetPrefixMsg("[PRE]")
+	logger.SetSuffixMsg("[SUF]")
+
+	// Act
+	logger.Info("middle")
+
+	// Assert: output should contain both
+	output := buf.String()
+	if !strings.Contains(output, "[PRE]") {
+		t.Errorf("Prefix not found in output: %s", output)
+	}
+	if !strings.Contains(output, "[SUF]") {
+		t.Errorf("Suffix not found in output: %s", output)
+	}
+}
+
+func TestLogger_FillPrefixSuffix_Empty(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+
+	// Arrange: no prefix or suffix set (default)
+
+	// Act
+	logger.Info("test")
+
+	// Assert: should still produce output without prefix/suffix markers
+	output := buf.String()
+	if len(output) == 0 {
+		t.Error("Logger should produce output even without prefix/suffix")
+	}
+}
+
 // TestNewLogger_ReleaseLogPath tests the newLogger function's ReleaseLogPath branch
 func TestNewLogger_ReleaseLogPath(t *testing.T) {
 	// Test newLogger with empty ReleaseLogPath (should use os.Stdout)
