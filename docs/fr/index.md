@@ -3,46 +3,46 @@ pageType: home
 
 hero:
     name: LazyGophers Log
-    text: 高性能、灵活的 Go 日志库
-    tagline: 基于 zap 构建，提供丰富的功能和简洁的 API
+    text: Une bibliothèque de journalisation Go performante et flexible
+    tagline: Construite sur zap, offrant des fonctionnalités riches et une API simple
     actions:
         - theme: brand
-          text: 快速开始
-          link: /API
+          text: Démarrage rapide
+          link: /fr/API
         - theme: alt
-          text: 查看 GitHub
+          text: Voir sur GitHub
           link: https://github.com/lazygophers/log
 
 features:
-    - title: "高性能"
-      details: 基于 zap 构建，采用对象池复用和条件字段记录，实现最优性能
+    - title: "Haute performance"
+      details: Construit sur zap avec réutilisation d'objets Entry via un pool, réduisant l'allocation mémoire
       icon: 🚀
-    - title: "丰富的日志级别"
-      details: 支持 Trace、Debug、Info、Warn、Error、Fatal、Panic 级别
+    - title: "Niveaux de journalisation riches"
+      details: Niveaux Trace, Debug, Info, Warn, Error, Fatal, Panic
       icon: 📊
-    - title: "灵活的配置"
-      details: 可自定义日志级别、调用者信息、追踪信息、前缀、后缀和输出目标
+    - title: "Configuration flexible"
+      details: Personnalisez les niveaux de journalisation, les informations de l'appelant, les informations de trace, les préfixes, les suffixes et les cibles de sortie
       icon: ⚙️
-    - title: "文件轮转"
-      details: 内置每小时日志文件轮转支持
+    - title: "Rotation de fichiers"
+      details: Support de la rotation horaire des fichiers journaux
       icon: 🔄
-    - title: "Zap 兼容性"
-      details: 与 zap WriteSyncer 无缝集成
+    - title: "Compatibilité Zap"
+      details: Intégration transparente avec zap WriteSyncer
       icon: 🔌
-    - title: "简洁的 API"
-      details: 类似标准日志库的清晰 API，易于使用和集成
+    - title: "API simple"
+      details: API claire similaire à la bibliothèque de journalisation standard, facile à utiliser
       icon: 🎯
 ---
 
-## 快速开始
+## Démarrage rapide
 
-### 安装
+### Installation
 
 ```bash
 go get github.com/lazygophers/log
 ```
 
-### 基本用法
+### Utilisation de base
 
 ```go
 package main
@@ -52,43 +52,43 @@ import (
 )
 
 func main() {
-    // 使用默认全局 logger
-    log.Debug("调试信息")
-    log.Info("普通信息")
-    log.Warn("警告信息")
-    log.Error("错误信息")
+    // Utiliser le logger global par défaut
+    log.Debug("Message de débogage")
+    log.Info("Message d'information")
+    log.Warn("Message d'avertissement")
+    log.Error("Message d'erreur")
 
-    // 使用格式化输出
-    log.Infof("用户 %s 登录成功", "admin")
+    // Utiliser la sortie formatée
+    log.Infof("L'utilisateur %s s'est connecté avec succès", "admin")
 
-    // 自定义配置
+    // Configuration personnalisée
     customLogger := log.New().
         SetLevel(log.InfoLevel).
         EnableCaller(false).
         SetPrefixMsg("[MyApp]")
 
-    customLogger.Info("这是来自自定义 logger 的日志")
+    customLogger.Info("Ceci est un journal du logger personnalisé")
 }
 ```
 
-## 文档
+## Documentation
 
--   [API 参考](API.md) - 完整的 API 文档
--   [更新日志](CHANGELOG.md) - 版本历史
--   [贡献指南](CONTRIBUTING.md) - 如何贡献
--   [安全策略](SECURITY.md) - 安全指南
--   [行为准则](CODE_OF_CONDUCT.md) - 社区准则
+-   [Référence API](API.md) - Documentation API complète
+-   [Journal des modifications](CHANGELOG.md) - Historique des versions
+-   [Guide de contribution](CONTRIBUTING.md) - Comment contribuer
+-   [Politique de sécurité](SECURITY.md) - Guide de sécurité
+-   [Code de conduite](CODE_OF_CONDUCT.md) - Normes communautaires
 
-## 性能比较
+## Comparaison des performances
 
-| 特性       | lazygophers/log | zap | logrus | 标准日志 |
-| ---------- | --------------- | --- | ------ | -------- |
-| 性能       | 高              | 高  | 中     | 低       |
-| API 简洁性 | 高              | 中  | 高     | 高       |
-| 功能丰富度 | 中              | 高  | 高     | 低       |
-| 灵活性     | 中              | 高  | 高     | 低       |
-| 学习曲线   | 低              | 中  | 中     | 低       |
+| Caractéristique     | lazygophers/log | zap    | logrus | Journal standard |
+| ------------------- | --------------- | ------ | ------ | --------------- |
+| Performance         | Élevée          | Élevée | Moyenne | Basse         |
+| Simplicité de l'API | Élevée          | Moyenne | Élevée | Élevée         |
+| Richesse des fonctionnalités | Moyenne      | Élevée | Élevée | Basse         |
+| Flexibilité         | Moyenne          | Élevée | Élevée | Basse         |
+| Courbe d'apprentissage | Basse          | Moyenne | Moyenne | Basse         |
 
-## 许可证
+## Licence
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
