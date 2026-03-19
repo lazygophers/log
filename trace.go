@@ -8,11 +8,8 @@ import (
 	"github.com/petermattis/goid"
 )
 
-// 追踪ID存储，优化为读多写少场景
-var (
-	traceMap   = make(map[int64]string, 64) // 预分配容量
-	traceMapMu sync.RWMutex
-)
+// 追踪ID存储，使用 sync.Map 优化高并发读写性能
+var traceMap sync.Map
 
 // DisableTrace 全局开关，禁用追踪功能
 var DisableTrace bool
@@ -21,10 +18,10 @@ var DisableTrace bool
 //
 //go:inline
 func getTrace(gid int64) string {
-	traceMapMu.RLock()
-	tid := traceMap[gid]
-	traceMapMu.RUnlock()
-	return tid
+	if val, ok := traceMap.Load(gid); ok {
+		return val.(string)
+	}
+	return ""
 }
 
 // 为指定 goroutine 设置追踪ID，空字符串自动生成
@@ -37,18 +34,14 @@ func setTrace(gid int64, traceId string) {
 	if traceId == "" {
 		traceId = fastGenTraceId()
 	}
-	traceMapMu.Lock()
-	traceMap[gid] = traceId
-	traceMapMu.Unlock()
+	traceMap.Store(gid, traceId)
 }
 
 // 删除指定 goroutine 的追踪ID
 //
 //go:inline
 func delTrace(gid int64) {
-	traceMapMu.Lock()
-	delete(traceMap, gid)
-	traceMapMu.Unlock()
+	traceMap.Delete(gid)
 }
 
 // GetTrace 获取当前 goroutine 的追踪ID
@@ -108,16 +101,16 @@ func GenTraceId() string {
 
 // 测试辅助函数
 func clearTraceMapForTest() {
-	traceMapMu.Lock()
-	for k := range traceMap {
-		delete(traceMap, k)
-	}
-	traceMapMu.Unlock()
+	traceMap.Range(func(key, _ any) bool {
+		traceMap.Delete(key)
+		return true
+	})
 }
 
 func loadTraceForTest(gid int64) (string, bool) {
-	traceMapMu.RLock()
-	trace, exists := traceMap[gid]
-	traceMapMu.RUnlock()
-	return trace, exists
+	val, ok := traceMap.Load(gid)
+	if !ok {
+		return "", false
+	}
+	return val.(string), true
 }

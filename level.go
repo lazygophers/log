@@ -63,8 +63,7 @@ func (level Level) MarshalText() ([]byte, error) {
 	case InfoLevel:
 		return []byte("info"), nil
 	case WarnLevel:
-		// Use "warning" instead of "warn" for logrus compatibility
-		return []byte("warning"), nil
+		return []byte("warn"), nil
 	case ErrorLevel:
 		return []byte("error"), nil
 	case FatalLevel:

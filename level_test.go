@@ -38,7 +38,7 @@ func TestLevel_MarshalText(t *testing.T) {
 		{TraceLevel, "trace", false},
 		{DebugLevel, "debug", false},
 		{InfoLevel, "info", false},
-		{WarnLevel, "warning", false}, // MarshalText 返回 "warning"
+		{WarnLevel, "warn", false},
 		{ErrorLevel, "error", false},
 		{FatalLevel, "fatal", false},
 		{PanicLevel, "panic", false},

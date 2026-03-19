@@ -406,6 +406,91 @@ func TestLoggerWithCtx_LogLevelFiltering_Coverage(t *testing.T) {
 	}
 }
 
+func TestLoggerWithCtx_CancelledContext_Log(t *testing.T) {
+	var buf bytes.Buffer
+	ctxLogger := newLoggerWithCtx()
+	ctxLogger.SetOutput(&buf)
+	ctxLogger.SetLevel(TraceLevel)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // 立即取消
+
+	ctxLogger.Log(ctx, InfoLevel, "should be skipped")
+
+	if buf.Len() != 0 {
+		t.Errorf("Cancelled context should skip logging, got: %s", buf.String())
+	}
+}
+
+func TestLoggerWithCtx_CancelledContext_Logf(t *testing.T) {
+	var buf bytes.Buffer
+	ctxLogger := newLoggerWithCtx()
+	ctxLogger.SetOutput(&buf)
+	ctxLogger.SetLevel(TraceLevel)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // 立即取消
+
+	ctxLogger.Logf(ctx, InfoLevel, "should be %s", "skipped")
+
+	if buf.Len() != 0 {
+		t.Errorf("Cancelled context should skip logging, got: %s", buf.String())
+	}
+}
+
+func TestLoggerWithCtx_ActiveContext_Log(t *testing.T) {
+	var buf bytes.Buffer
+	ctxLogger := newLoggerWithCtx()
+	ctxLogger.SetOutput(&buf)
+	ctxLogger.SetLevel(TraceLevel)
+
+	ctx := context.Background()
+	ctxLogger.Log(ctx, InfoLevel, "should be logged")
+
+	if !strings.Contains(buf.String(), "should be logged") {
+		t.Errorf("Active context should allow logging, got: %s", buf.String())
+	}
+}
+
+func TestLoggerWithCtx_ActiveContext_Logf(t *testing.T) {
+	var buf bytes.Buffer
+	ctxLogger := newLoggerWithCtx()
+	ctxLogger.SetOutput(&buf)
+	ctxLogger.SetLevel(TraceLevel)
+
+	ctx := context.Background()
+	ctxLogger.Logf(ctx, InfoLevel, "should be %s", "logged")
+
+	if !strings.Contains(buf.String(), "should be logged") {
+		t.Errorf("Active context should allow logging, got: %s", buf.String())
+	}
+}
+
+func TestLoggerWithCtx_CancelledContext_AllLevels(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	var buf bytes.Buffer
+	ctxLogger := newLoggerWithCtx()
+	ctxLogger.SetOutput(&buf)
+	ctxLogger.SetLevel(TraceLevel)
+
+	ctxLogger.Trace(ctx, "trace")
+	ctxLogger.Debug(ctx, "debug")
+	ctxLogger.Info(ctx, "info")
+	ctxLogger.Warn(ctx, "warn")
+	ctxLogger.Error(ctx, "error")
+	ctxLogger.Tracef(ctx, "trace %s", "f")
+	ctxLogger.Debugf(ctx, "debug %s", "f")
+	ctxLogger.Infof(ctx, "info %s", "f")
+	ctxLogger.Warnf(ctx, "warn %s", "f")
+	ctxLogger.Errorf(ctx, "error %s", "f")
+
+	if buf.Len() != 0 {
+		t.Errorf("Cancelled context should skip all logging, got: %s", buf.String())
+	}
+}
+
 func TestLoggerWithCtx_LogfLevelFiltering_Coverage(t *testing.T) {
 	// 测试LoggerWithCtx Logf方法的级别过滤（logger_ctx.go:116-118）
 	var buf bytes.Buffer

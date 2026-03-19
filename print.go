@@ -3,8 +3,6 @@
 // 包含标准日志级别函数和格式化版本，所有函数都是线程安全的
 package log
 
-import "fmt"
-
 // Trace 记录跟踪级别日志（最详细级别）。
 // 参数: args - 可变参数，日志内容。
 // 使用场景: 开发阶段的详细流程追踪。
@@ -57,31 +55,27 @@ func Logf(level Level, format string, args ...interface{}) {
 }
 
 // Infof 记录信息级别格式化日志。
-// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Info 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Infof(format string, args ...interface{}) {
-	std.Info(fmt.Sprintf(format, args...))
+	std.Infof(format, args...)
 }
 
 // Warnf 记录警告级别格式化日志。
-// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Warn 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Warnf(format string, args ...interface{}) {
-	std.Warn(fmt.Sprintf(format, args...))
+	std.Warnf(format, args...)
 }
 
 // Errorf 记录错误级别格式化日志。
-// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Error 进行记录。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Errorf(format string, args ...interface{}) {
-	std.Error(fmt.Sprintf(format, args...))
+	std.Errorf(format, args...)
 }
 
 // Panicf 记录致命错误格式化日志并触发panic。
-// 它首先使用 fmt.Sprintf 格式化消息，然后调用 std.Panic，这将最终触发 panic。
 // 参数: format - 格式字符串, args - 格式化参数。
 func Panicf(format string, args ...interface{}) {
-	std.Panic(fmt.Sprintf(format, args...))
+	std.Panicf(format, args...)
 }
 
 // Fatalf 记录致命错误格式化日志并退出程序。

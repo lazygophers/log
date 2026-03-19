@@ -266,7 +266,7 @@ func (p *Logger) write(level Level, buf []byte) {
 		panic(buf)
 	} else if level == FatalLevel {
 		p.Sync()
-		os.Exit(-1)
+		os.Exit(1)
 	}
 }
 

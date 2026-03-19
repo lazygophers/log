@@ -17,6 +17,7 @@ type HourlyRotator struct {
 	linkName    string
 	currentFile *os.File
 	currentHour string
+	currentSize int64 // Tracked file size to avoid Stat() calls
 	maxSize     int64 // Maximum file size in bytes
 	maxFiles    int   // Maximum number of files to keep
 	cleanupOnce sync.Once
@@ -54,7 +55,9 @@ func (r *HourlyRotator) Write(p []byte) (n int, err error) {
 		return 0, fmt.Errorf("no current file")
 	}
 
-	return r.currentFile.Write(p)
+	n, err = r.currentFile.Write(p)
+	r.currentSize += int64(n)
+	return n, err
 }
 
 // rotate checks if rotation is needed and performs it
@@ -65,8 +68,7 @@ func (r *HourlyRotator) rotate() error {
 	// Check if rotation needed (hour change or file size limit exceeded)
 	needRotate := r.currentHour != hour
 	if r.currentFile != nil && !needRotate {
-		// Check file size
-		if stat, err := r.currentFile.Stat(); err == nil && stat.Size() >= r.maxSize {
+		if r.currentSize >= r.maxSize {
 			needRotate = true
 		}
 	}
@@ -99,6 +101,10 @@ func (r *HourlyRotator) doRotate(hour string) error {
 
 	r.currentFile = file
 	r.currentHour = hour
+	r.currentSize = 0
+	if stat, err := file.Stat(); err == nil {
+		r.currentSize = stat.Size()
+	}
 
 	// Update soft link
 	r.updateLink(newFilename)

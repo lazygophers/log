@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"go.uber.org/zap/zapcore"
@@ -103,21 +102,29 @@ func (p *LoggerWithCtx) SetOutput(writes ...io.Writer) *LoggerWithCtx {
 }
 
 // Log 记录一条通用日志。
+// 如果 context 已取消或超时，将跳过日志记录。
 func (p *LoggerWithCtx) Log(ctx context.Context, level Level, args ...interface{}) {
+	if ctx.Err() != nil {
+		return
+	}
 	if !p.levelEnabled(level) {
 		return
 	}
 
-	p.log(level, fmt.Sprint(args...))
+	p.log(level, fastSprint(args...))
 }
 
 // Logf 记录一条格式化的通用日志。
+// 如果 context 已取消或超时，将跳过日志记录。
 func (p *LoggerWithCtx) Logf(ctx context.Context, level Level, format string, args ...interface{}) {
+	if ctx.Err() != nil {
+		return
+	}
 	if !p.levelEnabled(level) {
 		return
 	}
 
-	p.log(level, fmt.Sprintf(format, args...))
+	p.log(level, fastSprintf(format, args...))
 }
 
 // Trace 记录 Trace级别的日志。
