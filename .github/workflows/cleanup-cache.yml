@@ -11,6 +11,9 @@ permissions:
 jobs:
   cleanup:
     runs-on: lazy  # 使用自托管运行器
+    env:
+      # Opt into Node.js 24 to avoid deprecation warnings
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
