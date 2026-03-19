@@ -2,21 +2,21 @@
 
 package log
 
-// init 初始化发布模式下的日志输出。
+// init initializes log output for release mode.
 func init() {
 	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
 }
 
-// Debug 记录调试级别的日志。
+// Debug logs a message at Debug level.
 //
-// 仅当全局日志级别设置为 DebugLevel 或更低时，才会实际输出日志。
+// The message is only output when the global log level is set to DebugLevel or lower.
 func Debug(args ...interface{}) {
 	std.Debug(args...)
 }
 
-// Debugf 记录格式化的调试级别日志。
+// Debugf logs a formatted message at Debug level.
 //
-// 仅当全局日志级别设置为 DebugLevel 或更低时，才会实际输出日志。
+// The message is only output when the global log level is set to DebugLevel or lower.
 func Debugf(format string, args ...interface{}) {
 	std.Debugf(format, args...)
 }

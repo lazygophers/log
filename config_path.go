@@ -5,5 +5,5 @@ import (
 	"path/filepath"
 )
 
-// ReleaseLogPath 默认日志文件路径
+// ReleaseLogPath is the default log file path.
 var ReleaseLogPath = filepath.Join(os.TempDir(), "lazygophers", "log")

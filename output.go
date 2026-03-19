@@ -21,7 +21,7 @@ func GetOutputWriter(filename string) io.Writer {
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304
 	if err != nil {
 		// Panic if creating log writer fails (critical functionality)
-		std.Panicf("创建日志文件写入器 %s 失败: %v", filename, err)
+		std.Panicf("failed to create log file writer %s: %v", filename, err)
 	}
 	return file
 }
@@ -32,7 +32,7 @@ func ensureDir(dir string) {
 	if dir != "." && !isDir(dir) {
 		// Create directory with full permissions, log error if fails
 		if err := os.MkdirAll(dir, 0750); err != nil {
-			std.Errorf("无法创建日志目录 %s: %v", dir, err)
+			std.Errorf("failed to create log directory %s: %v", dir, err)
 		}
 	}
 }

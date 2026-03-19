@@ -1,91 +1,71 @@
-// Package log 提供核心日志接口
-//
-// 包含标准日志级别函数和格式化版本，所有函数都是线程安全的
 package log
 
-// Trace 记录跟踪级别日志（最详细级别）。
-// 参数: args - 可变参数，日志内容。
-// 使用场景: 开发阶段的详细流程追踪。
+// Trace logs a message at Trace level (most verbose).
 func Trace(args ...interface{}) {
 	std.Trace(args...)
 }
 
-// Log 记录指定级别的日志。
-// 参数: level - 日志级别, args - 可变参数，日志内容。
+// Log logs a message at the specified level.
 func Log(level Level, args ...interface{}) {
 	std.Log(level, args...)
 }
 
-// Info 记录信息级别日志（常规操作信息）。
-// 参数: args - 可变参数，日志内容。
+// Info logs a message at Info level.
 func Info(args ...interface{}) {
 	std.Info(args...)
 }
 
-// Warn 记录警告级别日志（非错误异常）。
-// 参数: args - 可变参数，日志内容。
+// Warn logs a message at Warn level.
 func Warn(args ...interface{}) {
 	std.Warn(args...)
 }
 
-// Error 记录错误级别日志（可恢复错误）。
-// 参数: args - 可变参数，日志内容。
+// Error logs a message at Error level.
 func Error(args ...interface{}) {
 	std.Error(args...)
 }
 
-// Panic 记录致命错误日志并触发panic。
-// 参数: args - 可变参数，日志内容。
-// 注意: 记录日志后会立即触发panic。
+// Panic logs a message at Panic level, then panics.
 func Panic(args ...interface{}) {
 	std.Panic(args...)
 }
 
-// Fatal 记录致命错误日志并退出程序。
-// 参数: args - 可变参数，日志内容。
-// 注意: 记录日志后会调用os.Exit(1)。
+// Fatal logs a message at Fatal level, then calls os.Exit(1).
 func Fatal(args ...interface{}) {
 	std.Fatal(args...)
 }
 
-// Logf 记录指定级别的格式化日志。
-// 参数: level - 日志级别, format - 格式字符串, args - 格式化参数。
+// Logf logs a formatted message at the specified level.
 func Logf(level Level, format string, args ...interface{}) {
 	std.Logf(level, format, args...)
 }
 
-// Infof 记录信息级别格式化日志。
-// 参数: format - 格式字符串, args - 格式化参数。
+// Infof logs a formatted message at Info level.
 func Infof(format string, args ...interface{}) {
 	std.Infof(format, args...)
 }
 
-// Warnf 记录警告级别格式化日志。
-// 参数: format - 格式字符串, args - 格式化参数。
+// Warnf logs a formatted message at Warn level.
 func Warnf(format string, args ...interface{}) {
 	std.Warnf(format, args...)
 }
 
-// Errorf 记录错误级别格式化日志。
-// 参数: format - 格式字符串, args - 格式化参数。
+// Errorf logs a formatted message at Error level.
 func Errorf(format string, args ...interface{}) {
 	std.Errorf(format, args...)
 }
 
-// Panicf 记录致命错误格式化日志并触发panic。
-// 参数: format - 格式字符串, args - 格式化参数。
+// Panicf logs a formatted message at Panic level, then panics.
 func Panicf(format string, args ...interface{}) {
 	std.Panicf(format, args...)
 }
 
-// Fatalf 记录致命错误格式化日志并退出程序。
-// 参数: format - 格式字符串, args - 格式化参数。
+// Fatalf logs a formatted message at Fatal level, then calls os.Exit(1).
 func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
 }
 
-// StartMsg 输出启动信息。
-// 特殊: 通常在应用启动时调用，输出初始化完成信息。
+// StartMsg outputs the application startup message.
 func StartMsg() {
 	std.StartMsg()
 }

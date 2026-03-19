@@ -8,13 +8,13 @@ import (
 	"github.com/petermattis/goid"
 )
 
-// 追踪ID存储，使用 sync.Map 优化高并发读写性能
+// traceMap stores trace IDs using sync.Map for high-concurrency read/write performance.
 var traceMap sync.Map
 
-// DisableTrace 全局开关，禁用追踪功能
+// DisableTrace is a global switch to disable tracing.
 var DisableTrace bool
 
-// 获取指定 goroutine 的追踪ID
+// getTrace returns the trace ID for the specified goroutine.
 //
 //go:inline
 func getTrace(gid int64) string {
@@ -24,7 +24,7 @@ func getTrace(gid int64) string {
 	return ""
 }
 
-// 为指定 goroutine 设置追踪ID，空字符串自动生成
+// setTrace sets the trace ID for the specified goroutine. An empty string triggers auto-generation.
 //
 //go:inline
 func setTrace(gid int64, traceId string) {
@@ -37,36 +37,34 @@ func setTrace(gid int64, traceId string) {
 	traceMap.Store(gid, traceId)
 }
 
-// 删除指定 goroutine 的追踪ID
+// delTrace removes the trace ID for the specified goroutine.
 //
 //go:inline
 func delTrace(gid int64) {
 	traceMap.Delete(gid)
 }
 
-// GetTrace 获取当前 goroutine 的追踪ID
+// GetTrace returns the trace ID of the current goroutine.
 func GetTrace() string {
 	return getTrace(goid.Get())
 }
 
-// GetTraceWithGID 获取指定 GID 的追踪ID
+// GetTraceWithGID returns the trace ID for the specified goroutine ID.
 func GetTraceWithGID(gid int64) string {
 	return getTrace(gid)
 }
 
-// SetTrace 为当前 goroutine 设置追踪ID，空参数自动生成
+// SetTrace sets the trace ID for the current goroutine. An empty argument triggers auto-generation.
 func SetTrace(traceId ...string) {
-	// 使用 goid.Get() 获取当前 Goroutine 的 ID
 	currentGid := goid.Get()
 	if len(traceId) > 0 {
 		setTrace(currentGid, traceId[0])
 		return
 	}
-	// 如果没有提供 traceId，则传入空字符串，由 setTrace 内部处理生成逻辑。
 	setTrace(currentGid, "")
 }
 
-// SetTraceWithGID 为指定 GID 设置追踪ID
+// SetTraceWithGID sets the trace ID for the specified goroutine ID.
 func SetTraceWithGID(gid int64, traceId ...string) {
 	if len(traceId) > 0 {
 		setTrace(gid, traceId[0])
@@ -75,17 +73,17 @@ func SetTraceWithGID(gid int64, traceId ...string) {
 	setTrace(gid, "")
 }
 
-// DelTrace 删除当前 goroutine 的追踪ID
+// DelTrace removes the trace ID of the current goroutine.
 func DelTrace() {
 	delTrace(goid.Get())
 }
 
-// DelTraceWithGID 删除指定 GID 的追踪ID
+// DelTraceWithGID removes the trace ID for the specified goroutine ID.
 func DelTraceWithGID(gid int64) {
 	delTrace(gid)
 }
 
-// 高性能 TraceID 生成
+// fastGenTraceId generates a high-performance trace ID.
 //
 //go:inline
 func fastGenTraceId() string {
@@ -94,12 +92,12 @@ func fastGenTraceId() string {
 	return hex.EncodeToString(buf[:])
 }
 
-// GenTraceId 生成 16 字符唯一追踪ID
+// GenTraceId generates a 16-character unique trace ID.
 func GenTraceId() string {
 	return fastGenTraceId()
 }
 
-// 测试辅助函数
+// clearTraceMapForTest is a test helper that clears the trace map.
 func clearTraceMapForTest() {
 	traceMap.Range(func(key, _ any) bool {
 		traceMap.Delete(key)
