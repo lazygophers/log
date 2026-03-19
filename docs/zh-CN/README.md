@@ -12,13 +12,13 @@ titleSuffix: ' | LazyGophers Log'
 
 ## 📖 文档语言
 
--   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](README_zh-CN.md)
--   [🇹🇼 繁體中文](README_zh-TW.md)
--   [🇫🇷 Français](README_fr.md)
--   [🇷🇺 Русский](README_ru.md)
--   [🇪🇸 Español](README_es.md)
--   [🇸🇦 العربية](README_ar.md)
+-   [🇺🇸 English](../en/README.md)
+-   [🇨🇳 简体中文](README.md)（当前）
+-   [🇹🇼 繁體中文](../zh-TW/README.md)
+-   [🇫🇷 Français](../fr/README.md)
+-   [🇷🇺 Русский](../ru/README.md)
+-   [🇪🇸 Español](../es/README.md)
+-   [🇸🇦 العربية](../ar/README.md)
 
 ## ✨ 特性
 

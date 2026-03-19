@@ -339,13 +339,13 @@ logger := log.New().
 
 本变更日志提供多种语言版本：
 
--   [🇺🇸 English](CHANGELOG.md)
--   [🇨🇳 简体中文](CHANGELOG.md) (当前)
+-   [🇺🇸 English](../en/CHANGELOG.md)
+-   [🇨🇳 简体中文](CHANGELOG.md)（当前）
 -   [🇹🇼 繁體中文](../zh-TW/CHANGELOG.md)
--   [🇫🇷 Français](../README_fr.md)
--   [🇷🇺 Русский](../README_ru.md)
--   [🇪🇸 Español](../README_es.md)
--   [🇸🇦 العربية](../README_ar.md)
+-   [🇫🇷 Français](../fr/CHANGELOG.md)
+-   [🇷🇺 Русский](../ru/CHANGELOG.md)
+-   [🇪🇸 Español](../es/CHANGELOG.md)
+-   [🇸🇦 العربية](../ar/CHANGELOG.md)
 
 ---
 

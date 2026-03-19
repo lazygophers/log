@@ -447,14 +447,14 @@ logger.Infof("User login: %+v", userRequest) // 可能包含密码
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](CONTRIBUTING.md)
--   [🇨🇳 简体中文](CONTRIBUTING_zh-CN.md) (当前)
--   [🇹🇼 繁體中文](CONTRIBUTING_zh-TW.md)
--   [🇫🇷 Français](CONTRIBUTING_fr.md)
--   [🇷🇺 Русский](CONTRIBUTING_ru.md)
--   [🇪🇸 Español](CONTRIBUTING_es.md)
--   [🇸🇦 العربية](CONTRIBUTING_ar.md)
+-   [🇺🇸 English](../en/CONTRIBUTING.md)
+-   [🇨🇳 简体中文](CONTRIBUTING.md)（当前）
+-   [🇹🇼 繁體中文](../zh-TW/CONTRIBUTING.md)
+-   [🇫🇷 Français](../fr/CONTRIBUTING.md)
+-   [🇷🇺 Русский](../ru/CONTRIBUTING.md)
+-   [🇪🇸 Español](../es/CONTRIBUTING.md)
+-   [🇸🇦 العربية](../ar/CONTRIBUTING.md)
 
 ---
 
-**Thank you for contributing to LazyGophers Log! 🚀**
+**感谢您为 LazyGophers Log 做出贡献！🚀**

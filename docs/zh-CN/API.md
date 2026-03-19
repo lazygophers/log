@@ -752,15 +752,15 @@ func main() {
     // 创建轮转文件写入器
     writer := log.GetOutputWriterHourly("./logs/app.log")
 
-    // Wrap with async writer for performance
+    // 使用异步写入器提升性能
     asyncWriter := log.NewAsyncWriter(writer, 5000)
     defer asyncWriter.Close()
 
     logger := log.New()
     logger.SetOutput(asyncWriter)
-    logger.SetLevel(log.InfoLevel)  // Skip debug in production
+    logger.SetLevel(log.InfoLevel)  // 生产环境跳过 debug 日志
 
-    // High-throughput logging
+    // 高吞吐量日志记录
     for i := 0; i < 10000; i++ {
         logger.Infof("Processing request %d", i)
     }
@@ -872,9 +872,13 @@ func (w *ErrorCapturingWriter) LastError() error {
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](API.md)
--   [🇨🇳 简体中文](API_zh-CN.md) (当前)
--   [🇹🇼 繁體中文](API_zh-TW.md)
+-   [🇺🇸 English](../en/API.md)
+-   [🇨🇳 简体中文](API.md)（当前）
+-   [🇹🇼 繁體中文](../zh-TW/API.md)
+-   [🇫🇷 Français](../fr/API.md)
+-   [🇷🇺 Русский](../ru/API.md)
+-   [🇪🇸 Español](../es/API.md)
+-   [🇸🇦 العربية](../ar/API.md)
 
 ---
 
