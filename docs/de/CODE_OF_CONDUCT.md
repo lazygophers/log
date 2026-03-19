@@ -3,208 +3,216 @@ titleSuffix: ' | LazyGophers Log'
 ---
 # 📋 Verhaltenskodex
 
-## Unser Engagement
+## Unsere Verpflichtung
 
-Als Mitglieder, Contributors und Leader verpflichten wir uns, eine stigmatisierungsfreie Community-Erfahrung für alle zu schaffen, unabhängig von Alter, Größe, sichtbaren oder unsichtbaren Beeinträchtigungen, Rasse, Geschlechtsmerkmalen, Geschlechtsidentität und -ausdruck, Erfahrungsniveau, Bildung, wirtschaftlichem und sozialem Status, Staatsangehörigkeit, körperlichen Merkmalen, Rasse, Kaste, Hautfarbe, Religion oder sexuelle Orientierung und Identität.
+Als Mitglieder, Beitragende und Leitende verpflichten wir uns, eine belästigungsfreie Community-Erfahrung für alle zu schaffen, unabhängig von Alter, Körpergröße, sichtbaren oder unsichtbaren Behinderungen, Ethnizität, Geschlechtsmerkmalen, Geschlechtsidentität und -ausdruck, Erfahrungsgrad, Bildung, sozioökonomischem Status, Nationalität, persönlicher Erscheinung, Rasse, Kaste, Hautfarbe, Religion oder sexueller Orientierung und Identität.
 
-Wir verpflichten uns, in einer Weise zu handeln und zu interagieren, die Offenheit, Willkommenheit, Vielfalt, Inklusion und Gesundheitsförderung der Community fördert.
+Wir verpflichten uns, auf eine Weise zu handeln und zu interagieren, die Offenheit, Wohlwollen, Vielfalt, Inklusion und eine gesunde Community fördert.
 
 ## Unsere Standards
 
-Positive Umgebungen förderndes Verhalten umfasst:
+Beispiele für Verhaltensweisen, die zu einer positiven Umgebung für die Community beitragen, sind:
 
 ### ✅ Ermutigtes Verhalten
 
--   **Empathie und Güte zeigen**
--   **Unterschiedliche Meinungen, Perspektiven und Erfahrungen respektieren**
--   **Konstruktives Feedback geben und annehmen**
--   **Verantwortung übernehmen**, Schuldigen finden und aus Fehlern lernen
--   **Das Beste für die gesamte Community**, nicht nur für persönliche Interessen
--   **Willkommene und inklusive Sprache verwenden**
--   **Beiträge danken**, unabhängig von Größe
--   **Neulinge unterstützen** und willkommen fühlen lassen
+-   **Empathie und Wohlwollen gegenüber anderen zeigen**
+-   **Verschiedene Meinungen, Ansichten und Erfahrungen respektieren**
+-   **Konstruktives Feedback geben und freundlich annehmen**
+-   **Verantwortung übernehmen** und sich von Personen entschuldigen, die von unseren Fehlern betroffen sind, und aus der Erfahrung lernen
+-   **Sich auf das konzentrieren, was für die Community als Ganzes am besten ist**, nicht nur auf den persönlichen Nutzen
+-   **Einladende und inklusive Sprache verwenden**
+-   **Für Beiträge danken**, unabhängig von ihrer Größe
+-   **Neuen Leuten helfen**，sich einzubringen und willkommen zu fühlen
 
-### ❌ Inakzeptables Verhalten
+### ❌ Unakzeptables Verhalten
 
-Inakzeptables Verhalten umfasst:
+Beispiele für inakzeptables Verhalten sind:
 
--   **Belästigung**: Sexuell anspielende Sprache oder Bilder sowie jeder Form von sexueller Aufmerksamkeit oder Annäherung
--   **Provokation**: Beleidigende oder herabsetzende Kommentare sowie persönliche oder politische Angriffe
--   **Diskriminierung**: Diskriminierende Äußerungen oder Handlungen gegen geschützte Gruppen
--   **Verletzung der Privatsphäre**: Veröffentlichung privater Informationen anderer ohne ausdrückliche Erlaubnis, z. B. physische Adresse oder E-Mail-Adresse
--   **Spam**: Übermäßige oder un relevante Veröffentlichungen oder Werbeaussendungen
--   **Unrelevante Inhalte**: Kontinuierliche Veröffentlichung von Inhalten, die mit dem Projekt nichts zu tun haben
--   **Andersartiges Verhalten**: Andere Verhalten, die im professionellen Umfeld als unangemessen empfunden werden könnten
+-   **Belästigung**: Verwendung von sexuell suggestiver Sprache oder Bildern sowie jede Form von sexueller Aufmerksamkeit oder Annäherung
+-   **Provokation**: Beleidigende oder abwertende Kommentare sowie persönliche oder politische Angriffe
+-   **Diskriminierung**: Diskriminierende Äußerungen oder Handlungen gegenüber jeder geschützten Gruppe
+-   **Verletzung der Privatsphäre**: Veröffentlichen privater Informationen anderer ohne ausdrückliche Genehmigung, wie z. B. physische Adressen oder E-Mail-Adressen
+-   **Spam**: Übermäßiges oder irrelevantes Posten oder kommerzielle Werbung
+-   **Unbezogene Inhalte**: Fortgesetztes Posten von Inhalten, die nicht mit dem Projekt zusammenhängen
+-   **Andere Verhaltensweisen**: Andere Verhaltensweisen, die in einer professionellen Umgebung als unangemessen betrachtet werden könnten
 
-## Durchsetzung der Verantwortung
+## Durchsetzungsverantwortung
 
-Community-Leader sind für die Klärung und Durchsetzung unserer akzeptablen Verhaltensstandards verantwortlich und werden angemessene und gerechte Korrekturmaßnahmen ergreifen, wenn sie inakzeptables, bedrohliches, beleidigendes oder schädliches Verhalten feststellen.
+Community-Leitende sind dafür verantwortlich, unsere Standards für akzeptables Verhalten zu klären und durchzusetzen, und werden angemessene und faire Korrekturmaßnahmen für jedes Verhalten ergreifen, das sie als unangemessen, bedrohlich, anstößig oder schädlich erachten.
 
-Community-Leader haben das Recht und die Pflicht, Kommentare, Pull Requests, Code, Wiki-Editoren, Issues und andere Beiträge zu löschen, zu editieren oder zu ablehnen, die gegen diesen Verhaltenskodex verstoßen, und die Gründe für die Überprüfungsergebnisse mitzuteilen.
+Community-Leitende haben das Recht und die Verantwortung, Kommentare, Commits, Code, Wiki-Bearbeitungen, Issues und andere Beiträge zu entfernen, zu bearbeiten oder abzulehnen, die nicht diesem Verhaltenskodex entsprechen, und werden die Gründe für Moderationsentscheidungen angemessen kommunizieren.
 
 ## Geltungsbereich
 
-Dieser Verhaltenskodex gilt für alle Community-Bräuche sowie für Personen, die im öffentlichen Raum offiziell für die Community auftreten. Beispiele für die Vertretung unserer Community umfassen die Verwendung offizieller E-Mail-Adressen, das Posten von Inhalten über offizielle Social-Media-Konten oder die Übernahme der Rolle als offizieller Vertreter in Online- oder Offline-Veranstaltungen.
+Dieser Verhaltenskodex gilt für alle Community-Räume und gilt auch, wenn Personen die Community öffentlich repräsentieren. Beispiele für die Repräsentation unserer Community sind die Verwendung einer offiziellen E-Mail-Adresse, das Posten über offizielle Social-Media-Konten oder das Handeln als designierter Repräsentant bei Online- oder Offline-Veranstaltungen.
 
-### Community-Bräuche umfassen
+### Community-Räume umfassen
 
--   **GitHub-Repository** und alle zugehörigen Bereiche (Issues, Pull Requests, Discussions, Wiki)
--   **Offizielle Kommunikationskanäle** (Discord, Slack, Mailing Listen)
--   **Projekt-Social-Media** -Konten und Posts
--   **Projekt-Veranstaltungen** (Konferenzen, Treffen, Workshops)
+-   **GitHub-Repository** und alle damit verbundenen Räume (Issues, Pull Requests, Discussions, Wiki)
+-   **Offizielle Kommunikationskanäle** (Discord, Slack, Mailinglisten)
+-   **Projekt-Social-Media**-Konten und Beiträge
+-   **Projektveranstaltungen** (Konferenzen, Treffen, Workshops)
 -   **Dokumentation** und andere offizielle Projektmaterialien
 
-## Durchsetzungsmechanismus
+## Durchsetzungsmechanismen
 
-### Berichterstattung
+### Meldung
 
-:::info Berichtskanäle
+:::info Meldewege
 
-Fälle von Missbrauch, Belästigung oder anderen inakzeptablem Verhalten können an Community-Leader berichtet werden, die für die Durchsetzung verantwortlich sind:
+Instanzen von Missbrauch, Belästigung oder anderem inakzeptablem Verhalten können an die für die Durchsetzung zuständigen Community-Leitenden gemeldet werden:
 
 -   **Hauptkontakt**: support@lazygophers.com
--   **GitHub Issues**: Für öffentliche Verstöße können Sie über GitHub Issues berichten
--   **Vertrauliche Berichte**: Für sensible Themen bitte uns direkt per E-Mail kontaktieren
+-   **GitHub Issues**: Für öffentliche Verstöße können Sie über GitHub Issues melden
+-   **Vertrauliche Meldung**: Für sensible Angelegenheiten kontaktieren Sie uns bitte direkt per E-Mail
 
-Alle Beschwerden werden zeitnah und fair geprüft und untersucht. Alle Community-Leader sind verpflichtet, die Privatsphäre und Sicherheit jedes Berichtenden zu respektieren.
+Alle Beschwerden werden rechtzeitig und fair überprüft und untersucht. Alle Community-Leitenden sind verpflichtet, die Privatsphäre und Sicherheit von Personen, die Vorfälle melden, zu respektieren.
 
 :::
 
-### Reaktionszeitpläne
+### Reaktionszeitplan
 
--   **Bestätigung**: innerhalb von 24-48 Stunden
--   **Ersteinschätzung**: innerhalb von 72 Stunden
--   **Lösung**: innerhalb von 1-2 Wochen (komplexe Fälle können längere Zeit benötigen)
+-   **Bestätigung**: Innerhalb von 24-48 Stunden
+-   **Erste Reaktion**: Innerhalb von 72 Stunden
+-   **Lösung**: Innerhalb von 1-2 Wochen (komplexe Fälle können länger dauern)
 
-## Durchführungsleitfäden
+## Durchsetzungsrichtlinien
 
-Community-Leader werden den Auswirkungen auf die Community basierend auf diesen Community-Impact-Richtlinien bewerten, um die Konsequenzen von Verstößen zu bestimmen:
+Community-Leitende werden diesen Community-Impact-Richtlinien folgen, um die Konsequenzen von Verstößen anhand der Community-Impact-Matrix zu bestimmen:
 
 ### 1. Korrektur
 
-:::warning Erste Verletzung
+:::warning Erster Verstoß
 
-**Community-Impact**: Unangemessene Sprache oder andere Verhalten, die in der Community als unprofessionell oder unerwünscht empfunden werden.
+**Community-Impact**: Verwendung von unangemessener Sprache oder anderem Verhalten, das in der Community als unprofessionell oder unerwünscht angesehen wird.
 
-**Konsequenz**: Schriftliche persönliche Warnung durch Community-Leader, die den Charakter der Verletzung klar darlegt und erklärt, warum das Verhalten unangemessen ist. Eine öffentliche Entschuldigung kann verlangt werden.
+**Konsequenz**: Private schriftliche Warnung von Community-Leitenden, die die Art des Verstoßes klar darlegt und erklärt, warum das Verhalten unangemessen war. Es kann eine öffentliche Entschuldigung verlangt werden.
 
-**Maßnahmen**:
+**Beispielmaßnahmen**:
 
--   Problem privat erläutern
--   Erforderlich machen, den verletzenden Inhalt zu editieren oder zu löschen
+-   Private Erläuterung des Problems
+-   Aufforderung zur Bearbeitung oder Löschung der regelwidrigen Inhalte
 -   Temporäre Einschränkung der Aktivität in bestimmten Projektbereichen
 
 :::
 
 ### 2. Warnung
 
-:::warning Schwere oder anhaltende Verletzung
+:::warning Schwerwiegender oder anhaltender Verstoß
 
-**Community-Impact**: Einzelner Vorfall oder eine Reihe von Verhaltensverstößen.
+**Community-Impact**: Verstöße durch ein einzelnes Ereignis oder eine Reihe von Handlungen.
 
-**Konsequenz**: Warnung, die ausdrückt, dass Fortsetzung des Verhaltens negative Konsequenzen hat. Keine Interaktion mit den beteiligten Personen für einen bestimmten Zeitraum, einschließlich unverforderter Interaktion mit Durchsetzungsmitgliedern. Dies schließt Interaktion in der Community sowie in externen Kanälen (wie Social Media) ein. Verstöße gegen diese Klauseln können zu temporären oder dauerhaften Verbote führen.
+**Konsequenz**: Warnung mit dem Hinweis, dass bei fortgesetztem Verhalten Konsequenzen folgen. Vermeidung der Interaktion mit den betroffenen Personen für einen bestimmten Zeitraum, einschließlich unangemeldeter Interaktion mit Personen, die den Verhaltenskodex durchsetzen. Dies bedeutet, Interaktionen in Community-Räumen sowie in externen Kanälen wie Social Media zu vermeiden. Verstöße gegen diese Bedingungen können zu einem temporären oder permanenten Ausschluss führen.
 
-**Maßnahmen**:
+**Beispielmaßnahmen**:
 
--   Schriftliche Warnung mit klaren Erwartungen
+-   Schriftliche Warnung mit klaren Verhaltenserwartungen
 -   Temporäre Einschränkung der Teilnahme an Community-Aktivitäten
 -   Überwachung nachfolgender Beiträge
 
 :::
 
-### 3. Temporäres Verbot
+### 3. Temporärer Ausschluss
 
-:::danger Temporäres Verbot
+:::danger Temporärer Ausschluss
 
-**Community-Impact**: Schwere Verletzung der Community-Standards, einschließlich anhaltend unangemessenen Verhaltens.
+**Community-Impact**: Schwere Verletzung der Community-Standards, einschließlich anhaltenden unangemessenen Verhaltens.
 
-**Konsequenz**: Temporäre Einschränkung aller Interaktionen mit der Community oder jeder Form der öffentlichen Kommunikation für einen bestimmten Zeitraum. In dieser Zeit darf nicht öffentlich oder privat mit den beteiligten Personen interagiert werden, einschließlich unverforderter Interaktion mit Durchsetzungsmitgliedern. Verstöße gegen diese Klauseln können zu dauerhaften Verbotten führen.
+**Konsequenz**: Temporärer Ausschluss von jeder Art von Interaktion oder öffentlicher Kommunikation mit der Community für einen bestimmten Zeitraum. In dieser Zeit ist keine öffentliche oder private Interaktion mit den betroffenen Personen gestattet, einschließlich unangemeldeter Interaktion mit Personen, die den Verhaltenskodex durchsetzen. Verstöße gegen diese Bedingungen können zu einem permanenten Ausschluss führen.
 
-**Dauer**: Normalerweise 1-3 Monate, abhängig von der Schwere
-
-:::
-
-### 4. Dauerhaftes Verbot
-
-:::danger Dauerhaftes Verbot
-
-**Community-Impact**: Muster von Verstößen gegen die Community-Standards, einschließlich anhaltend unangemessenen Verhaltens, Belästigung von Personen oder Angriffe oder Herablassungen.
-
-**Konsequenz**: Dauerhaftes Verbot jeder Form der öffentlichen Interaktion in der Community.
+**Dauer**: Normalerweise 1-3 Monate, je nach Schweregrad
 
 :::
 
-## Beschwerdeprozess
+### 4. Permanenter Ausschluss
 
-Wenn Sie der Meinung sind, dass eine ungerechte Bestrafung erhalten haben, können Sie Beschwerde einlegen:
+:::danger Permanenter Ausschluss
 
-1.  **E-Mail senden**: support@lazygophers.com innerhalb von 30 Tagen
-2.  **Begründung bereitstellen**: Detaillierte Gründe für die Beschwerde
-3.  **Anhänge hinzufügen**: Relevantes Beweismaterial oder Hintergrundinformationen
-4.  **Warten**: Überprüfung durch eine andere Gruppe von Community-Leadern
+**Community-Impact**: Demonstrieren eines Musters von Verstößen gegen Community-Standards, einschließlich anhaltenden unangemessenen Verhaltens, Belästigung von Personen oder Angriffen oder Herabsetzungen von Personen.
 
-Die Beschwerde wird innerhalb von 2-3 Wochen geprüft, und die getroffenen Entscheidungen sind endgültig.
+**Konsequenz**: Permanenter Ausschluss von jeder Art von öffentlicher Interaktion innerhalb der Community.
 
-## Gemeinschaft aufbauen
+:::
 
-:::tip Gemeinschaft aufbauen
+## Berufungsverfahren
 
-Wir ermutigen Community-Mitglieder:
+Wenn Sie der Meinung sind, dass Sie zu Unrecht bestraft wurden, können Sie wie folgt Berufung einlegen:
+
+1.  **Senden Sie eine E-Mail** an support@lazygophers.com innerhalb von 30 Tagen
+2.  **Geben Sie** detaillierte Gründe für die Berufung an
+3.  **Fügen Sie** alle relevanten Beweise oder Hintergrundinformationen bei
+4.  **Warten Sie** auf die Überprüfung durch eine andere Gruppe von Community-Leitenden
+
+Berufungen werden innerhalb von 2-3 Wochen überprüft, und die zu diesem Zeitpunkt getroffene Entscheidung ist endgültig.
+
+## Aufbau einer positiven Community
+
+:::tip Gemeinsam eine bessere Community aufbauen
+
+Wir ermutigen Community-Mitglieder dazu:
 
 ### 🤝 Inklusion fördern
 
--   **Neulinge begrüßen** und hilfreiche Anleitung geben
--   **Vielfalt respektieren** und verschiedene Hintergründe und Perspektiven einbeziehen
--   **Inklusive Sprache** in allen Kommunikationen verwenden
--   **Patientie zeigen** für Personen, die lernen oder fragen
+-   **Neue Leute willkommen heißen** und hilfreiche Anleitungen geben
+-   **Vielfalt respektieren** und unterschiedliche Hintergründe und Perspektiven einbeziehen
+-   **Inklusive Sprache verwenden** für alle Kommunikation
+-   **Geduld haben** mit Personen, die lernen oder Fragen stellen
 
 ### 🎯 Fokus auf Lösungen
 
--   **Konstruktives Feedback**, nicht nur Kritik
--   **Proaktiv helfen**, wenn Sie sehen, dass jemand Probleme hat
--   **Wissen und Ressourcen teilen**
--   **Zusammenarbeit statt Konkurrenz**
+-   **Konstruktives Feedback geben**，nicht nur Kritik
+-   **Proaktiv Hilfe anbieten**，wenn Sie sehen, dass jemand Schwierigkeiten hat
+-   **Wissen und Ressourcen großzügig teilen**
+-   **Zusammenarbeiten statt konkurrieren**
 
 ### 🌟 Beiträge anerkennen
 
--   **Danken für Beiträge**, unabhängig von Größe
--   **Erfolge von Community-Mitgliedern** feiern
--   **Andere anleiten** zu lernen und zu wachsen
--   **Ideen und Arbeit anderer ordentlich zurechnen**
+-   **Die Arbeit von Beitragenden würdigen**，unabhängig von der Größe
+-   **Erfolge von Community-Mitgliedern hervorheben**
+-   **Andere beim Lernen und Wachsen anleiten**
+-   **Ideen und Arbeit anderer ordnungsgemäß zuordnen**
 
 :::
 
 ## Technische Standards
 
-Abgesehen von Verhaltensstandards halten wir auch folgende technische Standards:
+Zusätzlich zu Verhaltensstandards pflegen wir die folgenden technischen Standards:
 
 ### Codequalität
 
--   Bestehende Codestandards befolgen
--   Klaren, gut dokumentierten Code schreiben
--   Beiträge gründlich testen
--   Code-Review-Feedback anerkennen
+-   Befolgen Sie etablierte Codierungsstandards
+-   Schreiben Sie klaren, gut dokumentierten Code
+-   Testen Sie Ihre Beiträge gründlich
+-   Nehmen Sie Code-Review-Feedback demütig an
 
 ### Kommunikationsstandards
 
--   Diskussionen auf Projektbezogene konzentrieren
--   Klare und professionelle Sprache in Issues und Pull Requests verwenden
--   Nützliche Kontextinformationen bereitstellen, wenn Fehler gemeldet oder Funktionen angefordert werden
--   Geduld zeigen, während auf Antworten von Maintainer warten
+-   Halten Sie Diskussionen projektbezogen
+-   Verwenden Sie klare, professionelle Sprache in Issues und Pull Requests
+-   Geben Sie nützliche Kontextinformationen an, wenn Sie Fehler melden oder Funktionen anfordern
+-   Haben Sie Geduld, während Sie auf eine Antwort von Maintainer warten
 
 ## Ressourcen
 
 ### Bildung und Unterstützung
 
--   [GitHub Community Guidelines](https://docs.github.com/en/github/site-policy/github-community-guidelines)
+-   [GitHub-Community-Richtlinien](https://docs.github.com/en/github/site-policy/github-community-guidelines)
 -   [Contributor Covenant](https://www.contributor-covenant.org/)
 -   [Mozilla Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/)
 
-### Melde-Tools
+### Meldetools
 
--   Integrierte Berichtsfunktionen in GitHub
+-   GitHubs integrierte Meldefunktion
 -   Community-Management-Tools
--   Direkte Kommunikationskanäle zu Maintainer
+-   Direkte Kommunikationskanäle mit Maintainern
+
+## Zuschreibung
+
+Dieser Verhaltenskodex ist angepasst vom [Contributor Covenant][homepage] Version 2.1, verfügbar unter https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
+
+Die Community-Impact-Richtlinien sind inspiriert von [Mozilla's Code of Conduct Enforcement Ladder](https://github.com/mozilla/diversity).
+
+Für häufig gestellte Fragen zu diesem Verhaltenskodex siehe https://www.contributor-covenant.org/faq. Übersetzungen sind verfügbar unter https://www.contributor-covenant.org/translations.
 
 ---
 
@@ -213,14 +221,14 @@ Abgesehen von Verhaltensstandards halten wir auch folgende technische Standards:
 Dieses Dokument ist in mehreren Sprachen verfügbar:
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/CODE_OF_CONDUCT.md)
--   [🇨🇳 Vereinfachtes Chinesisch](/zh-CN/CODE_OF_CONDUCT)
--   [🇹🇼 Traditionelles Chinesisch](https://lazygophers.github.io/log/zh-TW/CODE_OF_CONDUCT.md)
+-   [🇨🇳 简体中文](https://lazygophers.github.io/log/zh-CN/CODE_OF_CONDUCT.md)
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/CODE_OF_CONDUCT.md)
 -   [🇫🇷 Français](https://lazygophers.github.io/log/fr/CODE_OF_CONDUCT.md)
 -   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/CODE_OF_CONDUCT.md)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/CODE_OF_CONDUCT.md)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/CODE_OF_CONDUCT.md)
--   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/CODE_OF_CONDUCT.md)
+-   [🇩🇪 Deutsch](/de/CODE_OF_CONDUCT)（aktuell）
 
 ---
 
-**Wir arbeiten zusammen für eine bessere Community.🚀**
+**Gemeinsam eine bessere Community aufbauen.🚀**
