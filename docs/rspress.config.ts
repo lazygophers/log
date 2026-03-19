@@ -6,9 +6,7 @@ export default defineConfig({
   description: 'A comprehensive logging library for Go',
   base: '/log/',
   root: '.',
-  ssg: {
-    experimentalExcludeRoutePaths: ['/rspress.config'],
-  },
+  ssg: false,
   builderConfig: {
     output: {
       distPath: {
