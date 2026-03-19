@@ -284,59 +284,57 @@ func TestAsyncWriter_ChannelCapacity(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-// TestAsyncWriter_BufferFull tests the ErrAsyncWriterFull error case
+// TestAsyncWriter_BufferFull tests the ErrAsyncWriterFull error case deterministically
 func TestAsyncWriter_BufferFull(t *testing.T) {
-	// Create a writer that writes very slowly
-	slowWriter := &VerySlowWriter{delay: 1 * time.Second}
-	asyncWriter := NewAsyncWriter(slowWriter)
+	// Arrange - create a writer that blocks on first Write, preventing the consumer goroutine
+	// from draining the channel
+	bw := &blockingWriter{
+		blockCh: make(chan struct{}),
+	}
+	asyncWriter := NewAsyncWriter(bw)
 
-	// Use a timeout to prevent hanging
-	done := make(chan bool, 1)
-	var errorOccurred bool
+	// Write one item to trigger the consumer goroutine to call bw.Write, which blocks
+	_, err := asyncWriter.Write([]byte("trigger"))
+	if err != nil {
+		t.Fatalf("Initial write failed: %v", err)
+	}
 
-	go func() {
-		defer func() { done <- true }()
+	// Wait for the consumer to pick up the message and block on bw.Write
+	time.Sleep(10 * time.Millisecond)
 
-		// Fill up the channel buffer very quickly
-		for i := 0; i < 1000; i++ { // Write many items to fill the buffer
-			_, err := asyncWriter.Write([]byte("test data"))
-			if err == ErrAsyncWriterFull {
-				errorOccurred = true
-				t.Logf("Successfully triggered ErrAsyncWriterFull on attempt %d", i+1)
-				return
-			}
-			if err != nil && err != ErrAsyncWriterFull {
-				t.Errorf("Unexpected error: %v", err)
-				return
-			}
+	// Act - fill the channel buffer (capacity 1024) while consumer is blocked
+	data := []byte("fill")
+	var fullErr error
+	for i := 0; i < 1500; i++ {
+		_, fullErr = asyncWriter.Write(data)
+		if fullErr == ErrAsyncWriterFull {
+			break
 		}
-	}()
-
-	// Wait for either completion or timeout
-	select {
-	case <-done:
-		// Test completed
-	case <-time.After(3 * time.Second):
-		t.Log("Test timed out - this might be expected if buffer doesn't fill")
 	}
 
-	asyncWriter.Close()
-
-	if !errorOccurred {
-		t.Log("ErrAsyncWriterFull was not triggered - buffer might be larger than expected")
+	// Assert
+	if fullErr != ErrAsyncWriterFull {
+		t.Error("Expected ErrAsyncWriterFull but never triggered")
 	}
+
+	// Unblock the consumer and clean up
+	close(bw.blockCh)
+	_ = asyncWriter.Close()
 }
 
-// VerySlowWriter writes very slowly to help fill the buffer
-type VerySlowWriter struct {
-	delay time.Duration
+// blockingWriter blocks on the first Write call until blockCh is closed
+type blockingWriter struct {
+	blockCh chan struct{}
+	once    sync.Once
 }
 
-func (vsw *VerySlowWriter) Write(p []byte) (n int, err error) {
-	time.Sleep(vsw.delay)
+func (w *blockingWriter) Write(p []byte) (int, error) {
+	w.once.Do(func() {
+		<-w.blockCh // Block on first write
+	})
 	return len(p), nil
 }
 
-func (vsw *VerySlowWriter) Close() error {
+func (w *blockingWriter) Close() error {
 	return nil
 }

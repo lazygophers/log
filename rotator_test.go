@@ -257,3 +257,184 @@ func TestHourlyRotator_RotateError(t *testing.T) {
 		t.Logf("Got expected error from rotate: %v", err)
 	}
 }
+
+// TestHourlyRotator_CleanupOldFiles_NoMatchingFiles tests cleanup when directory has no matching log files
+func TestHourlyRotator_CleanupOldFiles_NoMatchingFiles(t *testing.T) {
+	// Arrange
+	tmpDir := t.TempDir()
+	logPath := filepath.Join(tmpDir, "app")
+
+	rotator := NewHourlyRotator(logPath, 10*1024, 3)
+	defer func() { _ = rotator.Close() }()
+
+	// Create unrelated files
+	unrelatedFiles := []string{"other.txt", "readme.md", "data.csv"}
+	for _, name := range unrelatedFiles {
+		f, err := os.Create(filepath.Join(tmpDir, name))
+		if err != nil {
+			t.Fatalf("Failed to create test file: %v", err)
+		}
+		_ = f.Close()
+	}
+
+	// Act
+	rotator.cleanupOldFiles()
+
+	// Assert - unrelated files should not be deleted
+	files, err := os.ReadDir(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to read dir: %v", err)
+	}
+	if len(files) != len(unrelatedFiles) {
+		t.Errorf("Expected %d files, got %d - cleanup should not delete unrelated files", len(unrelatedFiles), len(files))
+	}
+}
+
+// TestHourlyRotator_CleanupOldFiles_DirectoryNotExist tests cleanup when log directory does not exist
+func TestHourlyRotator_CleanupOldFiles_DirectoryNotExist(t *testing.T) {
+	// Arrange
+	rotator := &HourlyRotator{
+		filename: "/nonexistent/path/app",
+		maxFiles: 3,
+	}
+
+	// Act & Assert - should not panic
+	rotator.cleanupOldFiles()
+}
+
+// TestHourlyRotator_CleanupOldFiles_ExactlyMaxFiles tests cleanup when file count equals maxFiles
+func TestHourlyRotator_CleanupOldFiles_ExactlyMaxFiles(t *testing.T) {
+	// Arrange
+	tmpDir := t.TempDir()
+	logPath := filepath.Join(tmpDir, "app")
+
+	maxFiles := 3
+	rotator := NewHourlyRotator(logPath, 10*1024, maxFiles)
+	defer func() { _ = rotator.Close() }()
+
+	// Create exactly maxFiles log files with correct naming pattern
+	// Pattern: base + YYYYMMDDHH + .log, total name length = len(base) + 14
+	for i := 0; i < maxFiles; i++ {
+		ts := time.Now().Add(-time.Duration(i) * time.Hour)
+		filename := filepath.Join(tmpDir, "app"+ts.Format("2006010215")+".log")
+		f, err := os.Create(filename)
+		if err != nil {
+			t.Fatalf("Failed to create test file: %v", err)
+		}
+		_ = f.Close()
+	}
+
+	// Count files before cleanup
+	filesBefore, _ := os.ReadDir(tmpDir)
+	logCountBefore := 0
+	for _, f := range filesBefore {
+		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
+			logCountBefore++
+		}
+	}
+
+	// Act
+	rotator.cleanupOldFiles()
+
+	// Assert - no files should be deleted
+	filesAfter, err := os.ReadDir(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to read dir: %v", err)
+	}
+	logCountAfter := 0
+	for _, f := range filesAfter {
+		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
+			logCountAfter++
+		}
+	}
+	if logCountAfter != logCountBefore {
+		t.Errorf("Expected %d files (unchanged), got %d", logCountBefore, logCountAfter)
+	}
+}
+
+// TestHourlyRotator_CleanupOldFiles_LessThanMaxFiles tests cleanup when file count is below maxFiles
+func TestHourlyRotator_CleanupOldFiles_LessThanMaxFiles(t *testing.T) {
+	// Arrange
+	tmpDir := t.TempDir()
+	logPath := filepath.Join(tmpDir, "app")
+
+	rotator := NewHourlyRotator(logPath, 10*1024, 10)
+	defer func() { _ = rotator.Close() }()
+
+	// Create only 2 files (below maxFiles=10)
+	for i := 0; i < 2; i++ {
+		ts := time.Now().Add(-time.Duration(i) * time.Hour)
+		filename := filepath.Join(tmpDir, "app"+ts.Format("2006010215")+".log")
+		f, err := os.Create(filename)
+		if err != nil {
+			t.Fatalf("Failed to create test file: %v", err)
+		}
+		_ = f.Close()
+	}
+
+	// Act
+	rotator.cleanupOldFiles()
+
+	// Assert - no files should be deleted
+	files, _ := os.ReadDir(tmpDir)
+	logCount := 0
+	for _, f := range files {
+		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
+			logCount++
+		}
+	}
+	if logCount != 2 {
+		t.Errorf("Expected 2 files, got %d - no files should be deleted when below maxFiles", logCount)
+	}
+}
+
+// TestHourlyRotator_Write_NilCurrentFile tests Write when currentFile is nil and rotate fails
+func TestHourlyRotator_Write_NilCurrentFile(t *testing.T) {
+	// Arrange - create rotator with invalid path so rotate() fails and currentFile stays nil
+	rotator := &HourlyRotator{
+		filename: "/nonexistent_dir_xyz/app",
+		linkName: "/nonexistent_dir_xyz/app.log",
+		maxSize:  1024,
+		maxFiles: 3,
+	}
+
+	// Act
+	_, err := rotator.Write([]byte("test"))
+
+	// Assert - should return error (either from rotate or from nil file check)
+	if err == nil {
+		t.Error("Expected error when writing with invalid path")
+	}
+}
+
+// TestHourlyRotator_Sync_NilCurrentFile tests Sync when currentFile is nil
+func TestHourlyRotator_Sync_NilCurrentFile(t *testing.T) {
+	// Arrange
+	rotator := &HourlyRotator{
+		currentFile: nil,
+	}
+
+	// Act
+	err := rotator.Sync()
+
+	// Assert - Sync returns nil when currentFile is nil (by design)
+	if err != nil {
+		t.Errorf("Sync should return nil when currentFile is nil, got: %v", err)
+	}
+}
+
+// TestHourlyRotator_Close_NilCurrentFile tests Close when currentFile is nil
+func TestHourlyRotator_Close_NilCurrentFile(t *testing.T) {
+	// Arrange
+	rotator := &HourlyRotator{
+		currentFile: nil,
+	}
+
+	// Act
+	err := rotator.Close()
+
+	// Assert
+	if err != nil {
+		t.Errorf("Close should return nil when currentFile is nil, got: %v", err)
+	}
+}
