@@ -3,8 +3,6 @@ package log
 import (
 	"context"
 	"io"
-
-	"go.uber.org/zap/zapcore"
 )
 
 // CloneToCtx 将一个 Logger 克隆到一个新的 LoggerWithCtx 中。
@@ -82,22 +80,7 @@ func (p *LoggerWithCtx) SetLevel(level Level) *LoggerWithCtx {
 // 如果没有提供 writer，输出将被禁用。
 // 返回 p 本身，以支持链式调用。
 func (p *LoggerWithCtx) SetOutput(writes ...io.Writer) *LoggerWithCtx {
-	var ws []zapcore.WriteSyncer
-	for _, write := range writes {
-		if write == nil {
-			continue
-		}
-		ws = append(ws, zapcore.AddSync(write))
-	}
-
-	if len(ws) == 0 {
-		p.out = nil
-	} else if len(ws) == 1 {
-		p.out = ws[0]
-	} else {
-		p.out = zapcore.NewMultiWriteSyncer(ws...)
-	}
-
+	p.Logger.SetOutput(writes...)
 	return p
 }
 
