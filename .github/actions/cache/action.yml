@@ -16,6 +16,9 @@ inputs:
     required: false
     default: '/tmp/action'
 
+permissions:
+  contents: read
+
 outputs:
   cache-hit:
     description: 'Whether cache was hit'
