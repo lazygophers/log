@@ -20,8 +20,12 @@ type FormatFull interface {
 	// ParsingAndEscaping controls message parsing and escaping
 	ParsingAndEscaping(disable bool)
 
+	// Caller enables or disables caller information in log output.
+	// When enabled, logs include file name, line number, and function name.
 	Caller(disable bool)
 
+	// Clone creates a deep copy of the formatter with independent settings.
+	// This allows creating formatter variants without affecting the original.
 	Clone() Format
 }
 

@@ -46,7 +46,8 @@ func isDir(path string) bool {
 	return s.IsDir()
 }
 
-// Output interface defines log writer behavior
+// Output defines the interface for log output destinations.
+// It embeds io.Writer to provide basic write capability for log data.
 type Output interface {
 	io.Writer
 }

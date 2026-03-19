@@ -11,7 +11,9 @@ import (
 // traceMap stores trace IDs using sync.Map for high-concurrency read/write performance.
 var traceMap sync.Map
 
-// DisableTrace is a global switch to disable tracing.
+// DisableTrace globally disables trace ID functionality when set to true.
+// This is useful in high-performance scenarios where trace overhead
+// should be eliminated entirely. Default is false (trace enabled).
 var DisableTrace bool
 
 // getTrace returns the trace ID for the specified goroutine.
