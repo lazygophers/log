@@ -39,13 +39,15 @@ titleSuffix: ' | LazyGophers Log'
 
 ### 安装
 
+:::tip 安装
 ```bash
 go get github.com/lazygophers/log
 ```
+:::
 
 ### 基本用法
 
-```go
+```go title="快速开始"
 package main
 
 import (
@@ -76,7 +78,7 @@ func main() {
 
 ### 带文件输出的自定义 Logger
 
-```go
+```go title="文件输出配置"
 package main
 
 import (
@@ -99,7 +101,7 @@ func main() {
 
 ### 日志级别控制
 
-```go
+```go title="日志级别控制"
 package main
 
 import "github.com/lazygophers/log"
@@ -115,7 +117,27 @@ func main() {
 }
 ```
 
+## 🎯 使用场景
+
+### 适用场景
+
+-   **Web 服务和 API 后端**：请求追踪、结构化日志、性能监控
+-   **微服务架构**：分布式追踪（TraceID）、统一日志格式、高吞吐量
+-   **命令行工具**：级别控制、简洁输出、错误报告
+-   **批处理任务**：文件轮转、长时间运行、资源优化
+
+### 特别优势
+
+-   **对象池优化**：Entry 和 Buffer 对象复用，减少 GC 压力
+-   **异步写入**：高吞吐量场景（10000+ 条/秒）无阻塞
+-   **TraceID 支持**：分布式系统请求追踪，与 OpenTelemetry 集成
+-   **零配置启动**：开箱即用，渐进式配置
+
 ## 🔧 配置选项
+
+:::note 配置选项
+以下方法均支持链式调用，可组合使用构建自定义 Logger。
+:::
 
 ### Logger 配置
 
@@ -159,6 +181,10 @@ func main() {
 
 ## 📊 性能比较
 
+:::info 性能对比
+以下数据基于基准测试，实际性能可能因环境和配置不同而有所差异。
+:::
+
 | 特性          | lazygophers/log | zap    | logrus | 标准日志 |
 | ------------- | --------------- | ------ | ------ | -------- |
 | 性能          | 高              | 高     | 中     | 低       |
@@ -166,6 +192,66 @@ func main() {
 | 功能丰富度    | 中              | 高     | 高     | 低       |
 | 灵活性        | 中              | 高     | 高     | 低       |
 | 学习曲线      | 低              | 中     | 中     | 低       |
+
+## ❓ 常见问题
+
+### 如何选择合适的日志级别？
+
+-   **开发环境**：使用 `DebugLevel` 或 `TraceLevel` 获取详细信息
+-   **生产环境**：使用 `InfoLevel` 或 `WarnLevel` 减少开销
+-   **性能测试**：使用 `PanicLevel` 禁用所有日志
+
+### 如何在生产环境优化性能？
+
+:::warning 注意
+在高吞吐量场景下，建议结合异步写入和合理的日志级别来优化性能。
+:::
+
+1. 使用 `AsyncWriter` 异步写入：
+
+```go title="异步写入配置"
+writer := log.GetOutputWriterHourly("./logs/app.log")
+asyncWriter := log.NewAsyncWriter(writer, 5000)
+logger.SetOutput(asyncWriter)
+```
+
+2. 调整日志级别，避免不必要的日志：
+
+```go title="级别优化"
+logger.SetLevel(log.InfoLevel)  // 跳过 Debug 和 Trace
+```
+
+3. 使用条件日志减少开销：
+
+```go title="条件日志"
+if logger.Level >= log.DebugLevel {
+    logger.Debug("详细调试信息")
+}
+```
+
+### `Caller` 和 `EnableCaller` 有什么区别？
+
+-   **`EnableCaller(enable bool)`**：控制 Logger 是否收集调用者信息
+    -   `EnableCaller(true)` 启用调用者信息收集
+-   **`Caller(disable bool)`**：控制 Formatter 是否输出调用者信息
+    -   `Caller(true)` 禁用调用者信息输出
+
+推荐使用 `EnableCaller` 进行全局控制。
+
+### 如何实现自定义格式化器？
+
+实现 `Format` 接口：
+
+```go title="自定义格式化器"
+type MyFormatter struct{}
+
+func (f *MyFormatter) Format(entry *log.Entry) []byte {
+    return []byte(fmt.Sprintf("[%s] %s\n",
+        entry.Level.String(), entry.Message))
+}
+
+logger.SetFormatter(&MyFormatter{})
+```
 
 ## 🔗 相关文档
 

@@ -47,7 +47,7 @@ func New() *Logger
 
 **示例：**
 
-```go
+```go title="创建日志器"
 logger := log.New()
 logger.Info("新日志记录器已创建")
 ```
@@ -92,7 +92,7 @@ func (l *Logger) SetLevel(level Level) *Logger
 
 **示例：**
 
-```go
+```go title="设置日志级别"
 logger.SetLevel(log.InfoLevel)
 logger.Debug("这不会被显示")  // 被忽略
 logger.Info("这会被显示")    // 被处理
@@ -116,7 +116,7 @@ func (l *Logger) SetOutput(writers ...io.Writer) *Logger
 
 **示例：**
 
-```go
+```go title="设置输出目标"
 // 单一输出
 logger.SetOutput(os.Stdout)
 
@@ -147,17 +147,17 @@ func (l *Logger) SetFormatter(formatter Format) *Logger
 logger.SetFormatter(&JSONFormatter{})
 ```
 
-#### Caller
+#### EnableCaller
 
 ```go
-func (l *Logger) Caller(enabled bool) *Logger
+func (l *Logger) EnableCaller(enable bool) *Logger
 ```
 
-启用或禁用日志条目中的调用者信息。
+启用或禁用日志条目中的调用者信息记录。
 
 **参数：**
 
--   `enabled`：是否包含调用者信息
+-   `enable`：是否启用调用者信息（传入 `true` 表示启用）
 
 **返回值：**
 
@@ -166,8 +166,37 @@ func (l *Logger) Caller(enabled bool) *Logger
 **示例：**
 
 ```go
-logger.Caller(true)
+logger.EnableCaller(true)
 logger.Info("这将包含文件:行号信息")
+
+logger.EnableCaller(false)
+logger.Info("这不会包含文件:行号信息")
+```
+
+#### Caller
+
+```go
+func (l *Logger) Caller(disable bool) *Logger
+```
+
+控制格式化器中的调用者信息。
+
+**参数：**
+
+-   `disable`：是否禁用调用者信息（传入 `true` 表示禁用）
+
+**返回值：**
+
+-   `*Logger`：返回自身以支持方法链式调用
+
+**示例：**
+
+```go
+logger.Caller(false)  // 不禁用，显示调用者信息
+logger.Info("这将包含文件:行号信息")
+
+logger.Caller(true)   // 禁用调用者信息
+logger.Info("这不会包含文件:行号信息")
 ```
 
 #### SetCallerDepth
@@ -311,6 +340,10 @@ func (l *Logger) Fatalf(format string, v ...any)
 
 记录致命错误并调用 `os.Exit(1)`。
 
+:::danger 破坏性操作
+`Fatal` 和 `Fatalf` 会在日志记录后立即调用 `os.Exit(1)` 终止进程。请确保仅在不可恢复的错误情况下使用。`defer` 语句**不会**被执行。
+:::
+
 **示例：**
 
 ```go
@@ -326,6 +359,10 @@ func (l *Logger) Panicf(format string, v ...any)
 ```
 
 记录错误消息并调用 `panic()`。
+
+:::danger 破坏性操作
+`Panic` 和 `Panicf` 会在日志记录后调用 `panic()`。与 `Fatal` 不同，`panic` 可以被 `recover()` 捕获，但如果未捕获则会终止程序。
+:::
 
 **示例：**
 
@@ -382,7 +419,7 @@ ctxLogger.Info(ctx, "上下文感知消息")
 func SetLevel(level Level)
 func SetOutput(writers ...io.Writer)
 func SetFormatter(formatter Format)
-func Caller(enabled bool)
+func Caller(disable bool)
 
 func Trace(v ...any)
 func Tracef(format string, v ...any)
@@ -511,7 +548,7 @@ func GetOutputWriterHourly(filename string) io.Writer
 
 **示例：**
 
-```go
+```go title="按小时轮转日志"
 writer := log.GetOutputWriterHourly("./logs/app.log")
 logger.SetOutput(writer)
 // 创建类似的文件：app-2024010115.log, app-2024010116.log 等
@@ -543,7 +580,7 @@ func (aw *AsyncWriter) Close() error
 
 **示例：**
 
-```go
+```go title="异步写入器"
 file, _ := os.Create("app.log")
 asyncWriter := log.NewAsyncWriter(file, 1000)
 defer asyncWriter.Close()
@@ -597,6 +634,10 @@ fmt.Println("当前追踪 ID:", traceID)
 
 该库支持使用构建标签进行条件编译：
 
+:::info 构建标签说明
+构建标签通过 `go build -tags` 参数指定，不同标签会改变日志库的编译行为和运行时特性。选择合适的标签可以在开发便利性和生产性能之间取得平衡。
+:::
+
 ### 默认模式
 
 ```bash
@@ -646,6 +687,10 @@ go build -tags "release,discard"  # 发布与丢弃
 
 ## 性能优化
 
+:::tip 性能最佳实践
+该库通过对象池、级别检查前置和异步写入等机制进行了深度性能优化。在高吞吐量场景下，建议组合使用异步写入器和适当的构建标签以获得最佳性能。
+:::
+
 ### 对象池
 
 该库在内部使用 `sync.Pool` 来管理：
@@ -691,7 +736,7 @@ defer asyncWriter.Close()
 
 ### 基本用法
 
-```go
+```go title="基本用法"
 package main
 
 import (
@@ -708,7 +753,7 @@ func main() {
 
 ### 自定义日志记录器
 
-```go
+```go title="自定义配置"
 package main
 
 import (
@@ -721,7 +766,7 @@ func main() {
 
     // 配置日志记录器
     logger.SetLevel(log.DebugLevel)
-    logger.Caller(true)
+    logger.Caller(true)  // 禁用调用者信息
     logger.SetPrefixMsg("[MyApp] ")
 
     // 设置输出到文件
@@ -740,7 +785,7 @@ func main() {
 
 ### 高性能日志记录
 
-```go
+```go title="高性能日志记录"
 package main
 
 import (
@@ -769,7 +814,7 @@ func main() {
 
 ### 上下文感知日志记录
 
-```go
+```go title="上下文感知日志记录"
 package main
 
 import (
@@ -791,7 +836,7 @@ func main() {
 
 ### 自定义 JSON 格式化器
 
-```go
+```go title="自定义 JSON 格式化器"
 package main
 
 import (
@@ -831,7 +876,7 @@ func (f *JSONFormatter) Format(entry *log.Entry) []byte {
 func main() {
     logger := log.New()
     logger.SetFormatter(&JSONFormatter{})
-    logger.Caller(true)
+    logger.Caller(true)  // 禁用调用者信息
     logger.SetOutput(os.Stdout)
 
     log.SetTrace("request-456")
@@ -841,9 +886,13 @@ func main() {
 
 ## 错误处理
 
-出于性能考虑，大多数日志记录器方法不返回错误。如果您需要对输出操作进行错误处理，请实现自定义写入器：
+:::warning 注意
+出于性能考虑，大多数日志记录器方法不返回错误。如果写入失败，日志将被静默丢弃。如果需要错误感知能力，请使用自定义写入器。
+:::
 
-```go
+如果您需要对输出操作进行错误处理，请实现自定义写入器：
+
+```go title="错误捕获写入器"
 type ErrorCapturingWriter struct {
     writer io.Writer
     lastError error
@@ -864,7 +913,9 @@ func (w *ErrorCapturingWriter) LastError() error {
 
 ## 线程安全
 
-所有日志记录器操作都是线程安全的，可以在多个 goroutine 中并发使用，无需额外的同步机制。
+:::tip 并发安全
+所有 `Logger` 实例的方法都是线程安全的，可以在多个 goroutine 中并发使用，无需额外的同步机制。但请注意，单个 `Entry` 对象**不是**线程安全的，属于一次性使用。
+:::
 
 ---
 
