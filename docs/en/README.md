@@ -12,17 +12,13 @@ A high-performance, flexible Go logging library built on zap, providing rich fea
 
 ## 📖 Documentation Languages
 
--   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](https://lazygophers.github.io/log/)
--   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/)
--   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
--   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
--   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
--   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
-
-## 🚀 Online Documentation
-
-Visit our [GitHub Pages documentation](https://lazygophers.github.io/log/) for a better reading experience.
+-   [🇺🇸 English](README.md) (Current)
+-   [🇨🇳 简体中文](README.md)
+-   [🇹🇼 繁體中文](README.md)
+-   [🇫🇷 Français](README.md)
+-   [🇷🇺 Русский](README.md)
+-   [🇪🇸 Español](README.md)
+-   [🇸🇦 العربية](README.md)
 
 ## ✨ Features
 
@@ -43,13 +39,15 @@ Visit our [GitHub Pages documentation](https://lazygophers.github.io/log/) for a
 
 ### Installation
 
+:::tip Installation
 ```bash
 go get github.com/lazygophers/log
 ```
+:::
 
 ### Basic Usage
 
-```go
+```go title="Quick Start"
 package main
 
 import (
@@ -80,7 +78,7 @@ func main() {
 
 ### Custom Logger with File Output
 
-```go
+```go title="File Output Configuration"
 package main
 
 import (
@@ -103,7 +101,7 @@ func main() {
 
 ### Log Level Control
 
-```go
+```go title="Log Level Control"
 package main
 
 import "github.com/lazygophers/log"
@@ -119,7 +117,27 @@ func main() {
 }
 ```
 
+## 🎯 Use Cases
+
+### Applicable Scenarios
+
+-   **Web Services and API Backends**: Request tracing, structured logging, performance monitoring
+-   **Microservices Architecture**: Distributed tracing (TraceID), unified log format, high throughput
+-   **Command-line Tools**: Level control, clean output, error reporting
+-   **Batch Tasks**: File rotation, long-running, resource optimization
+
+### Special Advantages
+
+-   **Object Pool Optimization**: Entry and Buffer object reuse, reducing GC pressure
+-   **Async Writing**: High throughput scenarios (10000+ logs/second) without blocking
+-   **TraceID Support**: Request tracing in distributed systems, integration with OpenTelemetry
+-   **Zero Configuration**: Ready to use, progressive configuration
+
 ## 🔧 Configuration Options
+
+:::note Configuration Options
+All the following methods support chaining and can be combined to build a custom Logger.
+:::
 
 ### Logger Configuration
 
@@ -163,6 +181,10 @@ func main() {
 
 ## 📊 Performance Comparison
 
+:::info Performance Comparison
+The following data is based on benchmarks; actual performance may vary depending on environment and configuration.
+:::
+
 | Feature          | lazygophers/log | zap    | logrus | standard log |
 | ---------------- | --------------- | ------ | ------ | ------------ |
 | Performance      | High            | High   | Medium | Low          |
@@ -171,39 +193,99 @@ func main() {
 | Flexibility      | Medium          | High   | High   | Low          |
 | Learning Curve   | Low             | Medium | Medium | Low          |
 
+## ❓ Frequently Asked Questions
+
+### How to choose the right log level?
+
+-   **Development Environment**: Use `DebugLevel` or `TraceLevel` for detailed information
+-   **Production Environment**: Use `InfoLevel` or `WarnLevel` to reduce overhead
+-   **Performance Testing**: Use `PanicLevel` to disable all logs
+
+### How to optimize performance in production?
+
+:::warning Note
+In high throughput scenarios, it's recommended to combine async writing with reasonable log levels to optimize performance.
+:::
+
+1. Use `AsyncWriter` for async writing：
+
+```go title="Async Writer Configuration"
+writer := log.GetOutputWriterHourly("./logs/app.log")
+asyncWriter := log.NewAsyncWriter(writer, 5000)
+logger.SetOutput(asyncWriter)
+```
+
+2. Adjust log levels to avoid unnecessary logs：
+
+```go title="Level Optimization"
+logger.SetLevel(log.InfoLevel)  // Skip Debug and Trace
+```
+
+3. Use conditional logging to reduce overhead：
+
+```go title="Conditional Logging"
+if logger.Level >= log.DebugLevel {
+    logger.Debug("Detailed debug info")
+}
+```
+
+### What's the difference between `Caller` and `EnableCaller`?
+
+-   **`EnableCaller(enable bool)`**：Controls whether the Logger collects caller information
+    -   `EnableCaller(true)` enables caller information collection
+-   **`Caller(disable bool)`**：Controls whether the Formatter outputs caller information
+    -   `Caller(true)` disables caller information output
+
+It's recommended to use `EnableCaller` for global control.
+
+### How to implement a custom formatter?
+
+Implement the `Format` interface：
+
+```go title="Custom Formatter"
+type MyFormatter struct{}
+
+func (f *MyFormatter) Format(entry *log.Entry) []byte {
+    return []byte(fmt.Sprintf("[%s] %s\n",
+        entry.Level.String(), entry.Message))
+}
+
+logger.SetFormatter(&MyFormatter{})
+```
+
 ## 🔗 Related Documentation
 
--   [📚 API Documentation](/API) - Complete API reference
--   [🤝 Contributing Guide](/CONTRIBUTING) - How to contribute
--   [📋 Changelog](/CHANGELOG) - Version history
--   [🔒 Security Policy](/SECURITY) - Security guidelines
--   [📜 Code of Conduct](/CODE_OF_CONDUCT) - Community guidelines
+-   [📚 API Documentation](API.md) - Complete API reference
+-   [🤝 Contributing Guide](/en/CONTRIBUTING) - How to contribute
+-   [📋 Changelog](/en/CHANGELOG) - Version history
+-   [🔒 Security Policy](/en/SECURITY) - Security guidelines
+-   [📜 Code of Conduct](/en/CODE_OF_CONDUCT) - Community guidelines
 
 ## 🚀 Getting Help
 
--   **GitHub Issues**: [Report bugs or request features](https://github.com/lazygophers/log/issues)
--   **GoDoc**: [API Documentation](https://pkg.go.dev/github.com/lazygophers/log)
--   **Examples**: [Usage examples](https://github.com/lazygophers/log/tree/main/examples)
+-   **GitHub Issues**：[Report bugs or request features](https://github.com/lazygophers/log/issues)
+-   **GoDoc**：[API Documentation](https://pkg.go.dev/github.com/lazygophers/log)
+-   **Examples**：[Usage examples](https://github.com/lazygophers/log/tree/main/examples)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/en/LICENSE) file for details.
 
-## 🌍 Multilingual Documentation
+## 🌟 Multilingual Documentation
 
-This document is available in multiple languages:
+This document is available in multiple languages：
 
 -   [🇺🇸 English](README.md) (Current)
--   [🇨🇳 简体中文](docs/README_zh-CN.md)
--   [🇹🇼 繁體中文](docs/README_zh-TW.md)
--   [🇫🇷 Français](docs/README_fr.md)
--   [🇷🇺 Русский](docs/README_ru.md)
--   [🇪🇸 Español](docs/README_es.md)
--   [🇸🇦 العربية](docs/README_ar.md)
+-   [🇨🇳 简体中文](README.md)
+-   [🇹🇼 繁體中文](README.md)
+-   [🇫🇷 Français](README.md)
+-   [🇷🇺 Русский](README.md)
+-   [🇪🇸 Español](README.md)
+-   [🇸🇦 العربية](README.md)
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](/CONTRIBUTING) for details.
+We welcome contributions! Please see our [Contributing Guide](/en/CONTRIBUTING) for details.
 
 ---
 
