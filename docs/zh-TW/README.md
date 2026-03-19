@@ -1,7 +1,6 @@
 ---
 titleSuffix: ' | LazyGophers Log'
 ---
-
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
@@ -13,13 +12,13 @@ titleSuffix: ' | LazyGophers Log'
 
 ## 📖 文檔語言
 
--   [🇺🇸 English](README.md)
--   [🇨🇳 簡體中文](README_zh-CN.md)
--   [🇹🇼 繁體中文](README_zh-TW.md)
--   [🇫🇷 Français](README_fr.md)
--   [🇷🇺 Русский](README_ru.md)
--   [🇪🇸 Español](README_es.md)
--   [🇸🇦 العربية](README_ar.md)
+-   [🇺🇸 English](../en/README.md)
+-   [🇨🇳 简体中文](../zh-CN/README.md)
+-   [🇹🇼 繁體中文](README.md)（當前）
+-   [🇫🇷 Français](../fr/README.md)
+-   [🇷🇺 Русский](../ru/README.md)
+-   [🇪🇸 Español](../es/README.md)
+-   [🇸🇦 العربية](../ar/README.md)
 
 ## ✨ 特性
 
@@ -40,13 +39,15 @@ titleSuffix: ' | LazyGophers Log'
 
 ### 安裝
 
+:::tip 安裝
 ```bash
 go get github.com/lazygophers/log
 ```
+:::
 
 ### 基本用法
 
-```go
+```go title="快速開始"
 package main
 
 import (
@@ -75,9 +76,9 @@ func main() {
 
 ## 📚 高級用法
 
-### 帶文件輸出的自定義 Logger
+### 帶檔案輸出的自定義 Logger
 
-```go
+```go title="檔案輸出配置"
 package main
 
 import (
@@ -86,7 +87,7 @@ import (
 )
 
 func main() {
-    // 建立帶文件輸出的 logger
+    // 創建帶檔案輸出的 logger
     logger := log.New().
         SetLevel(log.DebugLevel).
         EnableCaller(true).
@@ -100,7 +101,7 @@ func main() {
 
 ### 日誌級別控制
 
-```go
+```go title="日誌級別控制"
 package main
 
 import "github.com/lazygophers/log"
@@ -116,57 +117,141 @@ func main() {
 }
 ```
 
+## 🎯 使用場景
+
+### 適用場景
+
+-   **Web 服務和 API 後端**：請求追蹤、結構化日誌、性能監控
+-   **微服務架構**：分佈式追蹤（TraceID）、統一日誌格式、高吞吐量
+-   **命令列工具**：級別控制、簡潔輸出、錯誤報告
+-   **批處理任務**：檔案輪轉、長時間運行、資源優化
+
+### 特別優勢
+
+-   **物件池優化**：Entry 和 Buffer 物件重用，減少 GC 壓力
+-   **非同步寫入**：高吞吐量場景（10000+ 條/秒）無阻塞
+-   **TraceID 支援**：分佈式系統請求追蹤，與 OpenTelemetry 集成
+-   **零配置啟動**：開箱即用，漸進式配置
+
 ## 🔧 配置選項
+
+:::note 配置選項
+以下方法均支援鏈式呼叫，可組合使用構建自定義 Logger。
+:::
 
 ### Logger 配置
 
-| 方法                    | 描述                | 預設值       |
-| ----------------------- | ------------------- | ------------ |
-| `SetLevel(level)`       | 設定最低日誌級別    | `DebugLevel` |
-| `EnableCaller(enable)`  | 啟用/禁用調用者資訊 | `false`      |
-| `EnableTrace(enable)`   | 啟用/禁用追蹤資訊   | `false`      |
-| `SetCallerDepth(depth)` | 設定調用者深度      | `2`          |
-| `SetPrefixMsg(prefix)`  | 設定日誌前綴        | `""`         |
-| `SetSuffixMsg(suffix)`  | 設定日誌後綴        | `""`         |
-| `SetOutput(writers...)` | 設定輸出目標        | `os.Stdout`  |
+| 方法                  | 描述                | 預設值       |
+| --------------------- | ------------------- | ----------- |
+| `SetLevel(level)`       | 設定最低日誌級別     | `DebugLevel` |
+| `EnableCaller(enable)`  | 啟用/禁用調用者資訊  | `false`      |
+| `EnableTrace(enable)`   | 啟用/禁用追蹤資訊    | `false`      |
+| `SetCallerDepth(depth)` | 設定調用者深度       | `2`          |
+| `SetPrefixMsg(prefix)`  | 設定日誌前綴         | `""`         |
+| `SetSuffixMsg(suffix)`  | 設定日誌後綴         | `""`         |
+| `SetOutput(writers...)` | 設定輸出目標         | `os.Stdout`  |
 
 ### 日誌級別
 
-| 級別         | 描述                        |
-| ------------ | --------------------------- |
+| 級別        | 描述                        |
+| ----------- | --------------------------- |
 | `TraceLevel` | 最詳細，用於詳細追蹤        |
 | `DebugLevel` | 調試資訊                    |
 | `InfoLevel`  | 普通資訊                    |
 | `WarnLevel`  | 警告資訊                    |
 | `ErrorLevel` | 錯誤資訊                    |
-| `FatalLevel` | 致命錯誤（調用 os.Exit(1)） |
-| `PanicLevel` | 恐慌錯誤（調用 panic()）    |
+| `FatalLevel` | 致命錯誤（呼叫 os.Exit(1)） |
+| `PanicLevel` | 恐慌錯誤（呼叫 panic()）    |
 
 ## 🏗️ 架構
 
 ### 核心組件
 
 -   **Logger**：主日誌結構，具有可配置的級別、輸出、格式化器和調用者深度
--   **Entry**：單個日誌記錄，包含全面的元數據支援
+-   **Entry**：單個日誌記錄，包含全面的元資料支援
 -   **Level**：日誌級別定義和工具函數
 -   **Format**：日誌格式化介面和實現
 
 ### 性能優化
 
 -   **物件池**：重用 Entry 物件以減少記憶體分配
--   **條件記錄**：僅在需要時記錄昂貴欄位
+-   **條件記錄**：僅在需要時記錄昂貴字段
 -   **快速級別檢查**：在最外層檢查日誌級別
 -   **無鎖設計**：大多數操作不需要鎖
 
 ## 📊 性能比較
 
-| 特性       | lazygophers/log | zap | logrus | 標準日誌 |
-| ---------- | --------------- | --- | ------ | -------- |
-| 性能       | 高              | 高  | 中     | 低       |
-| API 簡潔性 | 高              | 中  | 高     | 高       |
-| 功能豐富度 | 中              | 高  | 高     | 低       |
-| 靈活性     | 中              | 高  | 高     | 低       |
-| 學習曲線   | 低              | 中  | 中     | 低       |
+:::info 性能對比
+以下資料基於基準測試，實際性能可能因環境和配置不同而有所差異。
+:::
+
+| 特性          | lazygophers/log | zap    | logrus | 標準日誌 |
+| ------------- | --------------- | ------ | ------ | -------- |
+| 性能          | 高              | 高     | 中     | 低       |
+| API 簡潔性    | 高              | 中     | 高     | 高       |
+| 功能豐富度    | 中              | 高     | 高     | 低       |
+| 靈活性        | 中              | 高     | 高     | 低       |
+| 學習曲線      | 低              | 中     | 中     | 低       |
+
+## ❓ 常見問題
+
+### 如何選擇合適的日誌級別？
+
+-   **開發環境**：使用 `DebugLevel` 或 `TraceLevel` 獲取詳細資訊
+-   **生產環境**：使用 `InfoLevel` 或 `WarnLevel` 減少開銷
+-   **性能測試**：使用 `PanicLevel` 禁用所有日誌
+
+### 如何在生產環境優化性能？
+
+:::warning 注意
+在高吞吐量場景下，建議結合非同步寫入和合理的日誌級別來優化性能。
+:::
+
+1. 使用 `AsyncWriter` 非同步寫入：
+
+```go title="非同步寫入配置"
+writer := log.GetOutputWriterHourly("./logs/app.log")
+asyncWriter := log.NewAsyncWriter(writer, 5000)
+logger.SetOutput(asyncWriter)
+```
+
+2. 調整日誌級別，避免不必要的日誌：
+
+```go title="級別優化"
+logger.SetLevel(log.InfoLevel)  // 跳過 Debug 和 Trace
+```
+
+3. 使用條件日誌減少開銷：
+
+```go title="條件日誌"
+if logger.Level >= log.DebugLevel {
+    logger.Debug("詳細調試資訊")
+}
+```
+
+### `Caller` 和 `EnableCaller` 有什麼區別？
+
+-   **`EnableCaller(enable bool)`**：控制 Logger 是否收集調用者資訊
+    -   `EnableCaller(true)` 啟用調用者資訊收集
+-   **`Caller(disable bool)`**：控制 Formatter 是否輸出調用者資訊
+    -   `Caller(true)` 禁用調用者資訊輸出
+
+推薦使用 `EnableCaller` 進行全域控制。
+
+### 如何實現自定義格式化器？
+
+實現 `Format` 介面：
+
+```go title="自定義格式化器"
+type MyFormatter struct{}
+
+func (f *MyFormatter) Format(entry *log.Entry) []byte {
+    return []byte(fmt.Sprintf("[%s] %s\n",
+        entry.Level.String(), entry.Message))
+}
+
+logger.SetFormatter(&MyFormatter{})
+```
 
 ## 🔗 相關文檔
 
@@ -180,11 +265,11 @@ func main() {
 
 -   **GitHub Issues**：[報告 bug 或請求功能](https://github.com/lazygophers/log/issues)
 -   **GoDoc**：[API 文檔](https://pkg.go.dev/github.com/lazygophers/log)
--   **範例**：[使用範例](https://github.com/lazygophers/log/tree/main/examples)
+-   **示例**：[使用示例](https://github.com/lazygophers/log/tree/main/examples)
 
 ## 📄 許可證
 
-本專案採用 MIT 許可證 - 詳見 [LICENSE](LICENSE) 文件。
+本專案採用 MIT 許可證 - 詳見 [LICENSE](LICENSE) 檔案。
 
 ## 🤝 貢獻
 
@@ -192,4 +277,4 @@ func main() {
 
 ---
 
-**lazygophers/log** 旨在成為重視性能和簡潔性的 Go 開發者的首選日誌解決方案。無論您是構建小型工具還是大規模分散式系統，該庫都能提供功能和易用性之間的良好平衡。
+**lazygophers/log** 旨在成為重視性能和簡潔性的 Go 開發者的首選日誌解決方案。無論您是構建小型工具還是大規模分佈式系統，該庫都能提供功能和易用性之間的良好平衡。

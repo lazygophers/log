@@ -36,12 +36,14 @@ titleSuffix: ' | LazyGophers Log'
 
 ### 工作流程
 
+:::note 开发流程概览
 1. **Fork** 仓库
 2. **Clone** 您的 fork 到本地
 3. **创建** 从 `master` 分支创建功能分支
 4. **进行** 您的更改
 5. **测试** 在所有构建标签下进行彻底测试
 6. **提交** 拉取请求
+:::
 
 ## 🚀 开始使用
 
@@ -53,7 +55,7 @@ titleSuffix: ' | LazyGophers Log'
 
 ### 本地开发设置
 
-```bash
+```bash title="克隆仓库并设置开发环境"
 # 1. 在 GitHub 上 Fork 仓库
 # 2. Clone 您的 fork
 git clone https://github.com/YOUR_USERNAME/log.git
@@ -71,7 +73,11 @@ make test-quick
 
 ### 环境设置
 
-```bash
+:::info 环境配置
+确保 Go 环境变量已正确配置，并安装推荐的开发工具以获得最佳开发体验。
+:::
+
+```bash title="环境设置"
 # 设置 Go 环境（如果尚未设置）
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
@@ -92,6 +98,10 @@ go install honnef.co/go/tools/cmd/staticcheck@latest
 5. **添加** 新功能的测试
 
 ### PR 检查清单
+
+:::warning 提交 PR 前请确认以下所有项目
+不满足检查清单要求的 PR 将不会被合并。
+:::
 
 -   [ ] **代码质量**
 
@@ -123,13 +133,15 @@ go install honnef.co/go/tools/cmd/staticcheck@latest
 
 ### PR 模板
 
-提交拉取请求时，请使用我们的[PR 模板](.github/pull_request_template.md)。
+提交拉取请求时，请使用我们的[PR 模板](../../.github/pull_request_template.md)。
 
 ## 📏 编码标准
 
 ### Go 风格指南
 
-我们遵循标准的 Go 风格指南，并有一些补充：
+:::tip Go 代码规范
+我们遵循标准的 Go 风格指南，并有一些补充。请确保代码格式化通过 `go fmt` 和 `goimports` 检查。
+:::
 
 ```go
 // ✅ Good
@@ -173,7 +185,11 @@ project/
 
 ### 错误处理
 
-```go
+:::tip 错误处理最佳实践
+库代码应返回错误而非 panic，让调用者决定如何处理异常情况。
+:::
+
+```go title="错误处理示例"
 // ✅ 推荐：返回错误，不要 panic
 func NewLogger(config Config) (*Logger, error) {
     if err := config.Validate(); err != nil {
@@ -195,7 +211,7 @@ func NewLogger(config Config) *Logger {
 
 ### 测试结构
 
-```go
+```go title="表驱动测试示例"
 func TestLogger_Info(t *testing.T) {
     tests := []struct {
         name     string
@@ -217,6 +233,10 @@ func TestLogger_Info(t *testing.T) {
 
 ### 覆盖率要求
 
+:::warning 覆盖率硬性要求
+新代码覆盖率低于 90% 的 PR 将不会通过 CI 检查。
+:::
+
 -   **最低要求**: 新代码覆盖率 90%
 -   **目标**: 总体覆盖率 95%+
 -   **所有构建标签**必须保持覆盖率
@@ -224,7 +244,7 @@ func TestLogger_Info(t *testing.T) {
 
 ### 测试命令
 
-```bash
+```bash title="运行测试"
 # 在所有构建标签下快速测试
 make test-quick
 
@@ -240,7 +260,9 @@ make benchmark
 
 ## 🏗️ 构建标签要求
 
-所有更改必须与我们的构建标签系统兼容：
+:::warning 构建兼容性
+所有更改必须与我们的构建标签系统兼容，未通过所有构建标签测试的代码不会被合并。
+:::
 
 ### 支持的构建标签
 
@@ -251,7 +273,11 @@ make benchmark
 
 ### 构建标签测试
 
-```bash
+:::info 构建标签说明
+项目使用构建标签实现条件编译，不同标签对应不同的运行模式。提交前请确保在所有标签下测试通过。
+:::
+
+```bash title="构建标签测试"
 # 测试每个构建配置
 make test-default
 make test-debug
@@ -316,7 +342,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 错误报告
 
-使用[错误报告模板](.github/ISSUE_TEMPLATE/bug_report.md)并包含：
+使用[错误报告模板](../../.github/ISSUE_TEMPLATE/bug_report.md)并包含：
 
 -   **清晰的问题描述**
 -   **重现步骤**
@@ -326,7 +352,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 功能请求
 
-使用[功能请求模板](.github/ISSUE_TEMPLATE/feature_request.md)并包含：
+使用[功能请求模板](../../.github/ISSUE_TEMPLATE/feature_request.md)并包含：
 
 -   **清晰的功能动机**
 -   **建议的 API** 设计
@@ -335,7 +361,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 问题
 
-使用[问题模板](.github/ISSUE_TEMPLATE/question.md)用于：
+使用[问题模板](../../.github/ISSUE_TEMPLATE/question.md)用于：
 
 -   使用问题
 -   配置帮助
@@ -348,7 +374,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 始终对性能敏感的更改进行基准测试：
 
-```bash
+```bash title="运行基准测试"
 # 运行基准测试
 go test -bench=. -benchmem
 
@@ -360,6 +386,10 @@ benchcmp before.txt after.txt
 ```
 
 ### 性能指南
+
+:::tip 性能优化要点
+这是一个性能敏感的日志库，任何更改都应考虑对热路径的影响。
+:::
 
 -   **最小化** 热路径中的内存分配
 -   **使用对象池** 用于频繁创建的对象
@@ -390,6 +420,10 @@ func putEntry(e *Entry) {
 ## 🔒 安全指南
 
 ### 敏感数据
+
+:::warning 安全注意事项
+日志中泄露敏感数据可能导致严重的安全事故，请务必遵循以下规范。
+:::
 
 -   **永远不要记录**密码、令牌或敏感数据
 -   **清理**日志消息中的用户输入
@@ -447,14 +481,14 @@ logger.Infof("User login: %+v", userRequest) // 可能包含密码
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](CONTRIBUTING.md)
--   [🇨🇳 简体中文](CONTRIBUTING_zh-CN.md) (当前)
--   [🇹🇼 繁體中文](CONTRIBUTING_zh-TW.md)
--   [🇫🇷 Français](CONTRIBUTING_fr.md)
--   [🇷🇺 Русский](CONTRIBUTING_ru.md)
--   [🇪🇸 Español](CONTRIBUTING_es.md)
--   [🇸🇦 العربية](CONTRIBUTING_ar.md)
+-   [🇺🇸 English](../en/CONTRIBUTING.md)
+-   [🇨🇳 简体中文](CONTRIBUTING.md)（当前）
+-   [🇹🇼 繁體中文](../zh-TW/CONTRIBUTING.md)
+-   [🇫🇷 Français](../fr/CONTRIBUTING.md)
+-   [🇷🇺 Русский](../ru/CONTRIBUTING.md)
+-   [🇪🇸 Español](../es/CONTRIBUTING.md)
+-   [🇸🇦 العربية](../ar/CONTRIBUTING.md)
 
 ---
 
-**Thank you for contributing to LazyGophers Log! 🚀**
+**感谢您为 LazyGophers Log 做出贡献！🚀**
