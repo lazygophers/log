@@ -33,7 +33,7 @@ export default defineConfig({
           tag: 'link',
           attrs: {
             rel: 'icon',
-            href: '/log/public/logo.svg',
+            href: 'logo.svg',
             type: 'image/svg+xml',
           },
         },
@@ -62,7 +62,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             property: 'og:image',
-            content: '/log/public/logo.svg',
+            content: 'logo.svg',
           },
         },
         {
@@ -90,7 +90,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             name: 'twitter:image',
-            content: '/log/public/logo.svg',
+            content: 'logo.svg',
           },
         },
       ],
@@ -102,18 +102,18 @@ export default defineConfig({
   },
   locales: [
     {
-      lang: 'en',
-      label: 'English',
-      title: 'LazyGophers Log Documentation',
-      description: 'A comprehensive logging library for Go',
-      path: '/',
-    },
-    {
       lang: 'zh-CN',
       label: '简体中文',
       title: 'LazyGophers Log 文档',
       description: '一个全面的 Go 语言日志库',
-      path: '/zh-CN/',
+      path: '/',
+    },
+    {
+      lang: 'en',
+      label: 'English',
+      title: 'LazyGophers Log Documentation',
+      description: 'A comprehensive logging library for Go',
+      path: '/en/',
     },
     {
       lang: 'zh-TW',
@@ -145,31 +145,31 @@ export default defineConfig({
     ],
     locales: [
       {
-        lang: 'en',
-        label: 'English',
-        outlineTitle: 'ON THIS PAGE',
-        lastUpdatedText: 'Last Updated',
-        nav: [
-          { text: 'Home', link: '/' },
-          { text: 'API Reference', link: '/API' },
-          { text: 'Changelog', link: '/CHANGELOG' },
-          { text: 'Contributing', link: '/CONTRIBUTING' },
-          { text: 'Code of Conduct', link: '/CODE_OF_CONDUCT' },
-          { text: 'Security Policy', link: '/SECURITY' },
-        ],
-      },
-      {
         lang: 'zh-CN',
         label: '简体中文',
         outlineTitle: '大纲',
         lastUpdatedText: '最后更新',
         nav: [
-          { text: '首页', link: '/zh-CN/' },
-          { text: 'API 参考', link: '/zh-CN/API' },
-          { text: '更新日志', link: '/zh-CN/CHANGELOG' },
-          { text: '贡献指南', link: '/zh-CN/CONTRIBUTING' },
-          { text: '行为准则', link: '/zh-CN/CODE_OF_CONDUCT' },
-          { text: '安全策略', link: '/zh-CN/SECURITY' },
+          { text: '首页', link: '/' },
+          { text: 'API 参考', link: '/API' },
+          { text: '更新日志', link: '/CHANGELOG' },
+          { text: '贡献指南', link: '/CONTRIBUTING' },
+          { text: '行为准则', link: '/CODE_OF_CONDUCT' },
+          { text: '安全策略', link: '/SECURITY' },
+        ],
+      },
+      {
+        lang: 'en',
+        label: 'English',
+        outlineTitle: 'ON THIS PAGE',
+        lastUpdatedText: 'Last Updated',
+        nav: [
+          { text: 'Home', link: '/en/' },
+          { text: 'API Reference', link: '/en/API' },
+          { text: 'Changelog', link: '/en/CHANGELOG' },
+          { text: 'Contributing', link: '/en/CONTRIBUTING' },
+          { text: 'Code of Conduct', link: '/en/CODE_OF_CONDUCT' },
+          { text: 'Security Policy', link: '/en/SECURITY' },
         ],
       },
       {

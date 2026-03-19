@@ -1,0 +1,11 @@
+# robots.txt for LazyGophers Log Documentation
+# https://lazygophers.github.io/log/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://lazygophers.github.io/log/sitemap.xml
+
+# Disallow specific paths if needed
+# Disallow: /private/

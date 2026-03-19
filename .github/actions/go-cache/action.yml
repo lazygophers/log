@@ -49,7 +49,15 @@ runs:
         fi
 
         # Go build 缓存键
-        BUILD_KEY="go-build-${GO_VERSION}-${{ runner.os }}-${{ github.sha }}"
+        # 使用 GITHUB_SHA 环境变量（GitHub 控制的值，仅包含十六进制字符）
+        # 验证其为有效的 SHA 格式以防止注入
+        GITHUB_SHA="${GITHUB_SHA:-}"
+        if [[ "$GITHUB_SHA" =~ ^[a-fA-F0-9]+$ ]]; then
+          BUILD_KEY="go-build-${GO_VERSION}-${{ runner.os }}-${GITHUB_SHA}"
+        else
+          # 如果 GITHUB_SHA 无效，使用时间戳作为后备
+          BUILD_KEY="go-build-${GO_VERSION}-${{ runner.os }}-$(date +%s)"
+        fi
         BUILD_RESTORE_KEY="go-build-${GO_VERSION}-${{ runner.os }}-"
 
         echo "modules-key=${MODULES_KEY}" >> $GITHUB_OUTPUT

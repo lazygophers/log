@@ -74,10 +74,10 @@ func main() {
 ## 文档
 
 -   [API 参考](API.md) - 完整的 API 文档
--   [更新日志](CHANGELOG.md) - 版本历史
--   [贡献指南](CONTRIBUTING.md) - 如何贡献
--   [安全策略](SECURITY.md) - 安全指南
--   [行为准则](CODE_OF_CONDUCT.md) - 社区准则
+-   [更新日志](/zh-TW/CHANGELOG) - 版本历史
+-   [贡献指南](/zh-TW/CONTRIBUTING) - 如何贡献
+-   [安全策略](/zh-TW/SECURITY) - 安全指南
+-   [行为准则](/zh-TW/CODE_OF_CONDUCT) - 社区准则
 
 ## 性能比较
 
@@ -91,4 +91,4 @@ func main() {
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+本项目采用 MIT 许可证 - 详见 [LICENSE](/zh-TW/LICENSE) 文件。

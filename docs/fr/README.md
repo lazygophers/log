@@ -12,13 +12,13 @@ Une bibliotheque de journalisation Go performante et flexible, construite sur za
 
 ## Langues de documentation
 
--   [English](../en/README.md)
--   [简体中文](../zh-CN/README.md)
--   [繁體中文](../zh-TW/README.md)
+-   [English](https://lazygophers.github.io/log/en/)
+-   [简体中文](https://lazygophers.github.io/log/)
+-   [繁體中文](https://lazygophers.github.io/log/zh-TW/)
 -   [Français](README.md) (actuel)
--   [Русский](../ru/README.md)
--   [Español](../es/README.md)
--   [العربية](../ar/README.md)
+-   [Русский](https://lazygophers.github.io/log/ru/)
+-   [Español](https://lazygophers.github.io/log/es/)
+-   [العربية](https://lazygophers.github.io/log/ar/)
 
 ## Documentation en ligne
 
@@ -66,10 +66,10 @@ func main() {
 ## Documentation
 
 -   [Documentation API](API.md)
--   [Journal des modifications](CHANGELOG.md)
--   [Guide de contribution](CONTRIBUTING.md)
--   [Politique de sécurité](SECURITY.md)
--   [Code de conduite](CODE_OF_CONDUCT.md)
+-   [Journal des modifications](/fr/CHANGELOG)
+-   [Guide de contribution](/fr/CONTRIBUTING)
+-   [Politique de sécurité](/fr/SECURITY)
+-   [Code de conduite](/fr/CODE_OF_CONDUCT)
 
 ## Licence
 

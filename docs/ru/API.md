@@ -923,13 +923,13 @@ func (w *ErrorCapturingWriter) LastError() error {
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](../en/API.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/API.md)
 -   [🇨🇳 简体中文](API.md)（当前）
--   [🇹🇼 繁體中文](../zh-TW/API.md)
--   [🇫🇷 Français](../fr/API.md)
--   [🇷🇺 Русский](../ru/API.md)
--   [🇪🇸 Español](../es/API.md)
--   [🇸🇦 العربية](../ar/API.md)
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/API.md)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/API.md)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/API.md)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/API.md)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/API.md)
 
 ---
 

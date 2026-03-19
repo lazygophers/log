@@ -4,7 +4,9 @@
   "description": "Documentation for LazyGophers Log",
   "scripts": {
     "dev": "rspress dev",
-    "build": "rspress build",
+    "build": "rspress build && npm run build:post",
+    "build:post": "cp doc_build/index.html doc_build/404.html && cp public/logo.svg doc_build/ && cp robots.txt.template doc_build/robots.txt && npm run build:sitemap",
+    "build:sitemap": "bash scripts/generate-sitemap.sh",
     "clean": "rm -rf doc_build/",
     "preview": "rspress preview"
   },

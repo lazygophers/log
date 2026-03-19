@@ -196,7 +196,7 @@ For answers to common questions about this code of conduct, see the FAQ at https
 
 This document is available in multiple languages:
 
--   [🇺🇸 English](CODE_OF_CONDUCT.md) (current)
+-   [🇺🇸 English](/CODE_OF_CONDUCT) (current)
 -   [🇨🇳 简体中文](docs/CODE_OF_CONDUCT_zh-CN.md)
 -   [🇹🇼 繁體中文](docs/CODE_OF_CONDUCT_zh-TW.md)
 -   [🇫🇷 Français](docs/CODE_OF_CONDUCT_fr.md)

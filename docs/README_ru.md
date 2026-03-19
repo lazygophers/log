@@ -12,13 +12,13 @@ titleSuffix: " | LazyGophers Log"
 
 ## 📖 Языки документации
 
--   [🇺🇸 English](../en/README.md)
--   [🇨🇳 简体中文](../zh-CN/README.md)
--   [🇹🇼 繁體中文](../zh-TW/README.md)
--   [🇫🇷 Français](../fr/README.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/)
+-   [🇨🇳 简体中文](https://lazygophers.github.io/log/)
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
 -   [🇷🇺 Русский](README.md) (текущий)
--   [🇪🇸 Español](../es/README.md)
--   [🇸🇦 العربية](../ar/README.md)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
 
 ## ✨ Особенности
 

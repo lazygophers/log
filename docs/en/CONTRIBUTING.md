@@ -28,7 +28,7 @@ We welcome your contributions! We want to make contributing to LazyGophers Log a
 
 ## 📜 Code of Conduct
 
-This project and all participants are governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by this code.
+This project and all participants are governed by our [Code of Conduct](/CODE_OF_CONDUCT). By participating, you agree to abide by this code.
 
 ## 🔄 Development Process
 
@@ -248,7 +248,7 @@ When requesting features, please include:
 
 ## 🔒 Security Guidelines
 
-If you discover a security vulnerability, please follow our [Security Policy](SECURITY.md) to report it responsibly.
+If you discover a security vulnerability, please follow our [Security Policy](/SECURITY) to report it responsibly.
 
 ## 👥 Community
 
@@ -258,13 +258,13 @@ If you discover a security vulnerability, please follow our [Security Policy](SE
 
 ## 📄 License
 
-By contributing to LazyGophers Log, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing to LazyGophers Log, you agree that your contributions will be licensed under the [MIT License](/LICENSE).
 
 ## 🌍 Multilingual Documentation
 
 This document is available in multiple languages:
 
--   🇺🇸 [English](CONTRIBUTING.md) (current)
+-   🇺🇸 [English](/CONTRIBUTING) (current)
 -   🇨🇳 [简体中文](docs/CONTRIBUTING_zh-CN.md)
 -   🇹🇼 [繁體中文](docs/CONTRIBUTING_zh-TW.md)
 -   🇫🇷 [Français](docs/CONTRIBUTING_fr.md)

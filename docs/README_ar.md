@@ -12,12 +12,12 @@ titleSuffix: " | LazyGophers Log"
 
 ## 📖 لغات الوثائق
 
--   [🇺🇸 English](../en/README.md)
--   [🇨🇳 简体中文](../zh-CN/README.md)
--   [🇹🇼 繁體中文](../zh-TW/README.md)
--   [🇫🇷 Français](../fr/README.md)
--   [🇷🇺 Русский](../ru/README.md)
--   [🇪🇸 Español](../es/README.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/)
+-   [🇨🇳 简体中文](https://lazygophers.github.io/log/)
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
 -   [🇸🇦 العربية](README.md) (الحالي)
 
 ## 🚀 التوثيق الإلكتروني

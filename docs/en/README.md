@@ -13,12 +13,12 @@ A high-performance, flexible Go logging library built on zap, providing rich fea
 ## 📖 Documentation Languages
 
 -   [🇺🇸 English](README.md)
--   [🇨🇳 简体中文](../zh-CN/README.md)
--   [🇹🇼 繁體中文](../zh-TW/README.md)
--   [🇫🇷 Français](../README_fr.md)
--   [🇷🇺 Русский](../README_ru.md)
--   [🇪🇸 Español](../README_es.md)
--   [🇸🇦 العربية](../README_ar.md)
+-   [🇨🇳 简体中文](https://lazygophers.github.io/log/)
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
 
 ## 🚀 Online Documentation
 
@@ -173,11 +173,11 @@ func main() {
 
 ## 🔗 Related Documentation
 
--   [📚 API Documentation](docs/API.md) - Complete API reference
--   [🤝 Contributing Guide](docs/CONTRIBUTING.md) - How to contribute
--   [📋 Changelog](CHANGELOG.md) - Version history
--   [🔒 Security Policy](docs/SECURITY.md) - Security guidelines
--   [📜 Code of Conduct](docs/CODE_OF_CONDUCT.md) - Community guidelines
+-   [📚 API Documentation](/API) - Complete API reference
+-   [🤝 Contributing Guide](/CONTRIBUTING) - How to contribute
+-   [📋 Changelog](/CHANGELOG) - Version history
+-   [🔒 Security Policy](/SECURITY) - Security guidelines
+-   [📜 Code of Conduct](/CODE_OF_CONDUCT) - Community guidelines
 
 ## 🚀 Getting Help
 
@@ -187,7 +187,7 @@ func main() {
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
 
 ## 🌍 Multilingual Documentation
 
@@ -203,7 +203,7 @@ This document is available in multiple languages:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](/CONTRIBUTING) for details.
 
 ---
 

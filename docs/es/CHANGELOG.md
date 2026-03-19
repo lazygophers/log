@@ -305,7 +305,7 @@ logger := log.New().
 
 ## 贡献
 
-我们欢迎贡献！请查看我们的 [贡献指南](CONTRIBUTING.md) 了解以下详细信息：
+我们欢迎贡献！请查看我们的 [贡献指南](/es/CONTRIBUTING) 了解以下详细信息：
 
 -   报告错误和请求功能
 -   代码提交流程
@@ -315,7 +315,7 @@ logger := log.New().
 
 ## 安全
 
-对于安全漏洞，请查看我们的 [安全政策](SECURITY.md) 了解：
+对于安全漏洞，请查看我们的 [安全政策](/es/SECURITY) 了解：
 
 -   支持的版本
 -   报告流程
@@ -331,7 +331,7 @@ logger := log.New().
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目采用 MIT 许可证 - 查看 [LICENSE](/es/LICENSE) 文件了解详情。
 
 ---
 
@@ -339,13 +339,13 @@ logger := log.New().
 
 本变更日志提供多种语言版本：
 
--   [🇺🇸 English](../en/CHANGELOG.md)
--   [🇨🇳 简体中文](CHANGELOG.md)（当前）
--   [🇹🇼 繁體中文](../zh-TW/CHANGELOG.md)
--   [🇫🇷 Français](../fr/CHANGELOG.md)
--   [🇷🇺 Русский](../ru/CHANGELOG.md)
--   [🇪🇸 Español](../es/CHANGELOG.md)
--   [🇸🇦 العربية](../ar/CHANGELOG.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/CHANGELOG.md)
+-   [🇨🇳 简体中文](/es/CHANGELOG)（当前）
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/CHANGELOG.md)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/CHANGELOG.md)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/CHANGELOG.md)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/CHANGELOG.md)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/CHANGELOG.md)
 
 ---
 

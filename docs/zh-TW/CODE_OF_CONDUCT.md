@@ -220,13 +220,13 @@ titleSuffix: ' | LazyGophers Log'
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](../en/CODE_OF_CONDUCT.md)
--   [🇨🇳 简体中文](CODE_OF_CONDUCT.md)（当前）
--   [🇹🇼 繁體中文](../zh-TW/CODE_OF_CONDUCT.md)
--   [🇫🇷 Français](../fr/CODE_OF_CONDUCT.md)
--   [🇷🇺 Русский](../ru/CODE_OF_CONDUCT.md)
--   [🇪🇸 Español](../es/CODE_OF_CONDUCT.md)
--   [🇸🇦 العربية](../ar/CODE_OF_CONDUCT.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/CODE_OF_CONDUCT.md)
+-   [🇨🇳 简体中文](/zh-TW/CODE_OF_CONDUCT)（当前）
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/CODE_OF_CONDUCT.md)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/CODE_OF_CONDUCT.md)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/CODE_OF_CONDUCT.md)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/CODE_OF_CONDUCT.md)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/CODE_OF_CONDUCT.md)
 
 ---
 

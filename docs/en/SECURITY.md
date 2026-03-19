@@ -299,8 +299,8 @@ We use the following severity classifications:
 
 ### Internal Documentation
 
--   [Contributing Guide](CONTRIBUTING.md) - Security considerations for contributors
--   [Code of Conduct](CODE_OF_CONDUCT.md) - Community security and safety
+-   [Contributing Guide](/CONTRIBUTING) - Security considerations for contributors
+-   [Code of Conduct](/CODE_OF_CONDUCT) - Community security and safety
 -   [API Documentation](API.md) - Secure usage patterns and examples
 -   [Build Configuration Guide](README.md#build-tags) - Security implications of build tags
 
@@ -421,7 +421,7 @@ Last updated: 2024-01-01
 
 This document is available in multiple languages:
 
--   [🇺🇸 English](SECURITY.md) (current)
+-   [🇺🇸 English](/SECURITY) (current)
 -   [🇨🇳 Simplified Chinese](zh-CN/SECURITY.md)
 -   [🇹🇼 Traditional Chinese](zh-TW/SECURITY.md)
 -   [🇫🇷 Français](README_fr.md)

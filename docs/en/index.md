@@ -74,10 +74,10 @@ func main() {
 ## Documentation
 
 - [API Reference](API.md) - Complete API documentation
-- [Changelog](CHANGELOG.md) - Version history
-- [Contributing](CONTRIBUTING.md) - How to contribute
-- [Security Policy](SECURITY.md) - Security guidelines
-- [Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
+- [Changelog](/CHANGELOG) - Version history
+- [Contributing](/CONTRIBUTING) - How to contribute
+- [Security Policy](/SECURITY) - Security guidelines
+- [Code of Conduct](/CODE_OF_CONDUCT) - Community guidelines
 
 ## Performance Comparison
 
@@ -91,4 +91,4 @@ func main() {
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.

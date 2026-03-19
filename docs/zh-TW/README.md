@@ -12,13 +12,13 @@ titleSuffix: ' | LazyGophers Log'
 
 ## 📖 文檔語言
 
--   [🇺🇸 English](../en/README.md)
--   [🇨🇳 简体中文](../zh-CN/README.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/)
+-   [🇨🇳 简体中文](https://lazygophers.github.io/log/)
 -   [🇹🇼 繁體中文](README.md)（當前）
--   [🇫🇷 Français](../fr/README.md)
--   [🇷🇺 Русский](../ru/README.md)
--   [🇪🇸 Español](../es/README.md)
--   [🇸🇦 العربية](../ar/README.md)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
 
 ## ✨ 特性
 
@@ -256,10 +256,10 @@ logger.SetFormatter(&MyFormatter{})
 ## 🔗 相關文檔
 
 -   [📚 API 文檔](API.md) - 完整的 API 參考
--   [🤝 貢獻指南](CONTRIBUTING.md) - 如何貢獻
--   [📋 變更日誌](CHANGELOG.md) - 版本歷史
--   [🔒 安全政策](SECURITY.md) - 安全指南
--   [📜 行為準則](CODE_OF_CONDUCT.md) - 社區準則
+-   [🤝 貢獻指南](/zh-TW/CONTRIBUTING) - 如何貢獻
+-   [📋 變更日誌](/zh-TW/CHANGELOG) - 版本歷史
+-   [🔒 安全政策](/zh-TW/SECURITY) - 安全指南
+-   [📜 行為準則](/zh-TW/CODE_OF_CONDUCT) - 社區準則
 
 ## 🚀 獲取幫助
 
@@ -269,11 +269,11 @@ logger.SetFormatter(&MyFormatter{})
 
 ## 📄 許可證
 
-本專案採用 MIT 許可證 - 詳見 [LICENSE](LICENSE) 檔案。
+本專案採用 MIT 許可證 - 詳見 [LICENSE](/zh-TW/LICENSE) 檔案。
 
 ## 🤝 貢獻
 
-我們歡迎貢獻！請查看我們的 [貢獻指南](CONTRIBUTING.md) 了解詳情。
+我們歡迎貢獻！請查看我們的 [貢獻指南](/zh-TW/CONTRIBUTING) 了解詳情。
 
 ---
 

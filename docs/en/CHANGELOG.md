@@ -267,7 +267,7 @@ logger := log.New().
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
+We welcome contributions! Please see our [Contributing Guidelines](/CONTRIBUTING) for details on:
 
 - Reporting bugs and requesting features
 - Code submission process  
@@ -277,7 +277,7 @@ We welcome contributions! Please see our [Contributing Guidelines](docs/CONTRIBU
 
 ## Security
 
-For security vulnerabilities, please see our [Security Policy](docs/SECURITY.md) for:
+For security vulnerabilities, please see our [Security Policy](/SECURITY) for:
 - Supported versions
 - Reporting procedures
 - Response timeline
@@ -285,14 +285,14 @@ For security vulnerabilities, please see our [Security Policy](docs/SECURITY.md)
 
 ## Support
 
-- 📖 [Documentation](docs/)
+- 📖 [Documentation](/)
 - 🐛 [Issue Tracker](https://github.com/lazygophers/log/issues)
 - 💬 [Discussions](https://github.com/lazygophers/log/discussions)
 - 📧 Email: support@lazygophers.com
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
 
 ---
 
@@ -300,7 +300,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 This changelog is available in multiple languages:
 
-- [🇺🇸 English](CHANGELOG.md) (Current)
+- [🇺🇸 English](/CHANGELOG) (Current)
 - [🇨🇳 简体中文](docs/CHANGELOG_zh-CN.md)
 - [🇹🇼 繁體中文](docs/CHANGELOG_zh-TW.md)
 - [🇫🇷 Français](docs/CHANGELOG_fr.md)

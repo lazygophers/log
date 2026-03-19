@@ -28,7 +28,7 @@ titleSuffix: ' | LazyGophers Log'
 
 ## 📜 行为准则
 
-本项目及其所有参与者都受我们的[行为准则](CODE_OF_CONDUCT.md)约束。通过参与，您需要遵守此准则。
+本项目及其所有参与者都受我们的[行为准则](/zh-TW/CODE_OF_CONDUCT)约束。通过参与，您需要遵守此准则。
 
 ## 🔄 开发流程
 
@@ -133,7 +133,7 @@ go install honnef.co/go/tools/cmd/staticcheck@latest
 
 ### PR 模板
 
-提交拉取请求时，请使用我们的[PR 模板](../../.github/pull_request_template.md)。
+提交拉取请求时，请使用我们的[PR 模板](https://github.com/lazygophers/log/blob/main/.github/pull_request_template.md)。
 
 ## 📏 编码标准
 
@@ -342,7 +342,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 错误报告
 
-使用[错误报告模板](../../.github/ISSUE_TEMPLATE/bug_report.md)并包含：
+使用[错误报告模板](https://github.com/lazygophers/log/blob/main/.github/ISSUE_TEMPLATE/bug_report.md)并包含：
 
 -   **清晰的问题描述**
 -   **重现步骤**
@@ -352,7 +352,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 功能请求
 
-使用[功能请求模板](../../.github/ISSUE_TEMPLATE/feature_request.md)并包含：
+使用[功能请求模板](https://github.com/lazygophers/log/blob/main/.github/ISSUE_TEMPLATE/feature_request.md)并包含：
 
 -   **清晰的功能动机**
 -   **建议的 API** 设计
@@ -361,7 +361,7 @@ func (l *Logger) SetLevel(level Level) *Logger {
 
 ### 问题
 
-使用[问题模板](../../.github/ISSUE_TEMPLATE/question.md)用于：
+使用[问题模板](https://github.com/lazygophers/log/blob/main/.github/ISSUE_TEMPLATE/question.md)用于：
 
 -   使用问题
 -   配置帮助
@@ -460,7 +460,7 @@ logger.Infof("User login: %+v", userRequest) // 可能包含密码
 -   **提问前先搜索**
 -   **请求帮助时提供上下文**
 -   **在力所能及时帮助他人**
--   **遵守** [行为准则](CODE_OF_CONDUCT.md)
+-   **遵守** [行为准则](/zh-TW/CODE_OF_CONDUCT)
 
 ## 🎯 认可
 
@@ -481,13 +481,13 @@ logger.Infof("User login: %+v", userRequest) // 可能包含密码
 
 本文档提供多种语言版本：
 
--   [🇺🇸 English](../en/CONTRIBUTING.md)
--   [🇨🇳 简体中文](CONTRIBUTING.md)（当前）
--   [🇹🇼 繁體中文](../zh-TW/CONTRIBUTING.md)
--   [🇫🇷 Français](../fr/CONTRIBUTING.md)
--   [🇷🇺 Русский](../ru/CONTRIBUTING.md)
--   [🇪🇸 Español](../es/CONTRIBUTING.md)
--   [🇸🇦 العربية](../ar/CONTRIBUTING.md)
+-   [🇺🇸 English](https://lazygophers.github.io/log/en/CONTRIBUTING.md)
+-   [🇨🇳 简体中文](/zh-TW/CONTRIBUTING)（当前）
+-   [🇹🇼 繁體中文](https://lazygophers.github.io/log/zh-TW/CONTRIBUTING.md)
+-   [🇫🇷 Français](https://lazygophers.github.io/log/fr/CONTRIBUTING.md)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/CONTRIBUTING.md)
+-   [🇪🇸 Español](https://lazygophers.github.io/log/es/CONTRIBUTING.md)
+-   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/CONTRIBUTING.md)
 
 ---
 
