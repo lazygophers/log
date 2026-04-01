@@ -124,16 +124,18 @@ func TestGetOutputWriterHourly(t *testing.T) {
 		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
 	}
 
-	// 检查是否创建了按小时命名的日志文件
-	files, err := os.ReadDir(tmpDir)
+	// 检查是否创建了按小时命名的日志文件（新的目录结构：test/YYYYMMDDHH.log）
+	logDir := filename
+	files, err := os.ReadDir(logDir)
 	if err != nil {
-		t.Fatalf("Failed to read temp dir: %v", err)
+		t.Fatalf("Failed to read log dir: %v", err)
 	}
 
 	var logFileFound bool
 	for _, file := range files {
 		name := file.Name()
-		if strings.HasPrefix(name, "test") && strings.HasSuffix(name, ".log") && len(name) > 10 {
+		// 匹配时间戳格式的日志文件（YYYYMMDDHH.log，共14个字符）
+		if strings.HasSuffix(name, ".log") && len(name) == 14 {
 			logFileFound = true
 			break
 		}

@@ -25,11 +25,12 @@ type HourlyRotator struct {
 
 // NewHourlyRotator creates a new hourly rotating log writer
 func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotator {
+	// Remove .log suffix if present to get directory path
 	filename = strings.TrimSuffix(filename, ".log")
 
 	r := &HourlyRotator{
-		filename: filename,
-		linkName: filename + ".log",
+		filename: filename, // This is now the directory path
+		linkName: filepath.Join(filename, "current.log"), // Link inside the directory
 		maxSize:  maxSize,
 		maxFiles: maxFiles,
 	}
@@ -88,10 +89,10 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	}
 
 	// Ensure directory exists
-	ensureDir(filepath.Dir(r.filename))
+	ensureDir(r.filename)
 
-	// Generate new filename
-	newFilename := r.filename + hour + ".log"
+	// Generate new filename (timestamp.log inside the directory)
+	newFilename := filepath.Join(r.filename, hour+".log")
 
 	// Open new file
 	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304
@@ -133,12 +134,8 @@ func (r *HourlyRotator) cleanup() {
 
 // cleanupOldFiles cleans up expired log files
 func (r *HourlyRotator) cleanupOldFiles() {
-	dir := filepath.Dir(r.filename)
-	base := filepath.Base(r.filename)
-	if strings.HasSuffix(r.filename, "/") || strings.HasSuffix(r.filename, "\\") {
-		dir = r.filename
-		base = ""
-	}
+	// r.filename is now the directory path
+	dir := r.filename
 
 	// Read all files in directory
 	files, err := os.ReadDir(dir)
@@ -152,9 +149,14 @@ func (r *HourlyRotator) cleanupOldFiles() {
 	for _, file := range files {
 		if !file.IsDir() {
 			name := file.Name()
-			// Match format: base + YYYYMMDDHH + .log
-			if strings.HasPrefix(name, base) && strings.HasSuffix(name, ".log") && len(name) == len(base)+14 {
-				logFiles = append(logFiles, name)
+			// Match format: YYYYMMDDHH + .log (e.g., "2026040114.log")
+			// Length: 10 digits (YYYYMMDDHH) + 4 (".log") = 14
+			if strings.HasSuffix(name, ".log") && len(name) == 14 {
+				// Verify that the prefix (without .log) is all digits (timestamp)
+				timestamp := strings.TrimSuffix(name, ".log")
+				if len(timestamp) == 10 && isAllDigits(timestamp) {
+					logFiles = append(logFiles, name)
+				}
 			}
 		}
 	}
@@ -200,4 +202,14 @@ func (r *HourlyRotator) Close() error {
 	}
 
 	return nil
+}
+
+// isAllDigits checks if a string consists only of digits
+func isAllDigits(s string) bool {
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return true
 }

@@ -39,3 +39,6 @@ temp/
 *.prof
 build-log.zip
 /.claude/plans/
+*.db
+.gitnexus
+.claude/skills/gitnexus/

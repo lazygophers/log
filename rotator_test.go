@@ -35,6 +35,9 @@ func TestHourlyRotator_Write(t *testing.T) {
 	tmpDir := t.TempDir()
 	filename := filepath.Join(tmpDir, "test")
 
+	t.Logf("tmpDir: %s", tmpDir)
+	t.Logf("filename: %s", filename)
+
 	rotator := NewHourlyRotator(filename, 1024*1024, 5)
 	defer func() { _ = rotator.Close() }()
 
@@ -49,15 +52,27 @@ func TestHourlyRotator_Write(t *testing.T) {
 		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
 	}
 
-	// 检查文件是否被创建
-	files, err := os.ReadDir(tmpDir)
+	// 检查文件是否被创建（新的目录结构：test/YYYYMMDDHH.log）
+	logDir := filename
+
+	// 检查目录是否存在
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		t.Fatalf("Log directory does not exist: %s", logDir)
+	}
+
+	files, err := os.ReadDir(logDir)
 	if err != nil {
-		t.Fatalf("Failed to read temp dir: %v", err)
+		t.Fatalf("Failed to read log dir: %v", err)
+	}
+
+	t.Logf("Found %d files in %s", len(files), logDir)
+	for _, file := range files {
+		t.Logf("File: %s", file.Name())
 	}
 
 	var logFileFound bool
 	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "test") && strings.HasSuffix(file.Name(), ".log") {
+		if strings.HasSuffix(file.Name(), ".log") && len(file.Name()) == 14 {
 			logFileFound = true
 			break
 		}
@@ -89,15 +104,17 @@ func TestHourlyRotator_Rotation(t *testing.T) {
 		t.Fatalf("Second write failed: %v", err)
 	}
 
-	// 检查是否创建了多个文件
-	files, err := os.ReadDir(tmpDir)
+	// 检查是否创建了多个文件（新的目录结构：test/YYYYMMDDHH.log）
+	logDir := filename
+	files, err := os.ReadDir(logDir)
 	if err != nil {
-		t.Fatalf("Failed to read temp dir: %v", err)
+		t.Fatalf("Failed to read log dir: %v", err)
 	}
 
 	logFileCount := 0
 	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "test") && strings.HasSuffix(file.Name(), ".log") && !strings.HasSuffix(file.Name(), "test.log") {
+		// 匹配时间戳格式的日志文件（不包括 current.log）
+		if strings.HasSuffix(file.Name(), ".log") && file.Name() != "current.log" && len(file.Name()) == 14 {
 			logFileCount++
 		}
 	}
@@ -158,10 +175,13 @@ func TestHourlyRotator_CleanupOldFiles(t *testing.T) {
 	tmpDir := t.TempDir()
 	filename := filepath.Join(tmpDir, "test")
 
-	// 创建一些旧的日志文件
+	// 创建日志目录
+	os.MkdirAll(filename, 0755)
+
+	// 创建一些旧的日志文件（新的目录结构：test/YYYYMMDDHH.log）
 	for i := 0; i < 15; i++ {
 		oldTime := time.Now().Add(-time.Duration(i) * time.Hour)
-		oldFilename := filename + oldTime.Format("2006010215") + ".log"
+		oldFilename := filepath.Join(filename, oldTime.Format("2006010215")+".log")
 		file, err := os.Create(oldFilename)
 		if err != nil {
 			t.Fatalf("Failed to create test file %s: %v", oldFilename, err)
@@ -176,15 +196,17 @@ func TestHourlyRotator_CleanupOldFiles(t *testing.T) {
 	// 手动触发清理
 	rotator.cleanupOldFiles()
 
-	// 检查文件数量
-	files, err := os.ReadDir(tmpDir)
+	// 检查文件数量（在新的目录结构中）
+	logDir := filename
+	files, err := os.ReadDir(logDir)
 	if err != nil {
-		t.Fatalf("Failed to read temp dir: %v", err)
+		t.Fatalf("Failed to read log dir: %v", err)
 	}
 
 	logFileCount := 0
 	for _, file := range files {
-		if strings.HasPrefix(file.Name(), "test") && strings.HasSuffix(file.Name(), ".log") {
+		// 匹配时间戳格式的日志文件（不包括 current.log）
+		if strings.HasSuffix(file.Name(), ".log") && file.Name() != "current.log" && len(file.Name()) == 14 {
 			logFileCount++
 		}
 	}
@@ -202,8 +224,11 @@ func TestHourlyRotator_UpdateLink(t *testing.T) {
 	rotator := NewHourlyRotator(filename, 1024, 5)
 	defer func() { _ = rotator.Close() }()
 
-	// 创建目标文件
-	targetFile := filename + "2023071015.log"
+	// 创建日志目录
+	os.MkdirAll(filename, 0755)
+
+	// 创建目标文件（新的目录结构：test/2023071015.log）
+	targetFile := filepath.Join(filename, "2023071015.log")
 	file, err := os.Create(targetFile)
 	if err != nil {
 		t.Fatalf("Failed to create target file: %v", err)
@@ -214,11 +239,11 @@ func TestHourlyRotator_UpdateLink(t *testing.T) {
 	rotator.updateLink(targetFile)
 
 	// 检查链接是否存在（在支持软链接的系统上）
-	linkName := filename + ".log"
+	linkName := filepath.Join(filename, "current.log")
 	if _, err := os.Lstat(linkName); err == nil {
 		// 软链接创建成功，验证它指向正确的文件
 		if link, err := os.Readlink(linkName); err == nil {
-			expected := filepath.Base(targetFile)
+			expected := "2023071015.log"
 			if link != expected {
 				t.Errorf("Expected link to point to %s, but it points to %s", expected, link)
 			}
