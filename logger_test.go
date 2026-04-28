@@ -532,13 +532,13 @@ func TestLogger_FillPrefixSuffix_Empty(t *testing.T) {
 	}
 }
 
-// TestNewLogger_ReleaseLogPath tests the newLogger function's ReleaseLogPath branch
+// TestNewLogger_ReleaseLogPath tests the newLogger function's ReleaseLogDir branch
 func TestNewLogger_ReleaseLogPath(t *testing.T) {
 	// Test newLogger with empty ReleaseLogPath (should use os.Stdout)
-	originalPath := ReleaseLogPath
-	ReleaseLogPath = ""
+	originalPath := ReleaseLogDir
+	ReleaseLogDir = ""
 	defer func() {
-		ReleaseLogPath = originalPath
+		ReleaseLogDir = originalPath
 	}()
 
 	logger := newLogger()
@@ -557,7 +557,7 @@ func TestNewLogger_ReleaseLogPath(t *testing.T) {
 
 	// Test newLogger with non-empty ReleaseLogPath (should use hourly rotator)
 	tmpDir := t.TempDir()
-	ReleaseLogPath = tmpDir + "/test.log"
+	ReleaseLogDir = tmpDir + "/test.log"
 
 	logger2 := newLogger()
 

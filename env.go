@@ -9,7 +9,7 @@ import (
 func init() {
 	switch strings.ToLower(os.Getenv("APP_ENV")) {
 	case "dev", "development":
-		SetLevel(DebugLevel)
+		SetLevel(TraceLevel)
 	case "test", "canary":
 		SetLevel(DebugLevel)
 	case "prod", "release", "production":

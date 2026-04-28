@@ -9,21 +9,21 @@ import (
 
 func TestReleaseLogPath_Debug(t *testing.T) {
 	// 在非 release 模式下，ReleaseLogPath 应该为空
-	if ReleaseLogPath != "" {
+	if ReleaseLogDir != "" {
 		// 这个测试只在 debug 模式下才有意义
 		// 如果在 release 模式下运行，ReleaseLogPath 会有默认值
 		t.Skip("This test is for debug build mode only")
 	}
 
 	// 在 debug 模式下，ReleaseLogPath 应该为空字符串
-	if ReleaseLogPath != "" {
-		t.Errorf("In debug mode, ReleaseLogPath should be empty, got %q", ReleaseLogPath)
+	if ReleaseLogDir != "" {
+		t.Errorf("In debug mode, ReleaseLogPath should be empty, got %q", ReleaseLogDir)
 	}
 }
 
 func TestNewLogger_OutputSelection(t *testing.T) {
 	// 保存原始的 ReleaseLogPath
-	originalPath := ReleaseLogPath
+	originalPath := ReleaseLogDir
 	defer func() {
 		// 由于 ReleaseLogPath 是全局变量，我们不能真正重置它
 		// 但可以记录原始值用于参考
@@ -42,7 +42,7 @@ func TestNewLogger_OutputSelection(t *testing.T) {
 	}
 
 	// 如果 ReleaseLogPath 为空（debug 模式），应该使用标准输出
-	if ReleaseLogPath == "" {
+	if ReleaseLogDir == "" {
 		// 在 debug 模式下，应该包装 stdout
 		wrapper, ok := logger.out.(*WriteSyncerWrapper)
 		if ok {
@@ -79,10 +79,10 @@ func TestBuildTagBehavior(t *testing.T) {
 			// 如果是 debug 模式，应该为空
 			// 如果是 release 模式，应该有默认路径
 
-			if strings.Contains(ReleaseLogPath, "lazygophers") || ReleaseLogPath == "" {
+			if strings.Contains(ReleaseLogDir, "lazygophers") || ReleaseLogDir == "" {
 				// 这是预期的行为（要么是空字符串，要么包含默认路径）
 			} else {
-				t.Errorf("Unexpected ReleaseLogPath value: %q", ReleaseLogPath)
+				t.Errorf("Unexpected ReleaseLogPath value: %q", ReleaseLogDir)
 			}
 		})
 	}
@@ -90,26 +90,26 @@ func TestBuildTagBehavior(t *testing.T) {
 
 // 测试默认路径的合理性
 func TestDefaultLogPath(t *testing.T) {
-	if ReleaseLogPath == "" {
+	if ReleaseLogDir == "" {
 		t.Skip("ReleaseLogPath is empty (debug mode)")
 	}
 
 	// 检查路径是否包含期望的组件
-	if !strings.Contains(ReleaseLogPath, "lazygophers") {
-		t.Errorf("Default log path should contain 'lazygophers', got: %q", ReleaseLogPath)
+	if !strings.Contains(ReleaseLogDir, "lazygophers") {
+		t.Errorf("Default log path should contain 'lazygophers', got: %q", ReleaseLogDir)
 	}
 
-	if !strings.Contains(ReleaseLogPath, "log") {
-		t.Errorf("Default log path should contain 'log', got: %q", ReleaseLogPath)
+	if !strings.Contains(ReleaseLogDir, "log") {
+		t.Errorf("Default log path should contain 'log', got: %q", ReleaseLogDir)
 	}
 
 	// 检查路径是否是绝对路径
-	if !filepath.IsAbs(ReleaseLogPath) {
-		t.Errorf("Default log path should be absolute, got: %q", ReleaseLogPath)
+	if !filepath.IsAbs(ReleaseLogDir) {
+		t.Errorf("Default log path should be absolute, got: %q", ReleaseLogDir)
 	}
 
 	// 检查父目录是否存在或可创建
-	parentDir := filepath.Dir(ReleaseLogPath)
+	parentDir := filepath.Dir(ReleaseLogDir)
 	if err := os.MkdirAll(parentDir, 0755); err != nil {
 		t.Errorf("Cannot create parent directory %q: %v", parentDir, err)
 	}

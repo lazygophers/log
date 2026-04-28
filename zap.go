@@ -5,6 +5,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// todo: 移动到子模块，作为独立的 go.mod ，使得当前的 log 包的依赖减少
+
 // ZapHook implements zapcore.WriteSyncer interface to redirect zap logs to our logging system
 type ZapHook struct {
 	logger *Logger

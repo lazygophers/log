@@ -7,6 +7,22 @@ import (
 	"github.com/petermattis/goid"
 )
 
+// clearTraceMapForTest is a test helper that clears the trace map.
+func clearTraceMapForTest() {
+	traceMap.Range(func(key, _ any) bool {
+		traceMap.Delete(key)
+		return true
+	})
+}
+
+func loadTraceForTest(gid int64) (string, bool) {
+	val, ok := traceMap.Load(gid)
+	if !ok {
+		return "", false
+	}
+	return val.(string), true
+}
+
 func TestGetTrace(t *testing.T) {
 	// 清空现有的 trace
 	clearTraceMapForTest()

@@ -18,8 +18,8 @@ func TestNewHourlyRotator(t *testing.T) {
 		t.Fatal("NewHourlyRotator returned nil")
 	}
 
-	if rotator.filename != filename {
-		t.Errorf("Expected filename %s, got %s", filename, rotator.filename)
+	if rotator.logDir != filename {
+		t.Errorf("Expected filename %s, got %s", filename, rotator.logDir)
 	}
 
 	if rotator.maxSize != 1024 {
@@ -319,7 +319,7 @@ func TestHourlyRotator_CleanupOldFiles_NoMatchingFiles(t *testing.T) {
 func TestHourlyRotator_CleanupOldFiles_DirectoryNotExist(t *testing.T) {
 	// Arrange
 	rotator := &HourlyRotator{
-		filename: "/nonexistent/path/app",
+		logDir:   "/nonexistent/path/app",
 		maxFiles: 3,
 	}
 
@@ -417,7 +417,7 @@ func TestHourlyRotator_CleanupOldFiles_LessThanMaxFiles(t *testing.T) {
 func TestHourlyRotator_Write_NilCurrentFile(t *testing.T) {
 	// Arrange - create rotator with invalid path so rotate() fails and currentFile stays nil
 	rotator := &HourlyRotator{
-		filename: "/nonexistent_dir_xyz/app",
+		logDir:   "/nonexistent_dir_xyz/app",
 		linkName: "/nonexistent_dir_xyz/app.log",
 		maxSize:  1024,
 		maxFiles: 3,

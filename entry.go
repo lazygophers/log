@@ -13,25 +13,25 @@ import (
 // - Total size: 200 bytes (4 bytes padding waste = 2.0%)
 type Entry struct {
 	// Hot path fields - accessed on every log call
-	Level      Level     // Log level (1 byte + 7 padding)
-	Pid        int       // Process ID (8 bytes)
-	Gid        int64     // Goroutine ID (8 bytes)
-	CallerLine int       // Caller line number (8 bytes)
+	Level      Level // Log level (1 byte + 7 padding)
+	Pid        int   // Process ID (8 bytes)
+	Gid        int64 // Goroutine ID (8 bytes)
+	CallerLine int   // Caller line number (8 bytes)
 
 	// Timestamp - accessed frequently but less than core fields
-	Time       time.Time // Log timestamp (24 bytes)
+	Time time.Time // Log timestamp (24 bytes)
 
 	// String fields (16 bytes each) - ordered by access frequency
-	Message    string    // Core log message (highest frequency)
-	File       string    // Source file name
-	CallerFunc string    // Caller function name
-	CallerDir  string    // Caller directory
-	CallerName string    // Caller package name
-	TraceId    string    // Trace ID for distributed tracing
+	Message    string // Core log message (highest frequency)
+	File       string // Source file name
+	CallerFunc string // Caller function name
+	CallerDir  string // Caller directory
+	CallerName string // Caller package name
+	TraceId    string // Trace ID for distributed tracing
 
 	// Byte slices (24 bytes each) - lower frequency
-	PrefixMsg  []byte    // Prefix message
-	SuffixMsg  []byte    // Suffix message
+	PrefixMsg []byte // Prefix message
+	SuffixMsg []byte // Suffix message
 }
 
 // NewEntry creates a new Entry instance from object pool
@@ -43,16 +43,8 @@ func NewEntry() *Entry {
 //
 //go:inline
 func (p *Entry) Reset() {
-	// Reset numeric fields
-	p.Gid = 0
-	p.CallerLine = 0
-	p.Level = 0
-
-	// Reset string fields (compiler optimizes consecutive assignments)
-	p.TraceId, p.File, p.Message = "", "", ""
-	p.CallerName, p.CallerDir, p.CallerFunc = "", "", ""
-
-	// Clear slices efficiently while retaining capacity
+	// 只清理如果不清理日志会出现问题的场景
+	p.TraceId = ""
 	p.PrefixMsg = p.PrefixMsg[:0]
 	p.SuffixMsg = p.SuffixMsg[:0]
 }
@@ -68,18 +60,13 @@ var entryPool = sync.Pool{
 //
 //go:inline
 func getEntry() *Entry {
-	if entry := entryPool.Get(); entry != nil {
-		return entry.(*Entry)
-	}
-	return &Entry{Pid: pid}
+	return entryPool.Get().(*Entry)
 }
 
 // putEntry returns Entry instance to object pool for reuse
 //
 //go:inline
 func putEntry(entry *Entry) {
-	if entry != nil {
-		entry.Reset()
-		entryPool.Put(entry)
-	}
+	entry.Reset()
+	entryPool.Put(entry)
 }

@@ -40,18 +40,18 @@ func TestDebugfRelease(t *testing.T) {
 	// and the function completes successfully
 }
 
-// TestReleaseLogPath tests the ReleaseLogPath variable
+// TestReleaseLogPath tests the ReleaseLogDir variable
 func TestReleaseLogPath(t *testing.T) {
 	// Verify that ReleaseLogPath is set to a reasonable default
-	if ReleaseLogPath == "" {
+	if ReleaseLogDir == "" {
 		t.Error("ReleaseLogPath should not be empty")
 	}
 
 	// Verify it contains expected path components
-	if !contains(ReleaseLogPath, "lazygophers") {
+	if !contains(ReleaseLogDir, "lazygophers") {
 		t.Error("ReleaseLogPath should contain 'lazygophers'")
 	}
-	if !contains(ReleaseLogPath, "log") {
+	if !contains(ReleaseLogDir, "log") {
 		t.Error("ReleaseLogPath should contain 'log'")
 	}
 }

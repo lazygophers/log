@@ -61,24 +61,24 @@ var (
 )
 
 // GetOutputWriterHourly creates an hourly rotating log writer with auto-cleanup
-func GetOutputWriterHourly(filename string) Writer {
+func GetOutputWriterHourly(logDir string) Writer {
 	rotatorMutex.Lock()
 	defer rotatorMutex.Unlock()
 
 	// Check if rotator instance already exists for this file
-	if rotator, exists := rotatorInstances[filename]; exists {
+	if rotator, exists := rotatorInstances[logDir]; exists {
 		return rotator
 	}
 
 	// Create new rotator instance
 	rotator := NewHourlyRotator(
-		filename,
-		1024*1024*8*100, // 800MB size limit
-		12,              // Keep latest 12 files
+		logDir,
+		DefaultMaxFileSize,
+		DefaultMaxFiles,
 	)
 
 	// Store instance for future use
-	rotatorInstances[filename] = rotator
+	rotatorInstances[logDir] = rotator
 
 	return rotator
 }

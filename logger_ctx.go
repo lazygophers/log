@@ -5,6 +5,8 @@ import (
 	"io"
 )
 
+// todo: 移动到独立的子模块，使得当前的 log 包的模块复杂度减少
+
 // CloneToCtx clones a Logger into a new LoggerWithCtx instance.
 // The new LoggerWithCtx inherits all settings from the original Logger.
 func (p *Logger) CloneToCtx() *LoggerWithCtx {

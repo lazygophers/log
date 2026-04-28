@@ -10,34 +10,40 @@ import (
 	"time"
 )
 
+var (
+	cleanupHourlyRotatorOnce sync.Once
+)
+
 // HourlyRotator implements hourly log rotation
 type HourlyRotator struct {
 	mu          sync.Mutex
-	filename    string
+	logDir      string
 	linkName    string
 	currentFile *os.File
 	currentHour string
 	currentSize int64 // Tracked file size to avoid Stat() calls
 	maxSize     int64 // Maximum file size in bytes
 	maxFiles    int   // Maximum number of files to keep
-	cleanupOnce sync.Once
 }
 
 // NewHourlyRotator creates a new hourly rotating log writer
-func NewHourlyRotator(filename string, maxSize int64, maxFiles int) *HourlyRotator {
-	// Remove .log suffix if present to get directory path
-	filename = strings.TrimSuffix(filename, ".log")
-
+func NewHourlyRotator(logDir string, maxSize int64, maxFiles int) *HourlyRotator {
 	r := &HourlyRotator{
-		filename: filename, // This is now the directory path
-		linkName: filepath.Join(filename, "current.log"), // Link inside the directory
+		logDir:   logDir,                               // This is now the directory path
+		linkName: filepath.Join(logDir, "current.log"), // Link inside the directory
 		maxSize:  maxSize,
 		maxFiles: maxFiles,
 	}
 
-	// Start cleanup goroutine
-	r.cleanupOnce.Do(func() {
-		go r.cleanup()
+	cleanupHourlyRotatorOnce.Do(func() {
+		go func() {
+			ticker := time.NewTicker(10 * time.Minute)
+			defer ticker.Stop()
+
+			for _, rotator := range rotatorInstances {
+				rotator.cleanupOldFiles()
+			}
+		}()
 	})
 
 	return r
@@ -66,6 +72,7 @@ func (r *HourlyRotator) rotate() error {
 	now := time.Now()
 	hour := now.Format("2006010215")
 
+	// todo 对于单小时超过日志文件大小的自动分片的支持
 	// Check if rotation needed (hour change or file size limit exceeded)
 	needRotate := r.currentHour != hour
 	if r.currentFile != nil && !needRotate {
@@ -89,10 +96,10 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	}
 
 	// Ensure directory exists
-	ensureDir(r.filename)
+	ensureDir(r.logDir)
 
 	// Generate new filename (timestamp.log inside the directory)
-	newFilename := filepath.Join(r.filename, hour+".log")
+	newFilename := filepath.Join(r.logDir, hour+".log")
 
 	// Open new file
 	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304
@@ -122,24 +129,19 @@ func (r *HourlyRotator) updateLink(target string) {
 	_ = os.Symlink(filepath.Base(target), r.linkName)
 }
 
-// cleanup periodically cleans up old log files
-func (r *HourlyRotator) cleanup() {
-	ticker := time.NewTicker(10 * time.Minute)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		r.cleanupOldFiles()
-	}
-}
-
 // cleanupOldFiles cleans up expired log files
 func (r *HourlyRotator) cleanupOldFiles() {
 	// r.filename is now the directory path
-	dir := r.filename
+	dir := r.logDir
 
 	// Read all files in directory
 	files, err := os.ReadDir(dir)
 	if err != nil {
+		// 找不到的情况，没有必要输出信息
+		if os.IsNotExist(err) {
+			return
+		}
+
 		fmt.Printf("Error reading log directory %s for cleanup: %v\n", dir, err)
 		return
 	}
@@ -148,6 +150,7 @@ func (r *HourlyRotator) cleanupOldFiles() {
 	var logFiles []string
 	for _, file := range files {
 		if !file.IsDir() {
+			// todo: 兼容对于单小时的多文件的情况
 			name := file.Name()
 			// Match format: YYYYMMDDHH + .log (e.g., "2026040114.log")
 			// Length: 10 digits (YYYYMMDDHH) + 4 (".log") = 14
@@ -172,10 +175,9 @@ func (r *HourlyRotator) cleanupOldFiles() {
 			continue
 		}
 
-		fullPath := filepath.Join(dir, filename)
-		fmt.Printf("Deleting old log file: %s\n", fullPath)
-		if err := os.Remove(fullPath); err != nil {
-			fmt.Printf("Failed to delete old log file %s: %v\n", fullPath, err)
+		err = os.Remove(filepath.Join(dir, filename))
+		if err != nil {
+			fmt.Printf("Failed to delete old log file %v\n", err)
 		}
 	}
 }

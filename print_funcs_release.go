@@ -4,5 +4,5 @@ package log
 
 // init initializes log output for release mode.
 func init() {
-	SetOutput(GetOutputWriterHourly(ReleaseLogPath))
+	SetOutput(GetOutputWriterHourly(ReleaseLogDir))
 }

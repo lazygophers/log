@@ -58,11 +58,6 @@ type Logger struct {
 func newLogger() *Logger {
 	var out io.Writer = os.Stdout
 
-	// Use hourly rotating file in release mode if path specified
-	if ReleaseLogPath != "" {
-		out = GetOutputWriterHourly(ReleaseLogPath)
-	}
-
 	logger := &Logger{
 		level: DebugLevel,
 		out:   wrapWriter(out),
