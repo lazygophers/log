@@ -20,6 +20,9 @@ func GetBuffer() *bytes.Buffer {
 
 // PutBuffer returns a buffer to the pool after resetting it
 func PutBuffer(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
 	buf.Reset()
 	bufPool.Put(buf)
 }

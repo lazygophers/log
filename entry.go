@@ -39,16 +39,6 @@ func NewEntry() *Entry {
 	return &Entry{Pid: pid}
 }
 
-// Reset resets Entry to initial values for safe pool reuse
-//
-//go:inline
-func (p *Entry) Reset() {
-	// 只清理如果不清理日志会出现问题的场景
-	p.TraceId = ""
-	p.PrefixMsg = p.PrefixMsg[:0]
-	p.SuffixMsg = p.SuffixMsg[:0]
-}
-
 // entryPool is a sync.Pool for caching and reusing Entry objects
 var entryPool = sync.Pool{
 	New: func() any {
@@ -67,6 +57,23 @@ func getEntry() *Entry {
 //
 //go:inline
 func putEntry(entry *Entry) {
+	if entry == nil {
+		return
+	}
 	entry.Reset()
 	entryPool.Put(entry)
+}
+// Reset resets Entry to initial values for safe pool reuse
+func (p *Entry) Reset() {
+	p.Gid = 0
+	p.TraceId = ""
+	p.Time = time.Time{}
+	p.Message = ""
+	p.File = ""
+	p.CallerLine = 0
+	p.CallerName = ""
+	p.CallerDir = ""
+	p.CallerFunc = ""
+	p.PrefixMsg = p.PrefixMsg[:0]
+	p.SuffixMsg = p.SuffixMsg[:0]
 }

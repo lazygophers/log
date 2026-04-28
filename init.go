@@ -42,10 +42,6 @@ func Clone() *Logger {
 	return std.Clone()
 }
 
-// CloneToCtx creates a context-aware logger copy
-func CloneToCtx() *LoggerWithCtx {
-	return std.CloneToCtx()
-}
 
 // SetCallerDepth sets the caller stack depth
 func SetCallerDepth(callerDepth int) *Logger {

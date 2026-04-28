@@ -14,23 +14,24 @@ var (
 	cleanupHourlyRotatorOnce sync.Once
 )
 
-// HourlyRotator implements hourly log rotation
+// HourlyRotator implements hourly log rotation with size-based sharding support
 type HourlyRotator struct {
-	mu          sync.Mutex
-	logDir      string
-	linkName    string
-	currentFile *os.File
-	currentHour string
-	currentSize int64 // Tracked file size to avoid Stat() calls
-	maxSize     int64 // Maximum file size in bytes
-	maxFiles    int   // Maximum number of files to keep
+	mu           sync.Mutex
+	logDir       string
+	linkName     string
+	currentFile  *os.File
+	currentHour  string
+	currentShard int   // Current shard number (0 = no shard, 1+ = sharded)
+	currentSize  int64 // Tracked file size to avoid Stat() calls
+	maxSize      int64 // Maximum file size in bytes
+	maxFiles     int   // Maximum number of files to keep
 }
 
 // NewHourlyRotator creates a new hourly rotating log writer
 func NewHourlyRotator(logDir string, maxSize int64, maxFiles int) *HourlyRotator {
 	r := &HourlyRotator{
-		logDir:   logDir,                               // This is now the directory path
-		linkName: filepath.Join(logDir, "current.log"), // Link inside the directory
+		logDir:   logDir,
+		linkName: filepath.Join(logDir, "current.log"),
 		maxSize:  maxSize,
 		maxFiles: maxFiles,
 	}
@@ -72,24 +73,32 @@ func (r *HourlyRotator) rotate() error {
 	now := time.Now()
 	hour := now.Format("2006010215")
 
-	// todo 对于单小时超过日志文件大小的自动分片的支持
-	// Check if rotation needed (hour change or file size limit exceeded)
+	// Check if rotation needed
 	needRotate := r.currentHour != hour
-	if r.currentFile != nil && !needRotate {
-		if r.currentSize >= r.maxSize {
-			needRotate = true
-		}
+	if needRotate {
+		// Hour changed, reset shard and do normal rotation
+		r.currentShard = 0
+		return r.doRotate(hour, false)
 	}
 
-	if needRotate || r.currentFile == nil {
-		return r.doRotate(hour)
+	// Check size-based rotation within same hour
+	if r.currentFile != nil && r.currentSize >= r.maxSize {
+		// Size limit exceeded, create new shard within same hour
+		r.currentShard++
+		return r.doRotate(hour, true)
+	}
+
+	// No rotation needed
+	if r.currentFile == nil {
+		return r.doRotate(hour, false)
 	}
 
 	return nil
 }
 
 // doRotate performs actual rotation operation
-func (r *HourlyRotator) doRotate(hour string) error {
+// shard indicates whether this is a size-based shard (true) or hour-based rotation (false)
+func (r *HourlyRotator) doRotate(hour string, shard bool) error {
 	// Close current file
 	if r.currentFile != nil {
 		_ = r.currentFile.Close()
@@ -98,8 +107,13 @@ func (r *HourlyRotator) doRotate(hour string) error {
 	// Ensure directory exists
 	ensureDir(r.logDir)
 
-	// Generate new filename (timestamp.log inside the directory)
-	newFilename := filepath.Join(r.logDir, hour+".log")
+	// Generate filename: YYYYMMDDHH.log or YYYYMMDDHH.log.N for shards
+	var newFilename string
+	if shard {
+		newFilename = filepath.Join(r.logDir, fmt.Sprintf("%s.log.%d", hour, r.currentShard))
+	} else {
+		newFilename = filepath.Join(r.logDir, hour+".log")
+	}
 
 	// Open new file
 	file, err := os.OpenFile(newFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304
@@ -131,7 +145,6 @@ func (r *HourlyRotator) updateLink(target string) {
 
 // cleanupOldFiles cleans up expired log files
 func (r *HourlyRotator) cleanupOldFiles() {
-	// r.filename is now the directory path
 	dir := r.logDir
 
 	// Read all files in directory
@@ -146,17 +159,29 @@ func (r *HourlyRotator) cleanupOldFiles() {
 		return
 	}
 
-	// Filter log files
+	// Filter log files: base.log, base.log.1, base.log.2, etc.
 	var logFiles []string
 	for _, file := range files {
 		if !file.IsDir() {
-			// todo: 兼容对于单小时的多文件的情况
 			name := file.Name()
-			// Match format: YYYYMMDDHH + .log (e.g., "2026040114.log")
-			// Length: 10 digits (YYYYMMDDHH) + 4 (".log") = 14
-			if strings.HasSuffix(name, ".log") && len(name) == 14 {
-				// Verify that the prefix (without .log) is all digits (timestamp)
-				timestamp := strings.TrimSuffix(name, ".log")
+			// Match format: YYYYMMDDHH.log or YYYYMMDDHH.log.N
+			if strings.HasSuffix(name, ".log") {
+				// Extract base timestamp (remove .log or .log.N suffix)
+				base := strings.TrimSuffix(name, ".log")
+				// Handle shard suffix: check if base ends with .N pattern
+				var timestamp string
+				if idx := strings.LastIndex(base, "."); idx > 0 {
+					suffix := base[idx+1:]
+					if isAllDigits(suffix) {
+						timestamp = base[:idx]
+					} else {
+						timestamp = base
+					}
+				} else {
+					timestamp = base
+				}
+
+				// Verify timestamp is valid (10 digits: YYYYMMDDHH)
 				if len(timestamp) == 10 && isAllDigits(timestamp) {
 					logFiles = append(logFiles, name)
 				}
