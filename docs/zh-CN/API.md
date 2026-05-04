@@ -504,28 +504,68 @@ type Formatter struct {
 }
 ```
 
-### JSON 格式化器示例
+### JSON Formatter
+
+为结构化日志和日志聚合系统提供 JSON 格式输出。
+
+**基本用法：**
 
 ```go
-type JSONFormatter struct{}
+logger := log.New()
+logger.Format = &log.JSONFormatter{}
 
-func (f *JSONFormatter) Format(entry *Entry) []byte {
-    data := map[string]interface{}{
-        "timestamp": entry.Time.Format(time.RFC3339),
-        "level":     entry.Level.String(),
-        "message":   entry.Message,
-        "caller":    fmt.Sprintf("%s:%d", entry.CallerFile, entry.CallerLine),
-    }
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
-    }
+logger.Info("JSON 输出")
+```
 
-    jsonData, _ := json.Marshal(data)
-    return append(jsonData, '\n')
+**输出：**
+
+```json
+{"level":"info","time":"2026-05-04T12:00:00.000+08:00","message":"JSON 输出","pid":12345}
+```
+
+#### JSONFormatter 配置选项
+
+```go
+type JSONFormatter struct {
+    EnablePrettyPrint bool // 启用美化打印（带缩进）
+    DisableTimestamp bool // 禁用时间戳字段
+    DisableCaller    bool // 禁用调用者信息
+    DisableTrace     bool // 禁用追踪信息
 }
+```
 
-// 使用
-logger.SetFormatter(&JSONFormatter{})
+**美化打印示例：**
+
+```go
+logger.Format = &log.JSONFormatter{EnablePrettyPrint: true}
+logger.Info("美化 JSON")
+```
+
+**输出：**
+
+```json
+{
+  "level": "info",
+  "time": "2026-05-04T12:00:00.000+08:00",
+  "message": "美化 JSON",
+  "pid": 12345
+}
+```
+
+**精简 JSON 示例：**
+
+```go
+logger.Format = &log.JSONFormatter{
+    DisableCaller: true,
+    DisableTrace:  true,
+}
+logger.Error("错误日志")
+```
+
+**输出：**
+
+```json
+{"level":"error","message":"错误日志","pid":12345}
 ```
 
 ## 输出写入器

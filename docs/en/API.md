@@ -448,6 +448,8 @@ fmt.Println(log.InfoLevel.String())  // "INFO"
 
 ## Formatters
 
+LazyGophers Log provides a flexible formatting system with built-in formatters for text and JSON output.
+
 ### Format Interface
 
 ```go
@@ -458,38 +460,127 @@ type Format interface {
 
 Custom formatters must implement this interface.
 
-### Default Formatter
+### Text Formatter (Default)
 
-Built-in text formatter with customizable options.
+The default `Formatter` provides human-readable text output with colored levels and timestamps.
+
+**Example:**
 
 ```go
-type Formatter struct {
-    // Configuration options
+logger := log.New()
+logger.Info("Application started")
+```
+
+**Output:**
+
+```
+(12345) 2026-05-04 12:00:00.000+08:00 [info] Application started
+```
+
+### JSON Formatter
+
+For structured logging and log aggregation systems, use `JSONFormatter` to output logs in JSON format.
+
+**Basic Usage:**
+
+```go
+logger := log.New()
+logger.Format = &log.JSONFormatter{}
+
+logger.Info("JSON output")
+```
+
+**Output:**
+
+```json
+{"level":"info","time":"2026-05-04T12:00:00.000+08:00","message":"JSON output","pid":12345}
+```
+
+#### JSONFormatter Options
+
+```go
+type JSONFormatter struct {
+    EnablePrettyPrint bool // Pretty print with indentation
+    DisableTimestamp bool // Disable timestamp field
+    DisableCaller    bool // Disable caller information
+    DisableTrace     bool // Disable trace information
 }
 ```
 
-### JSON Formatter Example
+**Pretty Print Example:**
 
 ```go
-type JSONFormatter struct{}
+logger.Format = &log.JSONFormatter{EnablePrettyPrint: true}
+logger.Info("Pretty JSON")
+```
 
-func (f *JSONFormatter) Format(entry *Entry) []byte {
-    data := map[string]interface{}{
-        "timestamp": entry.Time.Format(time.RFC3339),
-        "level":     entry.Level.String(),
-        "message":   entry.Message,
-        "caller":    fmt.Sprintf("%s:%d", entry.CallerFile, entry.CallerLine),
-    }
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
-    }
+**Output:**
 
-    jsonData, _ := json.Marshal(data)
-    return append(jsonData, '\n')
+```json
+{
+  "level": "info",
+  "time": "2026-05-04T12:00:00.000+08:00",
+  "message": "Pretty JSON",
+  "pid": 12345
+}
+```
+
+**Minimal JSON Example:**
+
+```go
+logger.Format = &log.JSONFormatter{
+    DisableCaller: true,
+    DisableTrace:  true,
+}
+logger.Error("Error log")
+```
+
+**Output:**
+
+```json
+{"level":"error","message":"Error log","pid":12345}
+```
+
+### Custom Formatters
+
+You can create custom formatters by implementing the `Format` interface:
+
+```go
+type MyFormatter struct {}
+
+func (f *MyFormatter) Format(entry *log.Entry) []byte {
+    // Custom formatting logic
+    return []byte("custom log output")
 }
 
-// Usage
-logger.SetFormatter(&JSONFormatter{})
+logger := log.New()
+logger.Format = &MyFormatter{}
+```
+
+For more control, implement `FormatFull` interface:
+
+```go
+type MyFormatter struct {
+    DisableCaller bool
+}
+
+func (f *MyFormatter) Format(entry *log.Entry) []byte {
+    // Format implementation
+}
+
+func (f *MyFormatter) ParsingAndEscaping(disable bool) {
+    f.DisableCaller = disable
+}
+
+func (f *MyFormatter) Caller(disable bool) {
+    f.DisableCaller = disable
+}
+
+func (f *MyFormatter) Clone() log.Format {
+    return &MyFormatter{
+        DisableCaller: f.DisableCaller,
+    }
+}
 ```
 
 ## Output Writers
