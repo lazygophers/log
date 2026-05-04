@@ -6,29 +6,9 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/lazygophers/log/constant"
 )
-
-// Format defines log formatting interface
-type Format interface {
-	// Format formats log entry to byte array
-	Format(entry *Entry) []byte
-}
-
-// FormatFull extends Format with additional controls
-type FormatFull interface {
-	Format // Inherits basic formatting interface
-
-	// ParsingAndEscaping controls message parsing and escaping
-	ParsingAndEscaping(disable bool)
-
-	// Caller enables or disables caller information in log output.
-	// When enabled, logs include file name, line number, and function name.
-	Caller(disable bool)
-
-	// Clone creates a deep copy of the formatter with independent settings.
-	// This allows creating formatter variants without affecting the original.
-	Clone() Format
-}
 
 // Formatter implements FormatFull interface with default formatting
 type Formatter struct {

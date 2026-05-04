@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== JSON Formatter Demo ===\n")
+	fmt.Println("=== JSON Formatter Demo ===")
 
 	// 1. Basic JSON logging
 	fmt.Println("1. Basic JSON Logging:")

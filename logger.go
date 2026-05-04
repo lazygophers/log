@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/lazygophers/log/constant"
 	"github.com/petermattis/goid"
 	"go.uber.org/zap/zapcore"
 )
@@ -53,6 +54,9 @@ type Logger struct {
 	// Performance optimization fields
 	enableCaller bool
 	enableTrace  bool
+
+	// Hooks for log processing
+	hooks []constant.Hook
 }
 
 // newLogger creates a new Logger instance with default values
@@ -132,6 +136,12 @@ func (p *Logger) Clone() *Logger {
 		l.Format = f.Clone()
 	default:
 		l.Format = f
+	}
+
+	// Copy hooks
+	if len(p.hooks) > 0 {
+		l.hooks = make([]constant.Hook, len(p.hooks))
+		copy(l.hooks, p.hooks)
 	}
 
 	return &l
@@ -274,6 +284,14 @@ func (p *Logger) log(level Level, msg string, args ...interface{}) {
 	p.fillTraceInfo(entry)
 	p.fillCallerInfo(entry)
 	p.fillPrefixSuffix(entry)
+
+	// Apply hooks
+	entry = p.applyHooks(entry)
+	if entry == nil {
+		// Hook filtered out this log entry
+		putEntry(entry)
+		return
+	}
 
 	// Format and write
 	formatted := p.Format.Format(entry)
@@ -530,4 +548,43 @@ func (p *Logger) Panicw(msg string, args ...interface{}) {
 		return
 	}
 	p.log(PanicLevel, msg, args...)
+}
+
+// applyHooks executes all hooks in order
+func (p *Logger) applyHooks(entry *Entry) *Entry {
+	if len(p.hooks) == 0 {
+		return entry
+	}
+
+	for _, hook := range p.hooks {
+		result := hook.OnWrite(entry)
+		if result == nil {
+			// Hook filtered this log
+			return nil
+		}
+		// Type assert back to *Entry
+		if e, ok := result.(*Entry); ok {
+			entry = e
+		}
+		// If hook returned non-*Entry, keep original entry
+	}
+	return entry
+}
+
+// AddHook adds a single hook to the logger
+func (p *Logger) AddHook(hook constant.Hook) *Logger {
+	p.hooks = append(p.hooks, hook)
+	return p
+}
+
+// AddHooks adds multiple hooks to the logger
+func (p *Logger) AddHooks(hooks ...constant.Hook) *Logger {
+	p.hooks = append(p.hooks, hooks...)
+	return p
+}
+
+// RemoveHooks removes all hooks from the logger
+func (p *Logger) RemoveHooks() *Logger {
+	p.hooks = nil
+	return p
 }
