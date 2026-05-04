@@ -462,8 +462,11 @@ func TestLogger_Caller_NotFormatFull(t *testing.T) {
 // SimpleFormat 是一个简单的格式化器，不实现 FormatFull 接口
 type SimpleFormat struct{}
 
-func (sf *SimpleFormat) Format(entry *Entry) []byte {
-	return []byte(entry.Message + "\n")
+func (sf *SimpleFormat) Format(entry interface{}) []byte {
+	if e, ok := entry.(*Entry); ok {
+		return []byte(e.Message + "\n")
+	}
+	return nil
 }
 
 func TestLogger_Write_Method(t *testing.T) {

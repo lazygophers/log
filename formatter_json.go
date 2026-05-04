@@ -38,11 +38,17 @@ type jsonEntry struct {
 }
 
 // Format formats log entry to JSON
-func (f *JSONFormatter) Format(entry *Entry) []byte {
+func (f *JSONFormatter) Format(entry interface{}) []byte {
+	// Type assert to *Entry
+	e, ok := entry.(*Entry)
+	if !ok {
+		return nil
+	}
+
 	b := GetBuffer()
 	defer PutBuffer(b)
 
-	je := f.toJSONEntry(entry)
+	je := f.toJSONEntry(e)
 
 	var data []byte
 	var err error
@@ -58,7 +64,7 @@ func (f *JSONFormatter) Format(entry *Entry) []byte {
 		b.WriteString(`{"level":"error","message":"JSON marshaling failed: `)
 		b.WriteString(err.Error())
 		b.WriteString(`","original":"`)
-		b.WriteString(jsonEscapeString(entry.Message))
+		b.WriteString(jsonEscapeString(e.Message))
 		b.WriteString(`"}`)
 	} else {
 		b.Write(data)

@@ -125,32 +125,38 @@ func (p *Formatter) formatSuffix(b *bytes.Buffer, entry *Entry) {
 	b.WriteByte('\n')
 }
 
-// Format implements Format interface, handles multi-line messages
-func (p *Formatter) Format(entry *Entry) []byte {
+// Format implements constant.Format interface, handles multi-line messages
+func (p *Formatter) Format(entry interface{}) []byte {
+	// Type assert to *Entry
+	e, ok := entry.(*Entry)
+	if !ok {
+		return nil
+	}
+
 	if p.DisableParsingAndEscaping {
-		return p.format(entry)
+		return p.format(e)
 	}
 	b := GetBuffer()
 	defer PutBuffer(b)
 
 	// Manual iteration to avoid strings.Split allocations
 	// This creates fewer intermediate objects compared to strings.Split
-	msg := entry.Message
+	msg := e.Message
 	start := 0
 	for {
 		// Find next newline in the remaining message
 		idx := strings.IndexByte(msg[start:], '\n')
 		if idx == -1 {
 			// Last line (or only line if no \n found)
-			entry.Message = msg[start:]
-			b.Write(p.format(entry))
+			e.Message = msg[start:]
+			b.Write(p.format(e))
 			break
 		}
 		// idx is relative to msg[start:], so we add start to get absolute position
 		absIdx := start + idx
 		// Extract line without the newline character
-		entry.Message = msg[start:absIdx]
-		b.Write(p.format(entry))
+		e.Message = msg[start:absIdx]
+		b.Write(p.format(e))
 		start = absIdx + 1 // Move past the newline
 	}
 
@@ -168,7 +174,7 @@ func (p *Formatter) Caller(disable bool) {
 }
 
 // Clone creates a deep copy of Formatter
-func (p *Formatter) Clone() Format {
+func (p *Formatter) Clone() constant.Format {
 	return &Formatter{
 		Module:                    p.Module,
 		DisableParsingAndEscaping: p.DisableParsingAndEscaping,

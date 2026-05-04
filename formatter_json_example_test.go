@@ -2,6 +2,8 @@ package log
 
 import (
 	"testing"
+
+	"github.com/lazygophers/log/constant"
 )
 
 func TestJSONFormatter_Usage(t *testing.T) {
@@ -48,7 +50,7 @@ func TestJSONFormatter_Integration(t *testing.T) {
 	logger.Error("Error message in JSON")
 
 	// Verify Format interface compatibility
-	var _ Format = (*JSONFormatter)(nil)
+	var _ constant.Format = (*JSONFormatter)(nil)
 }
 
 func BenchmarkJSONFormatter_Basic(b *testing.B) {

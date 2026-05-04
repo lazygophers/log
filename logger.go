@@ -46,7 +46,7 @@ func wrapWriter(w io.Writer) zapcore.WriteSyncer {
 type Logger struct {
 	level       Level
 	out         zapcore.WriteSyncer
-	Format      Format
+	Format      constant.Format
 	callerDepth int
 	PrefixMsg   []byte
 	SuffixMsg   []byte
@@ -132,7 +132,7 @@ func (p *Logger) Clone() *Logger {
 	}
 
 	switch f := p.Format.(type) {
-	case FormatFull:
+	case constant.FormatFull:
 		l.Format = f.Clone()
 	default:
 		l.Format = f
@@ -470,10 +470,10 @@ func (p *Logger) Sync() {
 // ParsingAndEscaping controls log content parsing and escaping
 func (p *Logger) ParsingAndEscaping(disable bool) *Logger {
 	switch f := p.Format.(type) {
-	case FormatFull:
+	case constant.FormatFull:
 		f.ParsingAndEscaping(disable)
 	default:
-		Panicf("%v is not interface log.FormatFull", f)
+		Panicf("%v is not interface constant.FormatFull", f)
 	}
 	return p
 }
@@ -481,10 +481,10 @@ func (p *Logger) ParsingAndEscaping(disable bool) *Logger {
 // Caller controls caller information in logs
 func (p *Logger) Caller(disable bool) *Logger {
 	switch f := p.Format.(type) {
-	case FormatFull:
+	case constant.FormatFull:
 		f.Caller(disable)
 	default:
-		Panicf("%v is not interface log.FormatFull", f)
+		Panicf("%v is not interface constant.FormatFull", f)
 	}
 	return p
 }
