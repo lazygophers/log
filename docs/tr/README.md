@@ -13,12 +13,20 @@ Yüksek performanslı ve esnek bir Go günlük kütüphanesi, zap üzerine inşa
 ## 📖 Belgelerin dilleri
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/)
--   [🇨🇳 Basitleştirilmiş Çince](README.md) (şu an)
+-   [🇨🇳 Basitleştirilmiş Çince](https://lazygophers.github.io/log/zh-CN/)
 -   [🇹🇼 Geleneksel Çince](https://lazygophers.github.io/log/zh-TW/)
 -   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
--   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
+-   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/)
+-   [🇩🇪 Deutsch](https://lazygophers.github.io/log/de/)
+-   [🇰🇷 한국어](https://lazygophers.github.io/log/ko/)
+-   [🇵🇹 Português](https://lazygophers.github.io/log/pt/)
+-   [🇳🇱 Nederlands](https://lazygophers.github.io/log/nl/)
+-   [🇵🇱 Polski](https://lazygophers.github.io/log/pl/)
+-   [🇮🇹 Italiano](https://lazygophers.github.io/log/it/)
+-   [🇹🇷 Türkçe](README.md) (şu an)
 
 ## ✨ Özellikler
 

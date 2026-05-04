@@ -13,12 +13,20 @@ A high-performance, flexible Go logging library built on zap, providing rich fea
 ## 📖 Documentation Languages
 
 -   [🇺🇸 English](README.md) (Current)
--   [🇨🇳 简体中文](README.md)
--   [🇹🇼 繁體中文](README.md)
--   [🇫🇷 Français](README.md)
--   [🇷🇺 Русский](README.md)
--   [🇪🇸 Español](README.md)
--   [🇸🇦 العربية](README.md)
+-   [🇨🇳 简体中文](../zh-CN/README.md)
+-   [🇹🇼 繁體中文](../zh-TW/README.md)
+-   [🇫🇷 Français](../fr/README.md)
+-   [🇪🇸 Español](../es/README.md)
+-   [🇷🇺 Русский](../ru/README.md)
+-   [🇸🇦 العربية](../ar/README.md)
+-   [🇯🇵 日本語](../ja/README.md)
+-   [🇩🇪 Deutsch](../de/README.md)
+-   [🇰🇷 한국어](../ko/README.md)
+-   [🇵🇹 Português](../pt/README.md)
+-   [🇳🇱 Nederlands](../nl/README.md)
+-   [🇵🇱 Polski](../pl/README.md)
+-   [🇮🇹 Italiano](../it/README.md)
+-   [🇹🇷 Türkçe](../tr/README.md)
 
 ## ✨ Features
 

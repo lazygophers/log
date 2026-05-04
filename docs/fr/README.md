@@ -13,12 +13,20 @@ Une bibliothèque de journalisation Go à haute performance et flexible, constru
 ## 📖 Langues de la documentation
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/)
--   [🇨🇳 Chinois simplifié](README.md) (actuel)
+-   [🇨🇳 Chinois simplifié](https://lazygophers.github.io/log/zh-CN/)
 -   [🇹🇼 Chinois traditionnel](https://lazygophers.github.io/log/zh-TW/)
 -   [🇫🇷 Français](README.md) (actuel)
--   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
+-   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/)
+-   [🇩🇪 Deutsch](https://lazygophers.github.io/log/de/)
+-   [🇰🇷 한국어](https://lazygophers.github.io/log/ko/)
+-   [🇵🇹 Português](https://lazygophers.github.io/log/pt/)
+-   [🇳🇱 Nederlands](https://lazygophers.github.io/log/nl/)
+-   [🇵🇱 Polski](https://lazygophers.github.io/log/pl/)
+-   [🇮🇹 Italiano](https://lazygophers.github.io/log/it/)
+-   [🇹🇷 Türkçe](https://lazygophers.github.io/log/tr/)
 
 ## ✨ Fonctionnalités
 

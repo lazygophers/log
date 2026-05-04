@@ -13,12 +13,20 @@ titleSuffix: ' | LazyGophers Log'
 ## 📖 Языки документации
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/)
--   [🇨🇳 Китайский упрощенный](README.md) (текущий)
+-   [🇨🇳 Китайский упрощенный](https://lazygophers.github.io/log/zh-CN/)
 -   [🇹🇼 Китайский традиционный](https://lazygophers.github.io/log/zh-TW/)
 -   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
--   [🇷🇺 Русский](README.md) (текущий)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇷🇺 Русский](README.md) (текущий)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
+-   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/)
+-   [🇩🇪 Deutsch](https://lazygophers.github.io/log/de/)
+-   [🇰🇷 한국어](https://lazygophers.github.io/log/ko/)
+-   [🇵🇹 Português](https://lazygophers.github.io/log/pt/)
+-   [🇳🇱 Nederlands](https://lazygophers.github.io/log/nl/)
+-   [🇵🇱 Polski](https://lazygophers.github.io/log/pl/)
+-   [🇮🇹 Italiano](https://lazygophers.github.io/log/it/)
+-   [🇹🇷 Türkçe](https://lazygophers.github.io/log/tr/)
 
 ## ✨ Возможности
 

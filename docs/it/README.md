@@ -13,12 +13,20 @@ Una libreria di registrazione Go ad alte prestazioni e flessibile, costruita su 
 ## 📖 Lingue della documentazione
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/)
--   [🇨🇳 Cinese semplificato](README.md) (attuale)
+-   [🇨🇳 Cinese semplificato](https://lazygophers.github.io/log/zh-CN/)
 -   [🇹🇼 Cinese tradizionale](https://lazygophers.github.io/log/zh-TW/)
 -   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
--   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
+-   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/)
+-   [🇩🇪 Deutsch](https://lazygophers.github.io/log/de/)
+-   [🇰🇷 한국어](https://lazygophers.github.io/log/ko/)
+-   [🇵🇹 Português](https://lazygophers.github.io/log/pt/)
+-   [🇳🇱 Nederlands](https://lazygophers.github.io/log/nl/)
+-   [🇵🇱 Polski](https://lazygophers.github.io/log/pl/)
+-   [🇮🇹 Italiano](README.md) (attuale)
+-   [🇹🇷 Türkçe](https://lazygophers.github.io/log/tr/)
 
 ## ✨ Caratteristiche
 

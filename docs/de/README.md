@@ -13,13 +13,20 @@ Eine Hochleistungs- und flexible Go-Logging-Bibliothek. Basierend auf zap mit um
 ## 📖 Sprachen
 
 -   [🇺🇸 English](https://lazygophers.github.io/log/en/)
--   [🇨🇳 Vereinfachtes Chinesisch](README.md) (Aktuell)
+-   [🇨🇳 Vereinfachtes Chinesisch](https://lazygophers.github.io/log/zh-CN/)
 -   [🇹🇼 Traditionelles Chinesisch](https://lazygophers.github.io/log/zh-TW/)
 -   [🇫🇷 Français](https://lazygophers.github.io/log/fr/)
--   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇪🇸 Español](https://lazygophers.github.io/log/es/)
+-   [🇷🇺 Русский](https://lazygophers.github.io/log/ru/)
 -   [🇸🇦 العربية](https://lazygophers.github.io/log/ar/)
 -   [🇯🇵 日本語](https://lazygophers.github.io/log/ja/)
+-   [🇩🇪 Deutsch](README.md) (Aktuell)
+-   [🇰🇷 한국어](https://lazygophers.github.io/log/ko/)
+-   [🇵🇹 Português](https://lazygophers.github.io/log/pt/)
+-   [🇳🇱 Nederlands](https://lazygophers.github.io/log/nl/)
+-   [🇵🇱 Polski](https://lazygophers.github.io/log/pl/)
+-   [🇮🇹 Italiano](https://lazygophers.github.io/log/it/)
+-   [🇹🇷 Türkçe](https://lazygophers.github.io/log/tr/)
 
 ## ✨ Funktionen
 

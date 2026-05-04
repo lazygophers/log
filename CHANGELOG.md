@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
-- Comprehensive multilingual documentation (7 languages)
+- Comprehensive multilingual documentation (15 languages)
 - GitHub issue templates (Bug Report, Feature Request, Questions)
 - Pull request template with build tag compatibility checks
 - Contributing guidelines in multiple languages
@@ -20,12 +20,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Enhanced README with comprehensive feature documentation
 - Improved test coverage across all build tag configurations
 - Updated project structure for better maintainability
+- **Refactored** log configuration and rotation mechanism, simplified Entry processing
+- **Removed** `logger_ctx` and related zap code to simplify logging logic
+- **Improved** rotator log rotation functionality and related documentation
+- **Refactored** debug log functionality implementation
 
 ### Documentation
 - Added multilingual support for all major documentation
 - Created comprehensive API reference
 - Established contributing workflow guidelines
 - Implemented security reporting procedures
+
+## [0.0.0.19] - 2026-04-28
+
+### Changed
+- Simplified logging architecture by removing `logger_ctx` abstraction
+- Enhanced rotator log rotation mechanism
+- Refactored debug logging implementation
+- Updated `petermattis/goid` to latest version
+
+### Removed
+- `logger_ctx.go` and `logger_ctx_test.go` — context-based logging layer
+- Legacy test files for removed features
+
+### Fixed
+- Simplified log entry processing pipeline
+- Improved build tag compatibility across different configurations
 
 ## [1.0.0] - 2024-01-01
 
