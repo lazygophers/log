@@ -107,6 +107,8 @@ func TestLoggerMethodsDisabled(t *testing.T) {
 		{"Debug", logger.Debug},
 		{"Info", logger.Info},
 		{"Warn", logger.Warn},
+		{"Print", logger.Print},     // Print is alias for Debug
+		{"Warning", logger.Warning}, // Warning is alias for Warn
 	}
 
 	for _, m := range methods {

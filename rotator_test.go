@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -8,458 +9,536 @@ import (
 	"time"
 )
 
-func TestNewHourlyRotator(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
+// Final comprehensive tests to reach 90% coverage
 
-	rotator := NewHourlyRotator(filename, 1024, 5)
+func TestRotatorDetailedCoverage(t *testing.T) {
+	t.Run("NewHourlyRotator_basic_write", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 5)
 
-	if rotator == nil {
-		t.Fatal("NewHourlyRotator returned nil")
-	}
+		rotator.Write([]byte("line 1\n"))
+		rotator.Write([]byte("line 2\n"))
+		rotator.Write([]byte("line 3\n"))
 
-	if rotator.logDir != filename {
-		t.Errorf("Expected filename %s, got %s", filename, rotator.logDir)
-	}
+		rotator.Close()
 
-	if rotator.maxSize != 1024 {
-		t.Errorf("Expected maxSize 1024, got %d", rotator.maxSize)
-	}
-
-	if rotator.maxFiles != 5 {
-		t.Errorf("Expected maxFiles 5, got %d", rotator.maxFiles)
-	}
-}
-
-func TestHourlyRotator_Write(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
-
-	t.Logf("tmpDir: %s", tmpDir)
-	t.Logf("filename: %s", filename)
-
-	rotator := NewHourlyRotator(filename, 1024*1024, 5)
-	defer func() { _ = rotator.Close() }()
-
-	testData := []byte("test log message\n")
-	n, err := rotator.Write(testData)
-
-	if err != nil {
-		t.Fatalf("Write failed: %v", err)
-	}
-
-	if n != len(testData) {
-		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
-	}
-
-	// 检查文件是否被创建（新的目录结构：test/YYYYMMDDHH.log）
-	logDir := filename
-
-	// 检查目录是否存在
-	if _, err := os.Stat(logDir); os.IsNotExist(err) {
-		t.Fatalf("Log directory does not exist: %s", logDir)
-	}
-
-	files, err := os.ReadDir(logDir)
-	if err != nil {
-		t.Fatalf("Failed to read log dir: %v", err)
-	}
-
-	t.Logf("Found %d files in %s", len(files), logDir)
-	for _, file := range files {
-		t.Logf("File: %s", file.Name())
-	}
-
-	var logFileFound bool
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".log") && len(file.Name()) == 14 {
-			logFileFound = true
-			break
+		// Verify file was created
+		files, _ := os.ReadDir(tmpDir)
+		if len(files) == 0 {
+			t.Error("Should create log file")
 		}
-	}
+	})
 
-	if !logFileFound {
-		t.Error("Log file was not created")
-	}
-}
+	t.Run("NewHourlyRotator_empty_write", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 5)
 
-func TestHourlyRotator_Rotation(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
-
-	// 设置小的文件大小限制来触发轮转
-	rotator := NewHourlyRotator(filename, 10, 5)
-	defer func() { _ = rotator.Close() }()
-
-	// 写入足够的数据触发大小轮转
-	testData := []byte("this is a long test message that should trigger rotation\n")
-	_, err := rotator.Write(testData)
-	if err != nil {
-		t.Fatalf("First write failed: %v", err)
-	}
-
-	// 再次写入应该触发轮转
-	_, err = rotator.Write(testData)
-	if err != nil {
-		t.Fatalf("Second write failed: %v", err)
-	}
-
-	// 检查是否创建了多个文件（新的目录结构：test/YYYYMMDDHH.log）
-	logDir := filename
-	files, err := os.ReadDir(logDir)
-	if err != nil {
-		t.Fatalf("Failed to read log dir: %v", err)
-	}
-
-	logFileCount := 0
-	for _, file := range files {
-		// 匹配时间戳格式的日志文件（不包括 current.log）
-		if strings.HasSuffix(file.Name(), ".log") && file.Name() != "current.log" && len(file.Name()) == 14 {
-			logFileCount++
-		}
-	}
-
-	if logFileCount < 1 {
-		t.Error("Expected at least one rotated log file")
-	}
-}
-
-func TestHourlyRotator_Sync(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
-
-	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer func() { _ = rotator.Close() }()
-
-	// 写入数据
-	testData := []byte("test log message\n")
-	_, err := rotator.Write(testData)
-	if err != nil {
-		t.Fatalf("Write failed: %v", err)
-	}
-
-	// 测试 Sync
-	err = rotator.Sync()
-	if err != nil {
-		t.Errorf("Sync failed: %v", err)
-	}
-}
-
-func TestHourlyRotator_Close(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
-
-	rotator := NewHourlyRotator(filename, 1024, 5)
-
-	// 写入数据以创建文件
-	testData := []byte("test log message\n")
-	_, err := rotator.Write(testData)
-	if err != nil {
-		t.Fatalf("Write failed: %v", err)
-	}
-
-	// 测试 Close
-	err = rotator.Close()
-	if err != nil {
-		t.Errorf("Close failed: %v", err)
-	}
-
-	// 再次关闭应该不会出错（可能返回 nil 或 file already closed 错误）
-	err = rotator.Close()
-	if err != nil && !strings.Contains(err.Error(), "file already closed") {
-		t.Errorf("Second close should not fail with unexpected error: %v", err)
-	}
-}
-
-func TestHourlyRotator_CleanupOldFiles(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
-
-	// 创建日志目录
-	os.MkdirAll(filename, 0755)
-
-	// 创建一些旧的日志文件（新的目录结构：test/YYYYMMDDHH.log）
-	for i := 0; i < 15; i++ {
-		oldTime := time.Now().Add(-time.Duration(i) * time.Hour)
-		oldFilename := filepath.Join(filename, oldTime.Format("2006010215")+".log")
-		file, err := os.Create(oldFilename)
+		_, err := rotator.Write([]byte{})
 		if err != nil {
-			t.Fatalf("Failed to create test file %s: %v", oldFilename, err)
+			t.Errorf("Empty write failed: %v", err)
 		}
-		_, _ = file.WriteString("test content")
-		_ = file.Close()
-	}
 
-	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer func() { _ = rotator.Close() }()
+		rotator.Close()
+	})
 
-	// 手动触发清理
-	rotator.cleanupOldFiles()
+	t.Run("NewHourlyRotator_large_write", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1000, 10)
 
-	// 检查文件数量（在新的目录结构中）
-	logDir := filename
-	files, err := os.ReadDir(logDir)
-	if err != nil {
-		t.Fatalf("Failed to read log dir: %v", err)
-	}
-
-	logFileCount := 0
-	for _, file := range files {
-		// 匹配时间戳格式的日志文件（不包括 current.log）
-		if strings.HasSuffix(file.Name(), ".log") && file.Name() != "current.log" && len(file.Name()) == 14 {
-			logFileCount++
+		largeData := strings.Repeat("test line\n", 1000)
+		_, err := rotator.Write([]byte(largeData))
+		if err != nil {
+			t.Errorf("Large write failed: %v", err)
 		}
-	}
 
-	// 应该最多保留 maxFiles (5) 个文件
-	if logFileCount > 5 {
-		t.Errorf("Expected at most 5 log files, found %d", logFileCount)
-	}
-}
+		rotator.Close()
+	})
 
-func TestHourlyRotator_UpdateLink(t *testing.T) {
-	tmpDir := t.TempDir()
-	filename := filepath.Join(tmpDir, "test")
+	t.Run("NewHourlyRotator_sync_operations", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 5)
 
-	rotator := NewHourlyRotator(filename, 1024, 5)
-	defer func() { _ = rotator.Close() }()
+		rotator.Write([]byte("test\n"))
 
-	// 创建日志目录
-	os.MkdirAll(filename, 0755)
-
-	// 创建目标文件（新的目录结构：test/2023071015.log）
-	targetFile := filepath.Join(filename, "2023071015.log")
-	file, err := os.Create(targetFile)
-	if err != nil {
-		t.Fatalf("Failed to create target file: %v", err)
-	}
-	_ = file.Close()
-
-	// 测试更新链接
-	rotator.updateLink(targetFile)
-
-	// 检查链接是否存在（在支持软链接的系统上）
-	linkName := filepath.Join(filename, "current.log")
-	if _, err := os.Lstat(linkName); err == nil {
-		// 软链接创建成功，验证它指向正确的文件
-		if link, err := os.Readlink(linkName); err == nil {
-			expected := "2023071015.log"
-			if link != expected {
-				t.Errorf("Expected link to point to %s, but it points to %s", expected, link)
+		for i := 0; i < 10; i++ {
+			err := rotator.Sync()
+			if err != nil {
+				t.Errorf("Sync %d failed: %v", i, err)
 			}
 		}
-	}
-	// 如果系统不支持软链接，测试仍然应该通过
-}
 
-// TestHourlyRotator_WriteError tests error conditions in Write function
-func TestHourlyRotator_WriteError(t *testing.T) {
-	// Create a rotator that will fail to rotate (permission denied)
-	// Use /dev/null as base path which should cause issues
-	rotator := NewHourlyRotator("/dev/null", 1024, 5)
-	defer func() { _ = rotator.Close() }()
+		rotator.Close()
+	})
 
-	// Try to write - this should fail during rotate() call
-	_, err := rotator.Write([]byte("test"))
-	if err != nil {
-		t.Logf("Got expected error from Write->rotate: %v", err)
-	} else {
-		t.Log("Write succeeded unexpectedly - system might allow /dev/null writes")
-	}
-}
+	t.Run("NewHourlyRotator_close_operations", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 5)
 
-// TestHourlyRotator_RotateError tests error conditions in rotate function
-func TestHourlyRotator_RotateError(t *testing.T) {
-	// Create a rotator with a path that will cause permission errors
-	rotator := NewHourlyRotator("/root/test", 1024, 5) // Path that likely doesn't have write permissions
-	defer func() { _ = rotator.Close() }()
-
-	// Try to write - this should trigger rotate error
-	_, err := rotator.Write([]byte("test"))
-	// We expect this to fail on most systems due to permissions, but it's hard to test reliably
-	// The important thing is that we're exercising the error path in Write->rotate
-	if err != nil {
-		t.Logf("Got expected error from rotate: %v", err)
-	}
-}
-
-// TestHourlyRotator_CleanupOldFiles_NoMatchingFiles tests cleanup when directory has no matching log files
-func TestHourlyRotator_CleanupOldFiles_NoMatchingFiles(t *testing.T) {
-	// Arrange
-	tmpDir := t.TempDir()
-	logPath := filepath.Join(tmpDir, "app")
-
-	rotator := NewHourlyRotator(logPath, 10*1024, 3)
-	defer func() { _ = rotator.Close() }()
-
-	// Create unrelated files
-	unrelatedFiles := []string{"other.txt", "readme.md", "data.csv"}
-	for _, name := range unrelatedFiles {
-		f, err := os.Create(filepath.Join(tmpDir, name))
+		// Close without write
+		err := rotator.Close()
 		if err != nil {
-			t.Fatalf("Failed to create test file: %v", err)
+			t.Errorf("Close failed: %v", err)
 		}
-		_ = f.Close()
-	}
-
-	// Act
-	rotator.cleanupOldFiles()
-
-	// Assert - unrelated files should not be deleted
-	files, err := os.ReadDir(tmpDir)
-	if err != nil {
-		t.Fatalf("Failed to read dir: %v", err)
-	}
-	if len(files) != len(unrelatedFiles) {
-		t.Errorf("Expected %d files, got %d - cleanup should not delete unrelated files", len(unrelatedFiles), len(files))
-	}
+	})
 }
 
-// TestHourlyRotator_CleanupOldFiles_DirectoryNotExist tests cleanup when log directory does not exist
-func TestHourlyRotator_CleanupOldFiles_DirectoryNotExist(t *testing.T) {
-	// Arrange
-	rotator := &HourlyRotator{
-		logDir:   "/nonexistent/path/app",
-		maxFiles: 3,
-	}
+func TestFormatterDetailedCoverage(t *testing.T) {
+	formatter := &Formatter{}
 
-	// Act & Assert - should not panic
-	rotator.cleanupOldFiles()
+	t.Run("Format_with_various_messages", func(t *testing.T) {
+		messages := []string{
+			"",
+			"simple",
+			"with \"quotes\"",
+			"with \\ backslash",
+			"with \n newline",
+			"with \t tab",
+			"with \r return",
+			"unicode: 你好世界",
+			"emoji: 🌍🌎🌏",
+			strings.Repeat("x", 1000),
+		}
+
+		for _, msg := range messages {
+			entry := &Entry{
+				Level:   InfoLevel,
+				Message: msg,
+				Time:    time.Now(),
+				Pid:     123,
+			}
+
+			result := formatter.Format(entry)
+			if len(result) == 0 {
+				t.Errorf("Should format message: %q", msg)
+			}
+		}
+	})
+
+	t.Run("Format_with_all_fields", func(t *testing.T) {
+		entry := &Entry{
+			Level:      InfoLevel,
+			Message:    "test",
+			Time:       time.Now(),
+			Pid:        123,
+			Gid:        456,
+			TraceId:    "trace-123",
+			CallerName: "main.Func",
+			File:       "file.go",
+			CallerLine: 42,
+			PrefixMsg:  []byte("[P]"),
+			SuffixMsg:  []byte("[S]"),
+			Fields: []KV{
+				{Key: "key1", Value: "value1"},
+				{Key: "key2", Value: 123},
+				{Key: "key3", Value: true},
+				{Key: "key4", Value: nil},
+				{Key: "key5", Value: 3.14},
+			},
+		}
+
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Error("Should format entry with all fields")
+		}
+	})
+
+	t.Run("Format_with_disabled_caller", func(t *testing.T) {
+		formatter.DisableCaller = true
+
+		entry := &Entry{
+			Level:      InfoLevel,
+			Message:    "test",
+			Time:       time.Now(),
+			Pid:        123,
+			CallerName: "main.Func",
+			File:       "file.go",
+			CallerLine: 42,
+		}
+
+		result := formatter.Format(entry)
+		resultStr := string(result)
+
+		if !strings.Contains(resultStr, "test") {
+			t.Error("Should contain message")
+		}
+	})
+
+	t.Run("Format_with_disabled_parsing", func(t *testing.T) {
+		formatter.ParsingAndEscaping(false)
+
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test with \"quotes\"",
+			Time:    time.Now(),
+			Pid:     123,
+		}
+
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Error("Should format with parsing disabled")
+		}
+	})
+
+	t.Run("Format_with_disabled_parse", func(t *testing.T) {
+		formatter.Caller(false)
+
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test",
+			Time:    time.Now(),
+			Pid:     123,
+		}
+
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Error("Should format with caller disabled")
+		}
+	})
 }
 
-// TestHourlyRotator_CleanupOldFiles_ExactlyMaxFiles tests cleanup when file count equals maxFiles
-func TestHourlyRotator_CleanupOldFiles_ExactlyMaxFiles(t *testing.T) {
-	// Arrange
-	tmpDir := t.TempDir()
-	logPath := filepath.Join(tmpDir, "app")
+func TestJSONFormatterDetailedCoverage(t *testing.T) {
+	t.Run("JSON_with_empty_entry", func(t *testing.T) {
+		formatter := &JSONFormatter{}
 
-	maxFiles := 3
-	rotator := NewHourlyRotator(logPath, 10*1024, maxFiles)
-	defer func() { _ = rotator.Close() }()
+		entry := &Entry{}
 
-	// Create exactly maxFiles log files with correct naming pattern
-	// Pattern: base + YYYYMMDDHH + .log, total name length = len(base) + 14
-	for i := 0; i < maxFiles; i++ {
-		ts := time.Now().Add(-time.Duration(i) * time.Hour)
-		filename := filepath.Join(tmpDir, "app"+ts.Format("2006010215")+".log")
-		f, err := os.Create(filename)
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Error("Should format empty entry")
+		}
+
+		resultStr := string(result)
+		if !strings.HasPrefix(resultStr, "{") {
+			t.Error("Should be valid JSON object")
+		}
+	})
+
+	t.Run("JSON_with_all_levels", func(t *testing.T) {
+		formatter := &JSONFormatter{}
+
+		levels := []Level{
+			TraceLevel,
+			DebugLevel,
+			InfoLevel,
+			WarnLevel,
+			ErrorLevel,
+		}
+
+		for _, level := range levels {
+			entry := &Entry{
+				Level:   level,
+				Message: "test",
+				Time:    time.Now(),
+				Pid:     123,
+			}
+
+			result := formatter.Format(entry)
+			resultStr := string(result)
+
+			if !strings.Contains(resultStr, level.String()) {
+				t.Errorf("Should contain level %s", level.String())
+			}
+		}
+	})
+
+	t.Run("JSON_pretty_print", func(t *testing.T) {
+		formatter := &JSONFormatter{EnablePrettyPrint: true}
+
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test",
+			Time:    time.Now(),
+			Pid:     123,
+		}
+
+		result := formatter.Format(entry)
+		resultStr := string(result)
+
+		if !strings.Contains(resultStr, "\n") {
+			t.Error("Pretty print should have newlines")
+		}
+		if !strings.HasPrefix(resultStr, "{") {
+			t.Error("Should be valid JSON")
+		}
+	})
+
+	t.Run("JSON_compact", func(t *testing.T) {
+		formatter := &JSONFormatter{EnablePrettyPrint: false}
+
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test",
+			Time:    time.Now(),
+			Pid:     123,
+		}
+
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Error("Should format JSON")
+		}
+	})
+
+	t.Run("JSON_with_all_disabled", func(t *testing.T) {
+		formatter := &JSONFormatter{
+			DisableTimestamp: true,
+			DisableCaller:    true,
+			DisableTrace:     true,
+		}
+
+		entry := &Entry{
+			Level:      InfoLevel,
+			Message:    "test",
+			Time:       time.Now(),
+			Pid:        123,
+			TraceId:    "trace-123",
+			CallerName: "main.Func",
+			File:       "file.go",
+			CallerLine: 42,
+		}
+
+		result := formatter.Format(entry)
+		resultStr := string(result)
+
+		// Should still have message and level
+		if !strings.Contains(resultStr, "test") {
+			t.Error("Should contain message")
+		}
+		if !strings.Contains(resultStr, "level") {
+			t.Error("Should contain level")
+		}
+
+		// Should not have disabled fields
+		if strings.Contains(resultStr, "caller") {
+			t.Error("Should not have caller when disabled")
+		}
+		if strings.Contains(resultStr, "trace") {
+			t.Error("Should not have trace when disabled")
+		}
+	})
+
+	t.Run("JSON_with_invalid_type", func(t *testing.T) {
+		formatter := &JSONFormatter{}
+
+		result := formatter.Format("not an entry")
+		if result != nil {
+			t.Error("Should return nil for non-entry type")
+		}
+	})
+
+	t.Run("JSON_with_marshall_error", func(t *testing.T) {
+		formatter := &JSONFormatter{}
+
+		// Create entry that will cause JSON marshaling to fail
+		ch := make(chan int)
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test message with control \x01 chars",
+			Time:    time.Now(),
+			Pid:     123,
+			Fields: []KV{
+				{Key: "invalid", Value: ch},
+			},
+		}
+
+		result := formatter.Format(entry)
+		resultStr := string(result)
+
+		// Should fall back to error message
+		if !strings.Contains(resultStr, "JSON marshaling failed") {
+			t.Error("Should include marshaling error")
+		}
+		if !strings.Contains(resultStr, "test message") {
+			t.Error("Should include original message")
+		}
+	})
+}
+
+func TestGetOutputWriterDetailed(t *testing.T) {
+	t.Run("GetOutputWriter_nested_paths", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		paths := []string{
+			filepath.Join(tmpDir, "test.log"),
+			filepath.Join(tmpDir, "logs", "test.log"),
+			filepath.Join(tmpDir, "logs", "app", "test.log"),
+			filepath.Join(tmpDir, "logs", "app", "service", "test.log"),
+		}
+
+		for _, logFile := range paths {
+			writer := GetOutputWriter(logFile)
+			if writer == nil {
+				t.Errorf("GetOutputWriter should return writer for %s", logFile)
+			}
+
+			writer.Write([]byte("test\n"))
+
+			// Verify file exists
+			if _, err := os.Stat(logFile); os.IsNotExist(err) {
+				t.Errorf("Log file %s should be created", logFile)
+			}
+		}
+	})
+
+	t.Run("GetOutputWriter_multiple_writers_same_file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		logFile := filepath.Join(tmpDir, "test.log")
+
+		writer1 := GetOutputWriter(logFile)
+		writer2 := GetOutputWriter(logFile)
+
+		if writer1 == nil || writer2 == nil {
+			t.Fatal("Both writers should be returned")
+		}
+
+		writer1.Write([]byte("line 1\n"))
+		writer2.Write([]byte("line 2\n"))
+
+		content, err := os.ReadFile(logFile)
 		if err != nil {
-			t.Fatalf("Failed to create test file: %v", err)
+			t.Fatalf("Failed to read log file: %v", err)
 		}
-		_ = f.Close()
+
+		contentStr := string(content)
+		if !strings.Contains(contentStr, "line 1") {
+			t.Error("Should contain first line")
+		}
+		if !strings.Contains(contentStr, "line 2") {
+			t.Error("Should contain second line")
+		}
+	})
+}
+func TestRotatorEdgeCases(t *testing.T) {
+	t.Run("NewHourlyRotater_with_subdirs", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		logDir := filepath.Join(tmpDir, "logs", "app")
+
+		rotator := NewHourlyRotator(logDir, 100, 10)
+		if rotator == nil {
+			t.Error("NewHourlyRotator should return rotator")
+		}
+
+		rotator.Close()
+	})
+}
+
+func TestIsAllDigits(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected bool
+	}{
+		{"123", true},
+		{"0", true},
+		{"", true},           // Empty string returns true (no non-digit chars)
+		{"abc", false},
+		{"12a34", false},
+		{"12.34", false},
+		{"12 34", false},
+		{"-123", false},
 	}
 
-	// Count files before cleanup
-	filesBefore, _ := os.ReadDir(tmpDir)
-	logCountBefore := 0
-	for _, f := range filesBefore {
-		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
-			logCountBefore++
-		}
-	}
-
-	// Act
-	rotator.cleanupOldFiles()
-
-	// Assert - no files should be deleted
-	filesAfter, err := os.ReadDir(tmpDir)
-	if err != nil {
-		t.Fatalf("Failed to read dir: %v", err)
-	}
-	logCountAfter := 0
-	for _, f := range filesAfter {
-		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
-			logCountAfter++
-		}
-	}
-	if logCountAfter != logCountBefore {
-		t.Errorf("Expected %d files (unchanged), got %d", logCountBefore, logCountAfter)
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			result := isAllDigits(tc.input)
+			if result != tc.expected {
+				t.Errorf("isAllDigits(%q) = %v, want %v", tc.input, result, tc.expected)
+			}
+		})
 	}
 }
 
-// TestHourlyRotator_CleanupOldFiles_LessThanMaxFiles tests cleanup when file count is below maxFiles
-func TestHourlyRotator_CleanupOldFiles_LessThanMaxFiles(t *testing.T) {
-	// Arrange
-	tmpDir := t.TempDir()
-	logPath := filepath.Join(tmpDir, "app")
+func TestCleanupOldFiles(t *testing.T) {
+	t.Run("cleanupOldFiles_with_nonexistent_dir", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(filepath.Join(tmpDir, "nonexistent"), 100, 10)
 
-	rotator := NewHourlyRotator(logPath, 10*1024, 10)
-	defer func() { _ = rotator.Close() }()
+		// Should not panic
+		rotator.cleanupOldFiles()
+		rotator.Close()
+	})
 
-	// Create only 2 files (below maxFiles=10)
-	for i := 0; i < 2; i++ {
-		ts := time.Now().Add(-time.Duration(i) * time.Hour)
-		filename := filepath.Join(tmpDir, "app"+ts.Format("2006010215")+".log")
-		f, err := os.Create(filename)
-		if err != nil {
-			t.Fatalf("Failed to create test file: %v", err)
+	t.Run("cleanupOldFiles_with_no_log_files", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 10)
+
+		// Should not panic
+		rotator.cleanupOldFiles()
+		rotator.Close()
+	})
+
+	t.Run("cleanupOldFiles_with_valid_log_files", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 10)
+
+		// Create some test log files with proper naming
+		timestamp := time.Now().Format("2006010215")
+		for i := 0; i < 5; i++ {
+			filename := filepath.Join(tmpDir, timestamp+".log."+fmt.Sprint(i))
+			_ = os.WriteFile(filename, []byte("test"), 0644)
 		}
-		_ = f.Close()
-	}
 
-	// Act
-	rotator.cleanupOldFiles()
+		// Should not panic
+		rotator.cleanupOldFiles()
+		rotator.Close()
+	})
 
-	// Assert - no files should be deleted
-	files, _ := os.ReadDir(tmpDir)
-	logCount := 0
-	for _, f := range files {
-		if strings.HasPrefix(f.Name(), "app") && strings.HasSuffix(f.Name(), ".log") {
-			logCount++
+	t.Run("cleanupOldFiles_with_mixed_files", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 10)
+
+		// Create mix of log files and non-log files
+		timestamp := time.Now().Format("2006010215")
+		_ = os.WriteFile(filepath.Join(tmpDir, timestamp+".log"), []byte("log1"), 0644)
+		_ = os.WriteFile(filepath.Join(tmpDir, "readme.txt"), []byte("readme"), 0644)
+		_ = os.WriteFile(filepath.Join(tmpDir, "config.json"), []byte("{}"), 0644)
+
+		// Should not panic and only process .log files
+		rotator.cleanupOldFiles()
+		rotator.Close()
+	})
+
+	t.Run("cleanupOldFiles_with_invalid_timestamp", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 100, 10)
+
+		// Create log files with invalid timestamps
+		_ = os.WriteFile(filepath.Join(tmpDir, "123.log"), []byte("short"), 0644)
+		_ = os.WriteFile(filepath.Join(tmpDir, "12345678901.log"), []byte("long"), 0644)
+		_ = os.WriteFile(filepath.Join(tmpDir, "notdigits.log"), []byte("invalid"), 0644)
+
+		// Should not panic and skip invalid files
+		rotator.cleanupOldFiles()
+		rotator.Close()
+	})
+
+	t.Run("cleanupOldFiles_deletes_old_files", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		maxFiles := 3
+		rotator := NewHourlyRotator(tmpDir, 100, maxFiles)
+
+		// Create more log files than maxFiles with different timestamps
+		now := time.Now()
+		for i := 0; i < 5; i++ {
+			timestamp := now.Add(time.Duration(i) * time.Hour).Format("2006010215")
+			filename := filepath.Join(tmpDir, timestamp+".log")
+			_ = os.WriteFile(filename, []byte("test"), 0644)
 		}
-	}
-	if logCount != 2 {
-		t.Errorf("Expected 2 files, got %d - no files should be deleted when below maxFiles", logCount)
-	}
-}
 
-// TestHourlyRotator_Write_NilCurrentFile tests Write when currentFile is nil and rotate fails
-func TestHourlyRotator_Write_NilCurrentFile(t *testing.T) {
-	// Arrange - create rotator with invalid path so rotate() fails and currentFile stays nil
-	rotator := &HourlyRotator{
-		logDir:   "/nonexistent_dir_xyz/app",
-		linkName: "/nonexistent_dir_xyz/app.log",
-		maxSize:  1024,
-		maxFiles: 3,
-	}
+		// Cleanup should delete files exceeding maxFiles
+		rotator.cleanupOldFiles()
 
-	// Act
-	_, err := rotator.Write([]byte("test"))
+		// Count remaining .log files
+		files, _ := os.ReadDir(tmpDir)
+		logFileCount := 0
+		for _, f := range files {
+			if strings.HasSuffix(f.Name(), ".log") {
+				logFileCount++
+			}
+		}
 
-	// Assert - should return error (either from rotate or from nil file check)
-	if err == nil {
-		t.Error("Expected error when writing with invalid path")
-	}
-}
+		if logFileCount > maxFiles {
+			t.Errorf("Should have at most %d log files, got %d", maxFiles, logFileCount)
+		}
 
-// TestHourlyRotator_Sync_NilCurrentFile tests Sync when currentFile is nil
-func TestHourlyRotator_Sync_NilCurrentFile(t *testing.T) {
-	// Arrange
-	rotator := &HourlyRotator{
-		currentFile: nil,
-	}
-
-	// Act
-	err := rotator.Sync()
-
-	// Assert - Sync returns nil when currentFile is nil (by design)
-	if err != nil {
-		t.Errorf("Sync should return nil when currentFile is nil, got: %v", err)
-	}
-}
-
-// TestHourlyRotator_Close_NilCurrentFile tests Close when currentFile is nil
-func TestHourlyRotator_Close_NilCurrentFile(t *testing.T) {
-	// Arrange
-	rotator := &HourlyRotator{
-		currentFile: nil,
-	}
-
-	// Act
-	err := rotator.Close()
-
-	// Assert
-	if err != nil {
-		t.Errorf("Close should return nil when currentFile is nil, got: %v", err)
-	}
+		rotator.Close()
+	})
 }

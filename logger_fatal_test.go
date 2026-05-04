@@ -185,3 +185,47 @@ func TestLoggerAllLevelfMethods(t *testing.T) {
 		})
 	}
 }
+func TestFatalFunctions(t *testing.T) {
+	t.Run("Fatal_exits", func(t *testing.T) {
+		if os.Getenv("TEST_FATAL_EXIT") == "1" {
+			Fatal("test fatal")
+			return
+		}
+		cmd := exec.Command(os.Args[0], "-test.run=TestFatalFunctions/Fatal_exits")
+		cmd.Env = append(os.Environ(), "TEST_FATAL_EXIT=1")
+		if err := cmd.Run(); err == nil {
+			t.Error("expected non-zero exit status")
+		}
+	})
+
+	t.Run("Fatalf_exits", func(t *testing.T) {
+		if os.Getenv("TEST_FATALF_EXIT") == "1" {
+			Fatalf("test %s", "fatalf")
+			return
+		}
+		cmd := exec.Command(os.Args[0], "-test.run=TestFatalFunctions/Fatalf_exits")
+		cmd.Env = append(os.Environ(), "TEST_FATALF_EXIT=1")
+		if err := cmd.Run(); err == nil {
+			t.Error("expected non-zero exit status")
+		}
+	})
+}
+func TestPanicFunctions(t *testing.T) {
+	t.Run("Panic_panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic")
+			}
+		}()
+		Panic("test panic")
+	})
+
+	t.Run("Panicf_panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic")
+			}
+		}()
+		Panicf("test %s", "panicf")
+	})
+}

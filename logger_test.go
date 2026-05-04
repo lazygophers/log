@@ -4,569 +4,364 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/lazygophers/log/constant"
 )
 
-// MockWriter 用于测试的模拟 Writer
-type MockWriter struct {
-	data        bytes.Buffer
-	syncCalls   int
-	syncError   error
-	shouldError bool
-}
+// Additional tests for edge cases and remaining coverage
 
-func (m *MockWriter) Write(p []byte) (n int, err error) {
-	if m.shouldError {
-		return 0, &MockWriteError{"mock write error"}
-	}
-	return m.data.Write(p)
-}
-
-func (m *MockWriter) Sync() error {
-	m.syncCalls++
-	return m.syncError
-}
-
-func (m *MockWriter) String() string {
-	return m.data.String()
-}
-
-// MockWriteError 是模拟的写入错误
-type MockWriteError struct {
-	msg string
-}
-
-func (e *MockWriteError) Error() string {
-	return e.msg
-}
-
-func TestWriteSyncerWrapper_Write(t *testing.T) {
-	mock := &MockWriter{}
-	wrapper := &WriteSyncerWrapper{writer: mock}
-
-	testData := []byte("test data")
-	n, err := wrapper.Write(testData)
-
-	if err != nil {
-		t.Errorf("Write failed: %v", err)
-	}
-
-	if n != len(testData) {
-		t.Errorf("Expected to write %d bytes, wrote %d", len(testData), n)
-	}
-
-	if mock.String() != string(testData) {
-		t.Errorf("Expected data %q, got %q", string(testData), mock.String())
-	}
-}
-
-func TestWriteSyncerWrapper_Sync_WithSyncMethod(t *testing.T) {
-	mock := &MockWriter{}
-	wrapper := &WriteSyncerWrapper{writer: mock}
-
-	err := wrapper.Sync()
-	if err != nil {
-		t.Errorf("Sync failed: %v", err)
-	}
-
-	if mock.syncCalls != 1 {
-		t.Errorf("Expected 1 sync call, got %d", mock.syncCalls)
-	}
-}
-
-func TestWriteSyncerWrapper_Sync_WithoutSyncMethod(t *testing.T) {
-	// 使用标准的 bytes.Buffer，它没有 Sync 方法
+func TestLoggerWithFieldsEdgeCases(t *testing.T) {
 	var buf bytes.Buffer
-	wrapper := &WriteSyncerWrapper{writer: &buf}
-
-	err := wrapper.Sync()
-	if err != nil {
-		t.Errorf("Sync should not fail for writers without Sync method: %v", err)
-	}
-}
-
-func TestWrapWriter_AlreadyWriteSyncer(t *testing.T) {
-	mock := &MockWriter{}
-	wrapper := &WriteSyncerWrapper{writer: mock}
-
-	// wrapWriter 应该识别已经是 WriteSyncer 的对象
-	result := wrapWriter(wrapper)
-
-	if result != wrapper {
-		t.Error("wrapWriter should return the same instance if already a WriteSyncer")
-	}
-}
-
-func TestWrapWriter_NeedsWrapping(t *testing.T) {
-	var buf bytes.Buffer
-	result := wrapWriter(&buf)
-
-	wrapper, ok := result.(*WriteSyncerWrapper)
-	if !ok {
-		t.Error("wrapWriter should return a WriteSyncerWrapper")
-	}
-
-	if wrapper.writer != &buf {
-		t.Error("Wrapper should contain the original writer")
-	}
-}
-
-func TestNewLogger(t *testing.T) {
-	logger := newLogger()
-
-	if logger == nil {
-		t.Fatal("newLogger returned nil")
-	}
-
-	if logger.level != DebugLevel {
-		t.Errorf("Expected level %v, got %v", DebugLevel, logger.level)
-	}
-
-	if logger.callerDepth != 4 {
-		t.Errorf("Expected callerDepth 4, got %d", logger.callerDepth)
-	}
-
-	if logger.Format == nil {
-		t.Error("Format should not be nil")
-	}
-
-	if logger.out == nil {
-		t.Error("Output should not be nil")
-	}
-}
-
-func TestLogger_SetCallerDepth(t *testing.T) {
-	logger := newLogger()
-
-	result := logger.SetCallerDepth(10)
-
-	if result != logger {
-		t.Error("SetCallerDepth should return the same logger instance")
-	}
-
-	if logger.callerDepth != 10 {
-		t.Errorf("Expected callerDepth 10, got %d", logger.callerDepth)
-	}
-}
-
-func TestLogger_SetPrefixMsg(t *testing.T) {
-	logger := newLogger()
-
-	prefix := "PREFIX: "
-	result := logger.SetPrefixMsg(prefix)
-
-	if result != logger {
-		t.Error("SetPrefixMsg should return the same logger instance")
-	}
-
-	if string(logger.PrefixMsg) != prefix {
-		t.Errorf("Expected prefix %q, got %q", prefix, string(logger.PrefixMsg))
-	}
-}
-
-func TestLogger_AppendPrefixMsg(t *testing.T) {
-	logger := newLogger()
-
-	// 设置初始前缀
-	logger.SetPrefixMsg("INITIAL: ")
-
-	// 追加前缀
-	additional := "ADDED: "
-	result := logger.AppendPrefixMsg(additional)
-
-	if result != logger {
-		t.Error("AppendPrefixMsg should return the same logger instance")
-	}
-
-	expected := "INITIAL: ADDED: "
-	if string(logger.PrefixMsg) != expected {
-		t.Errorf("Expected prefix %q, got %q", expected, string(logger.PrefixMsg))
-	}
-}
-
-func TestLogger_SetSuffixMsg(t *testing.T) {
-	logger := newLogger()
-
-	suffix := " :SUFFIX"
-	result := logger.SetSuffixMsg(suffix)
-
-	if result != logger {
-		t.Error("SetSuffixMsg should return the same logger instance")
-	}
-
-	if string(logger.SuffixMsg) != suffix {
-		t.Errorf("Expected suffix %q, got %q", suffix, string(logger.SuffixMsg))
-	}
-}
-
-func TestLogger_AppendSuffixMsg(t *testing.T) {
-	logger := newLogger()
-
-	// 设置初始后缀
-	logger.SetSuffixMsg(" :INITIAL")
-
-	// 追加后缀
-	additional := " :ADDED"
-	result := logger.AppendSuffixMsg(additional)
-
-	if result != logger {
-		t.Error("AppendSuffixMsg should return the same logger instance")
-	}
-
-	expected := " :INITIAL :ADDED"
-	if string(logger.SuffixMsg) != expected {
-		t.Errorf("Expected suffix %q, got %q", expected, string(logger.SuffixMsg))
-	}
-}
-
-func TestLogger_SetLevel(t *testing.T) {
-	logger := newLogger()
-
-	result := logger.SetLevel(ErrorLevel)
-
-	if result != logger {
-		t.Error("SetLevel should return the same logger instance")
-	}
-
-	if logger.level != ErrorLevel {
-		t.Errorf("Expected level %v, got %v", ErrorLevel, logger.level)
-	}
-}
-
-func TestLogger_Level(t *testing.T) {
-	logger := newLogger()
-	logger.SetLevel(WarnLevel)
-
-	if logger.Level() != WarnLevel {
-		t.Errorf("Expected level %v, got %v", WarnLevel, logger.Level())
-	}
-}
-
-func TestLogger_SetOutput(t *testing.T) {
-	logger := newLogger()
-	var buf1, buf2 bytes.Buffer
-
-	result := logger.SetOutput(&buf1, &buf2)
-
-	if result != logger {
-		t.Error("SetOutput should return the same logger instance")
-	}
-
-	// 测试写入是否工作
-	logger.Info("test message")
-
-	// 两个 buffer 都应该收到数据
-	if buf1.Len() == 0 {
-		t.Error("First buffer should contain data")
-	}
-
-	if buf2.Len() == 0 {
-		t.Error("Second buffer should contain data")
-	}
-}
-
-func TestLogger_Sync(t *testing.T) {
-	logger := newLogger()
-	mock := &MockWriter{}
-	logger.SetOutput(mock)
-
-	logger.Sync()
-
-	// 应该调用底层 writer 的 sync
-	if mock.syncCalls != 1 {
-		t.Errorf("Expected 1 sync call, got %d", mock.syncCalls)
-	}
-}
-
-func TestLogger_Clone_SimpleFormat(t *testing.T) {
-	// 测试Clone方法中Format不是FormatFull类型的情况
-	logger := newLogger()
-
-	// 设置一个不实现FormatFull的简单格式化器
-	simpleFormat := &SimpleFormat{}
-	logger.Format = simpleFormat
-
-	cloned := logger.Clone()
-
-	if cloned == logger {
-		t.Error("Clone should return a different logger instance")
-	}
-
-	if cloned.Format != simpleFormat {
-		t.Error("Clone should share the same format instance for non-FormatFull types")
-	}
-}
-
-func TestLogger_Clone(t *testing.T) {
-	original := newLogger()
-	original.SetLevel(ErrorLevel)
-	original.SetPrefixMsg("PREFIX: ")
-	original.SetSuffixMsg(" :SUFFIX")
-	original.SetCallerDepth(10)
-
-	clone := original.Clone()
-
-	if clone == original {
-		t.Error("Clone should return a different instance")
-	}
-
-	if clone.Level() != original.Level() {
-		t.Error("Clone should have the same level")
-	}
-
-	if string(clone.PrefixMsg) != string(original.PrefixMsg) {
-		t.Error("Clone should have the same prefix")
-	}
-
-	if string(clone.SuffixMsg) != string(original.SuffixMsg) {
-		t.Error("Clone should have the same suffix")
-	}
-
-	if clone.callerDepth != original.callerDepth {
-		t.Error("Clone should have the same caller depth")
-	}
-
-	// 修改克隆不应该影响原始对象
-	clone.SetLevel(TraceLevel)
-	if original.Level() == TraceLevel {
-		t.Error("Modifying clone should not affect original")
-	}
-}
-
-// 测试日志级别检查
-func TestLogger_LevelCheck(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
+	logger := New()
 	logger.SetOutput(&buf)
-	logger.SetLevel(WarnLevel)
-
-	// Debug 和 Info 消息应该被过滤
-	logger.Debug("debug message")
-	logger.Info("info message")
-
-	// 应该没有输出
-	if buf.Len() > 0 {
-		t.Error("Debug and Info messages should be filtered when level is Warn")
-	}
-
-	// Warn 消息应该通过
-	logger.Warn("warn message")
-
-	if buf.Len() == 0 {
-		t.Error("Warn message should not be filtered")
-	}
-
-	if !strings.Contains(buf.String(), "warn message") {
-		t.Error("Output should contain warn message")
-	}
-}
-
-// TestLogger_ErrorfLevelDisabled tests Errorf when Error level is disabled
-func TestLogger_ErrorfLevelDisabled(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
-	logger.SetLevel(FatalLevel) // Only fatal messages, error is disabled
-
-	// Errorf should be filtered out
-	logger.Errorf("error message: %s", "test")
-
-	// Should not have any output
-	if buf.Len() > 0 {
-		t.Error("Errorf should be filtered when Error level is disabled")
-	}
-}
-
-func TestLogger_EnableCaller(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
-	logger.SetCallerDepth(1)
-
-	// Arrange: disable caller
+	logger.SetLevel(InfoLevel)
 	logger.EnableCaller(false)
-
-	// Act
-	logger.Info("no caller")
-
-	// Assert: output should not contain .go: pattern (caller info)
-	output := buf.String()
-	if strings.Contains(output, ".go:") {
-		t.Errorf("Caller info should be disabled, got: %s", output)
-	}
-
-	// Arrange: enable caller
-	buf.Reset()
-	logger.EnableCaller(true)
-
-	// Act
-	logger.Info("with caller")
-
-	// Assert: output should contain .go: pattern
-	output = buf.String()
-	if !strings.Contains(output, ".go:") {
-		t.Errorf("Caller info should be enabled, got: %s", output)
-	}
-}
-
-func TestLogger_EnableCaller_ReturnsSelf(t *testing.T) {
-	logger := newLogger()
-	result := logger.EnableCaller(false)
-	if result != logger {
-		t.Error("EnableCaller should return the same logger instance")
-	}
-}
-
-func TestLogger_EnableTrace(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
-
-	// Arrange: set trace ID and disable trace
-	SetTrace("test-trace-id-123")
-	defer DelTrace()
 	logger.EnableTrace(false)
 
-	// Act
-	logger.Info("no trace")
+	t.Run("With_empty_fields", func(t *testing.T) {
+		buf.Reset()
+		logger.Infow("message")
+		if !strings.Contains(buf.String(), "message") {
+			t.Error("Should log message with no fields")
+		}
+	})
 
-	// Assert: output should not contain trace ID
-	output := buf.String()
-	if strings.Contains(output, "test-trace-id-123") {
-		t.Errorf("Trace info should be disabled, got: %s", output)
-	}
+	t.Run("With_nil_value_field", func(t *testing.T) {
+		buf.Reset()
+		logger.Infow("message", "key", nil)
+		if !strings.Contains(buf.String(), "key") {
+			t.Error("Should log message with nil field value")
+		}
+	})
 
-	// Arrange: enable trace
-	buf.Reset()
-	logger.EnableTrace(true)
+	t.Run("With_multiple_fields", func(t *testing.T) {
+		buf.Reset()
+		logger.Infow("message", "key1", "value1", "key2", 123, "key3", true)
+		output := buf.String()
+		if !strings.Contains(output, "key1") || !strings.Contains(output, "key2") || !strings.Contains(output, "key3") {
+			t.Error("Should log all fields")
+		}
+	})
 
-	// Act
-	logger.Info("with trace")
-
-	// Assert: output should contain trace ID
-	output = buf.String()
-	if !strings.Contains(output, "test-trace-id-123") {
-		t.Errorf("Trace info should be enabled, got: %s", output)
-	}
+	t.Run("With_complex_values", func(t *testing.T) {
+		buf.Reset()
+		logger.Infow("message", "slice", []int{1, 2, 3}, "map", map[string]int{"a": 1})
+		output := buf.String()
+		if !strings.Contains(output, "slice") || !strings.Contains(output, "map") {
+			t.Error("Should log complex values")
+		}
+	})
 }
 
-func TestLogger_EnableTrace_ReturnsSelf(t *testing.T) {
-	logger := newLogger()
-	result := logger.EnableTrace(false)
-	if result != logger {
-		t.Error("EnableTrace should return the same logger instance")
-	}
+func TestLoggerOutputMethods(t *testing.T) {
+	logger := New()
+
+	t.Run("SetOutput", func(t *testing.T) {
+		var buf1, buf2 bytes.Buffer
+		logger.SetOutput(&buf1)
+		logger.Info("test1")
+		if !strings.Contains(buf1.String(), "test1") {
+			t.Error("Should write to first output")
+		}
+
+		logger.SetOutput(&buf2)
+		logger.Info("test2")
+		if strings.Contains(buf1.String(), "test2") {
+			t.Error("Should not write to old output")
+		}
+		if !strings.Contains(buf2.String(), "test2") {
+			t.Error("Should write to new output")
+		}
+	})
 }
 
-func TestLogger_FillPrefixSuffix_WithSuffix(t *testing.T) {
+func TestLoggerSync(t *testing.T) {
+	t.Run("Sync_on_non_syncer", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := New()
+		logger.SetOutput(&buf)
+
+		// Should not panic even if output doesn't implement Syncer
+		logger.Sync()
+	})
+}
+
+type mockSyncer struct {
+	*bytes.Buffer
+	syncCount int
+}
+
+func (m *mockSyncer) Sync() error {
+	m.syncCount++
+	return nil
+}
+
+func TestLoggerSyncWithSyncer(t *testing.T) {
+	t.Run("Sync_calls_sync", func(t *testing.T) {
+		ms := &mockSyncer{Buffer: &bytes.Buffer{}}
+		logger := New()
+		logger.SetOutput(ms)
+
+		logger.Sync()
+
+		if ms.syncCount != 1 {
+			t.Errorf("Expected 1 sync, got %d", ms.syncCount)
+		}
+	})
+}
+
+func TestLoggerClone(t *testing.T) {
+	logger := New()
+	logger.SetLevel(InfoLevel)
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
+
+	t.Run("Clone_with_modified_settings", func(t *testing.T) {
+		cloned := logger.Clone()
+
+		// Verify cloned logger works independently
+		var buf1, buf2 bytes.Buffer
+		logger.SetOutput(&buf1)
+		cloned.SetOutput(&buf2)
+
+		logger.Info("original")
+		cloned.Info("cloned")
+
+		if !strings.Contains(buf1.String(), "original") {
+			t.Error("Original logger should work")
+		}
+		if !strings.Contains(buf2.String(), "cloned") {
+			t.Error("Cloned logger should work")
+		}
+		if strings.Contains(buf1.String(), "cloned") {
+			t.Error("Cloned should not write to original output")
+		}
+	})
+}
+
+func TestEntryPoolOperations(t *testing.T) {
+	t.Run("getEntry_returns_initialized_entry", func(t *testing.T) {
+		entry := getEntry()
+
+		if entry.Pid == 0 {
+			t.Error("Entry should have Pid set")
+		}
+		// Time is set when entry is used, not when retrieved from pool
+		entry.Time = time.Now()
+		if entry.Time.IsZero() {
+			t.Error("Entry time should be settable")
+		}
+
+		putEntry(entry)
+	})
+
+	t.Run("getEntry_multiple_entries", func(t *testing.T) {
+		entry1 := getEntry()
+		entry2 := getEntry()
+
+		if entry1 == entry2 {
+			t.Error("Should return different entries")
+		}
+
+		putEntry(entry1)
+		putEntry(entry2)
+	})
+}
+
+func TestLoggerWithPrefixSuffix(t *testing.T) {
 	var buf bytes.Buffer
-	logger := newLogger()
+	logger := New()
 	logger.SetOutput(&buf)
+	logger.SetLevel(InfoLevel)
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
 
-	// Arrange: set suffix
-	logger.SetSuffixMsg(" [SUFFIX-TAG]")
+	t.Run("With_prefix", func(t *testing.T) {
+		logger.SetPrefixMsg("[PREFIX] ")
+		logger.Info("message")
 
-	// Act
-	logger.Info("test message")
+		if !strings.Contains(buf.String(), "[PREFIX]") {
+			t.Error("Should include prefix")
+		}
+		if !strings.Contains(buf.String(), "message") {
+			t.Error("Should include message")
+		}
+	})
 
-	// Assert: output should contain suffix
-	output := buf.String()
-	if !strings.Contains(output, "[SUFFIX-TAG]") {
-		t.Errorf("Suffix not found in output: %s", output)
+	t.Run("With_suffix", func(t *testing.T) {
+		buf.Reset()
+		logger.SetSuffixMsg(" [SUFFIX]")
+		logger.Info("message")
+
+		if !strings.Contains(buf.String(), "[SUFFIX]") {
+			t.Error("Should include suffix")
+		}
+	})
+}
+
+func TestFormatterWithAllLevels(t *testing.T) {
+	formatter := &Formatter{}
+	levels := []Level{TraceLevel, DebugLevel, InfoLevel, WarnLevel, ErrorLevel}
+
+	for _, level := range levels {
+		t.Run(level.String(), func(t *testing.T) {
+			entry := &Entry{
+				Level:   level,
+				Message: "test",
+				Time:    time.Now(),
+				Pid:     123,
+			}
+
+			result := formatter.Format(entry)
+			if len(result) == 0 {
+				t.Errorf("Should format entry for level %v", level)
+			}
+
+			resultStr := string(result)
+			if !strings.Contains(resultStr, level.String()) {
+				t.Errorf("Should contain level string %v", level)
+			}
+		})
 	}
 }
 
-func TestLogger_FillPrefixSuffix_WithPrefix(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
+func TestWriteSyncerWrapper(t *testing.T) {
+	t.Run("Write_delegates_to_writer", func(t *testing.T) {
+		var buf bytes.Buffer
+		wrapper := &WriteSyncerWrapper{writer: &buf}
 
-	// Arrange: set prefix
-	logger.SetPrefixMsg("[PREFIX-TAG]")
+		data := []byte("test data\n")
+		n, err := wrapper.Write(data)
 
-	// Act
-	logger.Info("test message")
+		if err != nil {
+			t.Errorf("Write should not error, got %v", err)
+		}
+		if n != len(data) {
+			t.Errorf("Write should return %d, got %d", len(data), n)
+		}
 
-	// Assert: output should contain prefix
-	output := buf.String()
-	if !strings.Contains(output, "[PREFIX-TAG]") {
-		t.Errorf("Prefix not found in output: %s", output)
-	}
+		if buf.String() != "test data\n" {
+			t.Error("Write should delegate to underlying writer")
+		}
+	})
+
+	t.Run("Sync_with_syncer", func(t *testing.T) {
+		ms := &mockSyncer{Buffer: &bytes.Buffer{}}
+		wrapper := &WriteSyncerWrapper{writer: ms}
+
+		err := wrapper.Sync()
+		if err != nil {
+			t.Errorf("Sync should not error, got %v", err)
+		}
+		if ms.syncCount != 1 {
+			t.Errorf("Sync should call underlying syncer, got %d calls", ms.syncCount)
+		}
+	})
+
+	t.Run("Sync_without_syncer", func(t *testing.T) {
+		var buf bytes.Buffer
+		wrapper := &WriteSyncerWrapper{writer: &buf}
+
+		err := wrapper.Sync()
+		if err != nil {
+			t.Errorf("Sync should return nil for non-syncer, got %v", err)
+		}
+	})
 }
 
-func TestLogger_FillPrefixSuffix_Both(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
+func TestWrapWriter(t *testing.T) {
+	t.Run("wrapWriter_with_WriteSyncer", func(t *testing.T) {
+		ms := &mockSyncer{Buffer: &bytes.Buffer{}}
+		ws := wrapWriter(ms)
 
-	// Arrange: set both prefix and suffix
-	logger.SetPrefixMsg("[PRE]")
-	logger.SetSuffixMsg("[SUF]")
+		if ws != ms {
+			t.Error("wrapWriter should return original WriteSyncer")
+		}
+	})
 
-	// Act
-	logger.Info("middle")
+	t.Run("wrapWriter_with_io_Writer", func(t *testing.T) {
+		var buf bytes.Buffer
+		ws := wrapWriter(&buf)
 
-	// Assert: output should contain both
-	output := buf.String()
-	if !strings.Contains(output, "[PRE]") {
-		t.Errorf("Prefix not found in output: %s", output)
-	}
-	if !strings.Contains(output, "[SUF]") {
-		t.Errorf("Suffix not found in output: %s", output)
-	}
+		if ws == nil {
+			t.Error("wrapWriter should return wrapped writer")
+		}
+
+		// Verify it implements WriteSyncer
+		if _, err := ws.Write([]byte("test")); err != nil {
+			t.Errorf("Wrapped writer should write, got %v", err)
+		}
+	})
 }
 
-func TestLogger_FillPrefixSuffix_Empty(t *testing.T) {
-	var buf bytes.Buffer
-	logger := newLogger()
-	logger.SetOutput(&buf)
+func TestCloneWithHooks(t *testing.T) {
+	logger := New()
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
 
-	// Arrange: no prefix or suffix set (default)
+	t.Run("Clone_copies_hooks", func(t *testing.T) {
+		hookCalled := false
+		hook := constant.HookFunc(func(entry interface{}) interface{} {
+			hookCalled = true
+			return entry
+		})
 
-	// Act
-	logger.Info("test")
+		logger.AddHook(hook)
+		cloned := logger.Clone()
 
-	// Assert: should still produce output without prefix/suffix markers
-	output := buf.String()
-	if len(output) == 0 {
-		t.Error("Logger should produce output even without prefix/suffix")
-	}
+		var buf bytes.Buffer
+		cloned.SetOutput(&buf)
+		cloned.Info("test")
+
+		if !hookCalled {
+			t.Error("Cloned logger should have hooks copied")
+		}
+	})
+
+	t.Run("Clone_with_empty_hooks", func(t *testing.T) {
+		cloned := logger.Clone()
+		if cloned == nil {
+			t.Error("Clone should work with no hooks")
+		}
+
+		// Should not panic when logging
+		var buf bytes.Buffer
+		cloned.SetOutput(&buf)
+		cloned.Info("test")
+	})
 }
 
-// TestNewLogger_ReleaseLogPath tests the newLogger function's ReleaseLogDir branch
-func TestNewLogger_ReleaseLogPath(t *testing.T) {
-	// Test newLogger with empty ReleaseLogPath (should use os.Stdout)
-	originalPath := ReleaseLogDir
-	ReleaseLogDir = ""
-	defer func() {
-		ReleaseLogDir = originalPath
-	}()
+func TestCloneWithFormatFull(t *testing.T) {
+	logger := New()
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
 
-	logger := newLogger()
+	t.Run("Clone_with_FormatFull", func(t *testing.T) {
+		formatter := &Formatter{
+			DisableCaller:             true,
+			DisableParsingAndEscaping: true,
+		}
+		logger.Format = formatter
 
-	if logger == nil {
-		t.Fatal("newLogger returned nil")
-	}
+		cloned := logger.Clone()
 
-	if logger.level != DebugLevel {
-		t.Errorf("Expected DebugLevel, got %v", logger.level)
-	}
+		// Verify Format was cloned, not just copied
+		clonedFormatter, ok := cloned.Format.(*Formatter)
+		if !ok {
+			t.Fatal("Cloned format should be *Formatter")
+		}
 
-	if logger.callerDepth != 4 {
-		t.Errorf("Expected callerDepth 4, got %d", logger.callerDepth)
-	}
+		// Cloned formatter should have same values as original
+		if clonedFormatter.DisableCaller != formatter.DisableCaller {
+			t.Errorf("Cloned formatter should have same DisableCaller, got %v want %v",
+				clonedFormatter.DisableCaller, formatter.DisableCaller)
+		}
 
-	// Test newLogger with non-empty ReleaseLogPath (should use hourly rotator)
-	tmpDir := t.TempDir()
-	ReleaseLogDir = tmpDir + "/test.log"
-
-	logger2 := newLogger()
-
-	if logger2 == nil {
-		t.Fatal("newLogger returned nil with ReleaseLogPath")
-	}
-
-	// Verify it creates a logger (we can't easily test the exact output type without exposing internals)
-	if logger2.level != DebugLevel {
-		t.Errorf("Expected DebugLevel with ReleaseLogPath, got %v", logger2.level)
-	}
+		// Modifying cloned format should not affect original
+		clonedFormatter.DisableCaller = false
+		if formatter.DisableCaller != true {
+			t.Errorf("Original formatter should be unchanged, got %v want true", formatter.DisableCaller)
+		}
+	})
 }

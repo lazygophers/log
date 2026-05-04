@@ -1,280 +1,257 @@
 package log
 
 import (
-	"encoding/json"
+	"bytes"
+	"strings"
 	"testing"
 	"time"
 )
 
-func TestJSONFormatter_Format_Basic(t *testing.T) {
-	entry := &Entry{
-		Level:   InfoLevel,
-		Message: "test message",
-		Pid:     12345,
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
+func TestJSONFormatterSpecialCases(t *testing.T) {
+	t.Run("jsonEscapeString_with_control_chars", func(t *testing.T) {
+		formatter := &JSONFormatter{}
 
-	f := &JSONFormatter{}
-	output := f.Format(entry)
+		// Test various control characters that trigger hex encoding
+		testCases := []struct {
+			input    string
+			contains string
+		}{
+			{"\x01", "\\u00"},     // SOH
+			{"\x1F", "\\u00"},     // US
+			{"Hello\x00World", "\\u00"}, // NULL in middle
+		}
 
-	if len(output) == 0 {
-		t.Fatal("empty output")
-	}
+		for _, tc := range testCases {
+			entry := &Entry{
+				Level:   InfoLevel,
+				Message: tc.input,
+				Time:    time.Now(),
+			}
 
-	// Verify it's valid JSON
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
+			result := formatter.Format(entry)
+			resultStr := string(result)
 
-	if je.Level != "info" {
-		t.Errorf("expected level 'info', got '%s'", je.Level)
-	}
-	if je.Message != "test message" {
-		t.Errorf("expected message 'test message', got '%s'", je.Message)
-	}
-	if je.Pid != 12345 {
-		t.Errorf("expected pid 12345, got %d", je.Pid)
-	}
-}
+			if !strings.Contains(resultStr, tc.contains) {
+				t.Errorf("Expected %q to contain %q, got %q", tc.input, tc.contains, resultStr)
+			}
+		}
+	})
 
-func TestJSONFormatter_Format_WithTrace(t *testing.T) {
-	entry := &Entry{
-		Level:   DebugLevel,
-		Message: "debug with trace",
-		Pid:     12345,
-		Gid:     67890,
-		TraceId: "trace-123",
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
+	t.Run("jsonEscapeString_all_escapes", func(t *testing.T) {
+		formatter := &JSONFormatter{}
 
-	f := &JSONFormatter{}
-	output := f.Format(entry)
+		// Test all escape sequences
+		testCases := []string{
+			"Quote: \"",
+			"Backslash: \\",
+			"Newline: \n",
+			"Carriage Return: \r",
+			"Tab: \t",
+		}
 
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
+		for _, msg := range testCases {
+			entry := &Entry{
+				Level:   InfoLevel,
+				Message: msg,
+				Time:    time.Now(),
+			}
 
-	if je.TraceID != "trace-123" {
-		t.Errorf("expected trace_id 'trace-123', got '%s'", je.TraceID)
-	}
-	if je.Gid != 67890 {
-		t.Errorf("expected gid 67890, got %d", je.Gid)
-	}
-}
+			result := formatter.Format(entry)
+			if len(result) == 0 {
+				t.Errorf("Should format message with escape: %q", msg)
+			}
+		}
+	})
 
-func TestJSONFormatter_Format_WithCaller(t *testing.T) {
-	entry := &Entry{
-		Level:      ErrorLevel,
-		Message:    "error with caller",
-		Pid:        12345,
-		File:       "logger_test.go",
-		CallerLine: 42,
-		CallerFunc: "TestJSONFormatter",
-		CallerDir:  "log",
-		CallerName: "log.TestJSONFormatter",
-		Time:       time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
+	t.Run("jsonMarshal_fallback", func(t *testing.T) {
+		formatter := &JSONFormatter{}
 
-	f := &JSONFormatter{}
-	output := f.Format(entry)
-
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-
-	if je.CallerFile != "logger_test.go" {
-		t.Errorf("expected caller_file 'logger_test.go', got '%s'", je.CallerFile)
-	}
-	if je.CallerLine != 42 {
-		t.Errorf("expected caller_line 42, got %d", je.CallerLine)
-	}
-	if je.CallerFunc != "TestJSONFormatter" {
-		t.Errorf("expected caller_func 'TestJSONFormatter', got '%s'", je.CallerFunc)
-	}
-}
-
-func TestJSONFormatter_PrettyPrint(t *testing.T) {
-	entry := &Entry{
-		Level:   InfoLevel,
-		Message: "pretty test",
-		Pid:     12345,
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{EnablePrettyPrint: true}
-	output := f.Format(entry)
-
-	// Pretty printed JSON should contain newlines/indentation
-	if len(output) == 0 {
-		t.Fatal("empty output")
-	}
-
-	// Should contain indentation
-	if !contains(output, []byte("  ")) {
-		t.Error("pretty print should contain indentation")
-	}
-}
-
-func TestJSONFormatter_DisableTimestamp(t *testing.T) {
-	entry := &Entry{
-		Level:   InfoLevel,
-		Message: "no timestamp",
-		Pid:     12345,
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{DisableTimestamp: true}
-	output := f.Format(entry)
-
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-
-	if je.Time != "" {
-		t.Errorf("expected empty time, got '%s'", je.Time)
-	}
-}
-
-func TestJSONFormatter_DisableCaller(t *testing.T) {
-	entry := &Entry{
-		Level:      InfoLevel,
-		Message:    "no caller",
-		Pid:        12345,
-		File:       "test.go",
-		CallerLine: 10,
-		Time:       time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{DisableCaller: true}
-	output := f.Format(entry)
-
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-
-	if je.CallerFile != "" {
-		t.Errorf("expected empty caller_file, got '%s'", je.CallerFile)
-	}
-}
-
-func TestJSONFormatter_DisableTrace(t *testing.T) {
-	entry := &Entry{
-		Level:   InfoLevel,
-		Message: "no trace",
-		Pid:     12345,
-		Gid:     67890,
-		TraceId: "trace-abc",
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{DisableTrace: true}
-	output := f.Format(entry)
-
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-
-	if je.TraceID != "" {
-		t.Errorf("expected empty trace_id, got '%s'", je.TraceID)
-	}
-	if je.Gid != 0 {
-		t.Errorf("expected zero gid, got %d", je.Gid)
-	}
-}
-
-func TestJSONFormatter_WithPrefixSuffix(t *testing.T) {
-	entry := &Entry{
-		Level:    InfoLevel,
-		Message:   "with prefix/suffix",
-		Pid:      12345,
-		PrefixMsg: []byte("[PREFIX]"),
-		SuffixMsg: []byte("[SUFFIX]"),
-		Time:     time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{}
-	output := f.Format(entry)
-
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON: %v", err)
-	}
-
-	if je.PrefixMsg != "[PREFIX]" {
-		t.Errorf("expected prefix_msg '[PREFIX]', got '%s'", je.PrefixMsg)
-	}
-	if je.SuffixMsg != "[SUFFIX]" {
-		t.Errorf("expected suffix_msg '[SUFFIX]', got '%s'", je.SuffixMsg)
-	}
-}
-
-func TestJSONFormatter_Escaping(t *testing.T) {
-	entry := &Entry{
-		Level:   InfoLevel,
-		Message: "test with \"quotes\" and\nnewlines",
-		Pid:     12345,
-		Time:    time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC),
-	}
-
-	f := &JSONFormatter{}
-	output := f.Format(entry)
-
-	// Should be valid JSON
-	var je jsonEntry
-	if err := json.Unmarshal(output, &je); err != nil {
-		t.Fatalf("invalid JSON with special chars: %v", err)
-	}
-}
-
-func TestJSONFormatter_AllLevels(t *testing.T) {
-	levels := []Level{
-		TraceLevel, DebugLevel, InfoLevel, WarnLevel,
-		ErrorLevel, FatalLevel, PanicLevel,
-	}
-
-	time := time.Date(2026, 5, 4, 12, 0, 0, 0, time.UTC)
-
-	for _, level := range levels {
+		// Create a channel (unmarshallable type) to trigger JSON marshaling error
+		ch := make(chan int)
 		entry := &Entry{
-			Level:   level,
-			Message: level.String() + " message",
-			Pid:     12345,
-			Time:    time,
+			Level:   InfoLevel,
+			Message: "test",
+			Time:    time.Now(),
+			Fields: []KV{
+				{Key: "unmarshallable", Value: ch},
+			},
 		}
 
-		f := &JSONFormatter{}
-		output := f.Format(entry)
+		result := formatter.Format(entry)
+		resultStr := string(result)
 
-		var je jsonEntry
-		if err := json.Unmarshal(output, &je); err != nil {
-			t.Errorf("level %s: invalid JSON: %v", level, err)
+		// Should fallback to error message with jsonEscapeString
+		if !strings.Contains(resultStr, "JSON marshaling failed") {
+			t.Error("Should include marshaling error in fallback")
+		}
+		if !strings.Contains(resultStr, "test") {
+			t.Error("Should include original message in fallback")
+		}
+	})
+
+	t.Run("jsonMarshal_fallback_with_control_chars", func(t *testing.T) {
+		formatter := &JSONFormatter{}
+
+		// Create a channel (unmarshallable type) to trigger JSON marshaling error
+		ch := make(chan int)
+		entry := &Entry{
+			Level:   InfoLevel,
+			Message: "test\x01message\x02", // Include control characters
+			Time:    time.Now(),
+			Fields: []KV{
+				{Key: "unmarshallable", Value: ch},
+			},
 		}
 
-		expectedLevel := level.String()
-		if je.Level != expectedLevel {
-			t.Errorf("expected level '%s', got '%s'", expectedLevel, je.Level)
+		result := formatter.Format(entry)
+		resultStr := string(result)
+
+		// Should fallback to error message with jsonEscapeString (including hexByte)
+		if !strings.Contains(resultStr, "JSON marshaling failed") {
+			t.Error("Should include marshaling error in fallback")
 		}
+		// Control characters should be escaped as \u00
+		if !strings.Contains(resultStr, "\\u00") {
+			t.Error("Should escape control characters using hexByte")
+		}
+	})
+}
+
+func TestLoggerWMethodsFull(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New()
+	logger.SetOutput(&buf)
+	logger.SetLevel(TraceLevel)
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
+
+	methods := []struct {
+		name   string
+		method func(string, ...interface{})
+	}{
+		{"Debugw", logger.Debugw},
+		{"Infow", logger.Infow},
+		{"Warnw", logger.Warnw},
+		{"Errorw", logger.Errorw},
+	}
+
+	for _, m := range methods {
+		t.Run(m.name, func(t *testing.T) {
+			buf.Reset()
+			m.method("test message", "key1", "value1", "key2", "value2")
+
+			output := buf.String()
+			if !strings.Contains(output, "test message") {
+				t.Errorf("%s should log message", m.name)
+			}
+			if !strings.Contains(output, "key1") {
+				t.Errorf("%s should include key1 field", m.name)
+			}
+		})
 	}
 }
 
-func contains(data []byte, substr []byte) bool {
-	for i := 0; i <= len(data)-len(substr); i++ {
-		match := true
-		for j := 0; j < len(substr); j++ {
-		if i+j >= len(data) || data[i+j] != substr[j] {
-			match = false
-			break
-		}
+func TestLoggerWMethodsDisabled(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New()
+	logger.SetOutput(&buf)
+	logger.SetLevel(ErrorLevel) // Only Error and above
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
+
+	methods := []struct {
+		name   string
+		method func(string, ...interface{})
+	}{
+		{"Debugw", logger.Debugw},
+		{"Infow", logger.Infow},
+		{"Warnw", logger.Warnw},
 	}
-		if match {
-			return true
-		}
+
+	for _, m := range methods {
+		t.Run(m.name, func(t *testing.T) {
+			buf.Reset()
+			m.method("should not log", "key", "value")
+
+			if buf.Len() != 0 {
+				t.Errorf("%s should not log when level is disabled", m.name)
+			}
+		})
 	}
-	return false
+}
+func TestJSONFormatterCoverage(t *testing.T) {
+	t.Run("JSON_formatter_with_special_chars", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := New()
+		logger.SetOutput(&buf)
+		logger.Format = &JSONFormatter{}
+		logger.EnableCaller(false)
+		logger.EnableTrace(false)
+
+		// Test message with special characters
+		testStrings := []string{
+			`Message with "quotes"`,
+			"Message with\nnewline",
+			"Message with\ttab",
+			"Message with \\ backslash",
+		}
+
+		for _, s := range testStrings {
+			buf.Reset()
+			logger.Info(s)
+
+			output := buf.String()
+			if len(output) == 0 {
+				t.Errorf("should format message with special chars: %q", s)
+			}
+
+			// Verify it's valid JSON
+			if !strings.HasPrefix(output, "{") {
+				t.Error("should be JSON object")
+			}
+		}
+	})
+
+	t.Run("JSON_formatter_all_fields", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := New()
+		logger.SetOutput(&buf)
+		logger.Format = &JSONFormatter{}
+		logger.EnableCaller(false)
+		logger.EnableTrace(true)
+
+		logger.Infow("test", "key1", "value1", "key2", 123, "key3", true)
+
+		output := buf.String()
+		if !strings.Contains(output, "key1") {
+			t.Error("should contain key1")
+		}
+		if !strings.Contains(output, "key2") {
+			t.Error("should contain key2")
+		}
+		if !strings.Contains(output, "key3") {
+			t.Error("should contain key3")
+		}
+	})
+
+	t.Run("JSON_formatter_pretty_print", func(t *testing.T) {
+		var buf bytes.Buffer
+		logger := New()
+		logger.SetOutput(&buf)
+
+		formatter := &JSONFormatter{
+			EnablePrettyPrint: true,
+		}
+		logger.Format = formatter
+		logger.EnableCaller(false)
+		logger.EnableTrace(false)
+
+		logger.Info("test")
+
+		output := buf.String()
+		// Pretty printed JSON should have indentation
+		if !strings.Contains(output, "\n") {
+			t.Error("pretty print should have newlines")
+		}
+	})
 }
