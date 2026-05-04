@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+// KV represents a key-value pair for structured logging
+type KV struct {
+	Key   string
+	Value interface{}
+}
+
 // Entry represents a log entry
 //
 // Field layout is optimized for cache performance:
@@ -32,6 +38,9 @@ type Entry struct {
 	// Byte slices (24 bytes each) - lower frequency
 	PrefixMsg []byte // Prefix message
 	SuffixMsg []byte // Suffix message
+
+	// Structured fields (key-value pairs)
+	Fields []KV // Structured logging fields
 }
 
 // NewEntry creates a new Entry instance from object pool

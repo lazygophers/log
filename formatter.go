@@ -2,6 +2,7 @@ package log
 
 import (
 	"bytes"
+	"fmt"
 	"path"
 	"strconv"
 	"strings"
@@ -46,6 +47,7 @@ func (p *Formatter) format(entry *Entry) []byte {
 	p.formatTimestamp(b, entry)
 	p.formatLevel(b, entry)
 	b.WriteString(strings.TrimSpace(entry.Message))
+	p.formatFields(b, entry) // Format structured fields
 	p.formatCallerAndTrace(b, entry)
 	p.formatSuffix(b, entry)
 
@@ -84,6 +86,23 @@ func (p *Formatter) formatLevel(b *bytes.Buffer, entry *Entry) {
 	b.WriteString(entry.Level.String())
 	b.Write([]byte("] "))
 	b.Write(colorEnd)
+}
+
+// formatFields writes structured fields as key=value pairs
+func (p *Formatter) formatFields(b *bytes.Buffer, entry *Entry) {
+	if len(entry.Fields) == 0 {
+		return
+	}
+
+	b.WriteByte(' ')
+	for i, field := range entry.Fields {
+		if i > 0 {
+			b.WriteByte(' ')
+		}
+		b.WriteString(field.Key)
+		b.WriteByte('=')
+		b.WriteString(fmt.Sprintf("%v", field.Value))
+	}
 }
 
 // formatCallerAndTrace writes caller and trace information

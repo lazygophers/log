@@ -15,11 +15,12 @@ type JSONFormatter struct {
 
 // jsonEntry represents JSON-serializable log entry
 type jsonEntry struct {
-	Level      string `json:"level"`
-	Time       string `json:"time,omitempty"`
-	Message    string `json:"message"`
-	Pid        int    `json:"pid"`
-	Gid        int64  `json:"gid,omitempty"`
+	Level      string                    `json:"level"`
+	Time       string                    `json:"time,omitempty"`
+	Message    string                    `json:"message"`
+	Pid        int                       `json:"pid"`
+	Gid        int64                     `json:"gid,omitempty"`
+	Fields     map[string]interface{}    `json:"fields,omitempty"`
 
 	// Caller information
 	CallerFile     string `json:"caller_file,omitempty"`
@@ -105,6 +106,14 @@ func (f *JSONFormatter) toJSONEntry(entry *Entry) jsonEntry {
 	}
 	if len(entry.SuffixMsg) > 0 {
 		je.SuffixMsg = string(entry.SuffixMsg)
+	}
+
+	// Structured fields
+	if len(entry.Fields) > 0 {
+		je.Fields = make(map[string]interface{}, len(entry.Fields))
+		for _, field := range entry.Fields {
+			je.Fields[field.Key] = field.Value
+		}
 	}
 
 	return je

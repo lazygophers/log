@@ -201,29 +201,24 @@ func (p *Logger) populateFields(entry *Entry, args ...interface{}) {
 		return
 	}
 
-	// Append fields to message for text formatter
-	if len(entry.Message) > 0 {
-		entry.Message += " "
-	}
+	// Pre-allocate for efficiency
+	entry.Fields = make([]KV, 0, len(args)/2)
 
 	// Parse key-value pairs (odd=key, even=value)
 	for i := 0; i < len(args); i += 2 {
 		if i+1 >= len(args) {
-			// Missing value, use key as is
-			if i > 0 {
-				entry.Message += " "
-			}
-			entry.Message += fmt.Sprintf("%v", args[i])
+			// Odd number of args, last key without value
+			// Store as string key with nil value
+			entry.Fields = append(entry.Fields, KV{
+				Key:   fmt.Sprintf("%v", args[i]),
+				Value: nil,
+			})
 			break
-		}
-
-		if i > 0 {
-			entry.Message += " "
 		}
 
 		key := fmt.Sprintf("%v", args[i])
 		value := args[i+1]
-		entry.Message += fmt.Sprintf("%s=%v", key, value)
+		entry.Fields = append(entry.Fields, KV{Key: key, Value: value})
 	}
 }
 
