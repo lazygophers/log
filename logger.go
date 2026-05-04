@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -193,6 +194,39 @@ func (p *Logger) populateEntry(entry *Entry, level Level, msg string) {
 	entry.Time = time.Now()
 }
 
+// populateFields sets structured fields on the log entry
+// args: key1, value1, key2, value2, ...
+func (p *Logger) populateFields(entry *Entry, args ...interface{}) {
+	if len(args) == 0 {
+		return
+	}
+
+	// Append fields to message for text formatter
+	if len(entry.Message) > 0 {
+		entry.Message += " "
+	}
+
+	// Parse key-value pairs (odd=key, even=value)
+	for i := 0; i < len(args); i += 2 {
+		if i+1 >= len(args) {
+			// Missing value, use key as is
+			if i > 0 {
+				entry.Message += " "
+			}
+			entry.Message += fmt.Sprintf("%v", args[i])
+			break
+		}
+
+		if i > 0 {
+			entry.Message += " "
+		}
+
+		key := fmt.Sprintf("%v", args[i])
+		value := args[i+1]
+		entry.Message += fmt.Sprintf("%s=%v", key, value)
+	}
+}
+
 // fillTraceInfo conditionally sets trace information
 //
 //go:inline
@@ -237,10 +271,11 @@ func (p *Logger) fillPrefixSuffix(entry *Entry) {
 // log is the internal core logging function
 //
 //go:noinline
-func (p *Logger) log(level Level, msg string) {
+func (p *Logger) log(level Level, msg string, args ...interface{}) {
 	entry := getEntry()
 
 	p.populateEntry(entry, level, msg)
+	p.populateFields(entry, args...)
 	p.fillTraceInfo(entry)
 	p.fillCallerInfo(entry)
 	p.fillPrefixSuffix(entry)
@@ -444,4 +479,60 @@ func (p *Logger) Caller(disable bool) *Logger {
 // StartMsg logs a new log start message
 func (p *Logger) StartMsg() {
 	p.Infof("========== start new log ==========")
+}
+
+// Tracew logs TRACE level with structured fields
+func (p *Logger) Tracew(msg string, args ...interface{}) {
+	if !p.levelEnabled(TraceLevel) {
+		return
+	}
+	p.log(TraceLevel, msg, args...)
+}
+
+// Debugw logs DEBUG level with structured fields
+func (p *Logger) Debugw(msg string, args ...interface{}) {
+	if !p.levelEnabled(DebugLevel) {
+		return
+	}
+	p.log(DebugLevel, msg, args...)
+}
+
+// Infow logs INFO level with structured fields
+func (p *Logger) Infow(msg string, args ...interface{}) {
+	if !p.levelEnabled(InfoLevel) {
+		return
+	}
+	p.log(InfoLevel, msg, args...)
+}
+
+// Warnw logs WARN level with structured fields
+func (p *Logger) Warnw(msg string, args ...interface{}) {
+	if !p.levelEnabled(WarnLevel) {
+		return
+	}
+	p.log(WarnLevel, msg, args...)
+}
+
+// Errorw logs ERROR level with structured fields
+func (p *Logger) Errorw(msg string, args ...interface{}) {
+	if !p.levelEnabled(ErrorLevel) {
+		return
+	}
+	p.log(ErrorLevel, msg, args...)
+}
+
+// Fatalw logs FATAL level with structured fields and exits
+func (p *Logger) Fatalw(msg string, args ...interface{}) {
+	if !p.levelEnabled(FatalLevel) {
+		return
+	}
+	p.log(FatalLevel, msg, args...)
+}
+
+// Panicw logs PANIC level with structured fields and panics
+func (p *Logger) Panicw(msg string, args ...interface{}) {
+	if !p.levelEnabled(PanicLevel) {
+		return
+	}
+	p.log(PanicLevel, msg, args...)
 }
