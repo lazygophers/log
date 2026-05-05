@@ -78,7 +78,6 @@ titleSuffix: " | LazyGophers Log"
 -   带有方法链的流畅配置 API
 -   简单和格式化日志方法（`.Info()` 和 `.Infof()`）
 -   用于隔离配置的日志器克隆
--   带有 `CloneToCtx()` 的上下文感知日志
 -   前缀和后缀消息自定义
 -   调用者信息切换
 

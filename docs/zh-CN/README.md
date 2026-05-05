@@ -4,11 +4,11 @@ titleSuffix: ' | LazyGophers Log'
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Test Coverage](https://img.shields.io/badge/coverage-95.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-一个高性能、灵活的 Go 日志库，基于 zap 构建，提供丰富的功能和简洁的 API。
+一个高性能、灵活的 Go 日志库，专注于性能和简洁性，提供丰富的功能和简洁的 API。
 
 ## 📖 文档语言
 
@@ -30,7 +30,7 @@ titleSuffix: ' | LazyGophers Log'
 
 ## ✨ 特性
 
--   **🚀 高性能**：基于 zap 构建，采用对象池复用 Entry 对象，减少内存分配
+-   **🚀 高性能**：专注于性能和简洁性，采用对象池复用 Entry 对象，减少内存分配
 -   **📊 丰富的日志级别**：支持 Trace、Debug、Info、Warn、Error、Fatal、Panic 级别
 -   **⚙️ 灵活的配置**：
     -   日志级别控制

@@ -56,20 +56,48 @@ logger.Info("新日志记录器已创建")
 
 表示具有所有关联元数据的单个日志条目。
 
+> **注意：** Entry 定义在 `constant` 包中，以避免循环依赖。
+
 ```go
+// 位于 constant/entry.go
 type Entry struct {
-    Time       time.Time     // 条目创建时的时间戳
-    Level      Level         // 日志级别
-    Message    string        // 日志消息
-    Pid        int          // 进程 ID
-    Gid        uint64       // Goroutine ID
-    TraceID    string       // 分布式追踪的追踪 ID
-    CallerName string       // 调用者函数名
-    CallerFile string       // 调用者文件路径
-    CallerLine int          // 调用者行号
+    // 热路径字段 - 每次日志调用都访问
+    Level      Level     // 日志级别
+    Pid        int       // 进程 ID
+    Gid        int64     // Goroutine ID
+    CallerLine int       // 调用者行号
+
+    // 时间戳
+    Time       time.Time // 时间戳
+    TimeStr    string    // 缓存的格式化时间戳
+    TimeStrSet bool      // 内部标志
+
+    // 字符串字段（各 16 字节）- 按访问频率排序
+    Message    string    // 日志消息
+    File       string    // 调用者文件路径
+    CallerFunc string    // 调用者函数名
+    CallerDir  string    // 调用者目录
+    CallerName string    // 调用者短名称
+    TraceId    string    // 追踪 ID
+
+    // 字节切片（各 24 字节）
+    PrefixMsg []byte     // 日志前缀消息
+    SuffixMsg []byte     // 日志后缀消息
+
+    // 结构化字段
+    Fields []KV          // 键值对
 }
 ```
 
+**主要方法：**
+
+```go
+// Reset 重置 Entry 到初始值，用于对象池复用
+func (e *Entry) Reset()
+
+// MarshalJSON 实现 json.Marshaler 接口，支持条件序列化
+func (e *Entry) MarshalJSON() ([]byte, error)
+```
 ## Logger API
 
 ### 配置方法
@@ -392,24 +420,6 @@ dbLogger := logger.Clone()
 dbLogger.SetPrefixMsg("[DB] ")
 ```
 
-#### CloneToCtx
-
-```go
-func (l *Logger) CloneToCtx() LoggerWithCtx
-```
-
-创建一个上下文感知的日志记录器，接受 `context.Context` 作为第一个参数。
-
-**返回值：**
-
--   `LoggerWithCtx`：上下文感知的日志记录器实例
-
-**示例：**
-
-```go
-ctxLogger := logger.CloneToCtx()
-ctxLogger.Info(ctx, "上下文感知消息")
-```
 
 ## 全局函数
 
@@ -528,7 +538,6 @@ logger.Info("JSON 输出")
 ```go
 type JSONFormatter struct {
     EnablePrettyPrint bool // 启用美化打印（带缩进）
-    DisableTimestamp bool // 禁用时间戳字段
     DisableCaller    bool // 禁用调用者信息
     DisableTrace     bool // 禁用追踪信息
 }
@@ -628,67 +637,6 @@ defer asyncWriter.Close()
 logger.SetOutput(asyncWriter)
 ```
 
-## 上下文日志
-
-### LoggerWithCtx 接口
-
-```go
-type LoggerWithCtx interface {
-    Trace(ctx context.Context, v ...any)
-    Tracef(ctx context.Context, format string, v ...any)
-    Debug(ctx context.Context, v ...any)
-    Debugf(ctx context.Context, format string, v ...any)
-    Info(ctx context.Context, v ...any)
-    Infof(ctx context.Context, format string, v ...any)
-    Warn(ctx context.Context, v ...any)
-    Warnf(ctx context.Context, format string, v ...any)
-    Error(ctx context.Context, v ...any)
-    Errorf(ctx context.Context, format string, v ...any)
-    Fatal(ctx context.Context, v ...any)
-    Fatalf(ctx context.Context, format string, v ...any)
-    Panic(ctx context.Context, v ...any)
-    Panicf(ctx context.Context, format string, v ...any)
-}
-```
-
-### 上下文函数
-
-```go
-func SetTrace(traceID string)
-func GetTrace() string
-```
-
-设置和获取当前 goroutine 的追踪 ID。
-
-**示例：**
-
-```go
-log.SetTrace("trace-123-456")
-log.Info("此消息将包含追踪 ID")
-
-traceID := log.GetTrace()
-fmt.Println("当前追踪 ID:", traceID)
-```
-
-## 构建标签
-
-该库支持使用构建标签进行条件编译：
-
-:::info 构建标签说明
-构建标签通过 `go build -tags` 参数指定，不同标签会改变日志库的编译行为和运行时特性。选择合适的标签可以在开发便利性和生产性能之间取得平衡。
-:::
-
-### 默认模式
-
-```bash
-go build
-```
-
--   启用完整功能
--   包含调试消息
--   标准性能
-
-### 调试模式
 
 ```bash
 go build -tags debug
@@ -854,25 +802,6 @@ func main() {
 
 ### 上下文感知日志记录
 
-```go title="上下文感知日志记录"
-package main
-
-import (
-    "context"
-    "github.com/lazygophers/log"
-)
-
-func main() {
-    logger := log.New()
-    ctxLogger := logger.CloneToCtx()
-
-    ctx := context.Background()
-    log.SetTrace("trace-123-456")
-
-    ctxLogger.Info(ctx, "处理用户请求")
-    ctxLogger.Debug(ctx, "验证完成")
-}
-```
 
 ### 自定义 JSON 格式化器
 
@@ -897,8 +826,8 @@ func (f *JSONFormatter) Format(entry *log.Entry) []byte {
         "gid":       entry.Gid,
     }
 
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
+    if entry.TraceId != "" {
+        data["trace_id"] = entry.TraceId
     }
 
     if entry.CallerName != "" {
