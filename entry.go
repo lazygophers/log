@@ -2,48 +2,15 @@ package log
 
 import (
 	"sync"
-	"time"
+
+	"github.com/lazygophers/log/constant"
 )
 
-// KV represents a key-value pair for structured logging
-type KV struct {
-	Key   string
-	Value interface{}
-}
+// Entry re-exports constant.Entry for convenience
+type Entry = constant.Entry
 
-// Entry represents a log entry
-//
-// Field layout is optimized for cache performance:
-// - Hot path fields (accessed on every log) are grouped at the beginning
-// - Fields of similar sizes are grouped together to minimize padding
-// - Total size: 200 bytes (4 bytes padding waste = 2.0%)
-type Entry struct {
-	// Hot path fields - accessed on every log call
-	Level      Level // Log level (1 byte + 7 padding)
-	Pid        int   // Process ID (8 bytes)
-	Gid        int64 // Goroutine ID (8 bytes)
-	CallerLine int   // Caller line number (8 bytes)
-
-	// Timestamp - accessed frequently but less than core fields
-	Time       time.Time // Log timestamp (24 bytes)
-	timeStr    string    // Cached formatted timestamp string for performance
-	timeStrSet bool      // Flag indicating if timeStr is valid
-
-	// String fields (16 bytes each) - ordered by access frequency
-	Message    string // Core log message (highest frequency)
-	File       string // Source file name
-	CallerFunc string // Caller function name
-	CallerDir  string // Caller directory
-	CallerName string // Caller package name
-	TraceId    string // Trace ID for distributed tracing
-
-	// Byte slices (24 bytes each) - lower frequency
-	PrefixMsg []byte // Prefix message
-	SuffixMsg []byte // Suffix message
-
-	// Structured fields (key-value pairs)
-	Fields []KV // Structured logging fields
-}
+// KV re-exports constant.KV for convenience
+type KV = constant.KV
 
 // NewEntry creates a new Entry instance from object pool
 func NewEntry() *Entry {
@@ -74,19 +41,4 @@ func putEntry(entry *Entry) {
 	entry.Reset()
 	entryPool.Put(entry)
 }
-// Reset resets Entry to initial values for safe pool reuse
-func (p *Entry) Reset() {
-	p.Gid = 0
-	p.TraceId = ""
-	p.Time = time.Time{}
-	p.timeStr = ""
-	p.timeStrSet = false
-	p.Message = ""
-	p.File = ""
-	p.CallerLine = 0
-	p.CallerName = ""
-	p.CallerDir = ""
-	p.CallerFunc = ""
-	p.PrefixMsg = p.PrefixMsg[:0]
-	p.SuffixMsg = p.SuffixMsg[:0]
-}
+

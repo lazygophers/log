@@ -202,8 +202,8 @@ func (p *Logger) populateEntry(entry *Entry, level Level, msg string) {
 	entry.Level = level
 	entry.Message = msg
 	entry.Time = time.Now()
-	entry.timeStr = entry.Time.Format(time.RFC3339Nano)
-	entry.timeStrSet = true
+	entry.TimeStr = entry.Time.Format(time.RFC3339Nano)
+	entry.TimeStrSet = true
 }
 
 // populateFields sets structured fields on the log entry

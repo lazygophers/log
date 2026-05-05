@@ -118,8 +118,8 @@ func (f *JSONFormatter) populateJSONEntry(je *jsonEntry, entry *Entry) {
 
 	// Timestamp - use cached string if available
 	if !f.DisableTimestamp && !entry.Time.IsZero() {
-		if entry.timeStrSet {
-			je.Time = entry.timeStr
+		if entry.TimeStrSet {
+			je.Time = entry.TimeStr
 		} else {
 			je.Time = entry.Time.Format(time.RFC3339Nano)
 		}
