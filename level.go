@@ -30,27 +30,25 @@ const (
 	TraceLevel
 )
 
+// levelStrings provides fast array lookup for level string conversion
+var levelStrings = []string{
+	PanicLevel: "panic",
+	FatalLevel: "fatal",
+	ErrorLevel: "error",
+	WarnLevel:  "warn",
+	InfoLevel:  "info",
+	DebugLevel: "debug",
+	TraceLevel: "trace",
+}
+
 // String implements fmt.Stringer interface
+// Optimized to use array lookup instead of switch for better performance
 func (level Level) String() string {
-	switch level {
-	case TraceLevel:
-		return "trace"
-	case DebugLevel:
-		return "debug"
-	case InfoLevel:
-		return "info"
-	case WarnLevel:
-		return "warn"
-	case ErrorLevel:
-		return "error"
-	case FatalLevel:
-		return "fatal"
-	case PanicLevel:
-		return "panic"
-	default:
-		// Default fallback for unknown levels
-		return "trace"
+	if level >= 0 && int(level) < len(levelStrings) {
+		return levelStrings[level]
 	}
+	// Default fallback for unknown levels
+	return "trace"
 }
 
 // MarshalText implements encoding.TextMarshaler interface for logrus compatibility

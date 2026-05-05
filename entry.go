@@ -25,7 +25,9 @@ type Entry struct {
 	CallerLine int   // Caller line number (8 bytes)
 
 	// Timestamp - accessed frequently but less than core fields
-	Time time.Time // Log timestamp (24 bytes)
+	Time       time.Time // Log timestamp (24 bytes)
+	timeStr    string    // Cached formatted timestamp string for performance
+	timeStrSet bool      // Flag indicating if timeStr is valid
 
 	// String fields (16 bytes each) - ordered by access frequency
 	Message    string // Core log message (highest frequency)
@@ -77,6 +79,8 @@ func (p *Entry) Reset() {
 	p.Gid = 0
 	p.TraceId = ""
 	p.Time = time.Time{}
+	p.timeStr = ""
+	p.timeStrSet = false
 	p.Message = ""
 	p.File = ""
 	p.CallerLine = 0
