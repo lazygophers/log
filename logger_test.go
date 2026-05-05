@@ -365,3 +365,50 @@ func TestCloneWithFormatFull(t *testing.T) {
 		}
 	})
 }
+
+func TestLoggerCloneBranches(t *testing.T) {
+	t.Run("Clone_with_hooks_copies_hooks", func(t *testing.T) {
+		logger := New()
+
+		// Create a test hook that implements constant.Hook
+		hook := &mockHookForClone{}
+		logger.AddHook(hook)
+
+		cloned := logger.Clone()
+
+		// Verify cloned has its own hooks slice
+		if len(cloned.hooks) != len(logger.hooks) {
+			t.Errorf("Clone should copy hooks, got %d want %d", len(cloned.hooks), len(logger.hooks))
+		}
+
+		// Verify hooks are independent
+		cloned.RemoveHooks()
+		if len(logger.hooks) == 0 {
+			t.Error("Original logger hooks should not be affected by clone")
+		}
+	})
+
+	t.Run("Clone_without_hooks", func(t *testing.T) {
+		logger := New()
+		logger.SetLevel(InfoLevel)
+
+		cloned := logger.Clone()
+
+		if cloned == nil {
+			t.Error("Clone should return non-nil logger")
+		}
+		if cloned.level != logger.level {
+			t.Errorf("Clone should copy level, got %v want %v", cloned.level, logger.level)
+		}
+	})
+}
+
+// mockHookForClone implements constant.Hook interface for testing
+type mockHookForClone struct{}
+
+func (h *mockHookForClone) OnWrite(entry interface{}) interface{} {
+	return entry
+}
+
+
+// mockHookForClone implements constant.Hook interface for testing

@@ -98,3 +98,53 @@ func TestGetOutputWriterHourly(t *testing.T) {
 		}
 	})
 }
+
+func TestEnsureDirCoverage(t *testing.T) {
+	t.Run("ensureDir_with_dot_path", func(t *testing.T) {
+		// Test the "." path branch (should not create directory)
+		// This is implicitly tested when creating files in current directory
+		tmpDir := t.TempDir()
+		oldDir, _ := os.Getwd()
+		defer os.Chdir(oldDir)
+
+		os.Chdir(tmpDir)
+		writer := GetOutputWriter("test.log")
+		if writer == nil {
+			t.Error("GetOutputWriter should work with current directory")
+		}
+	})
+
+	t.Run("ensureDir_with_existing_directory", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		// Directory already exists from TempDir
+		writer := GetOutputWriter(tmpDir + "/test.log")
+		if writer == nil {
+			t.Error("GetOutputWriter should work with existing directory")
+		}
+	})
+
+	t.Run("GetOutputWriter_nested_paths", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		// Test deeply nested path creation
+		deepPath := tmpDir + "/a/b/c/d/test.log"
+		writer := GetOutputWriter(deepPath)
+		if writer == nil {
+			t.Error("GetOutputWriter should create nested directories")
+		}
+
+		// Verify all directories were created
+		dirs := []string{
+			tmpDir + "/a",
+			tmpDir + "/a/b",
+			tmpDir + "/a/b/c",
+			tmpDir + "/a/b/c/d",
+		}
+		for _, dir := range dirs {
+			if info, err := os.Stat(dir); err != nil || !info.IsDir() {
+				t.Errorf("Directory %s should exist", dir)
+			}
+		}
+	})
+}

@@ -595,3 +595,32 @@ func TestFormatter_format_ElseBranch(t *testing.T) {
 		t.Errorf("Output should contain function name, got: %s", output)
 	}
 }
+
+
+func TestSplitPackageNameEdgeCases(t *testing.T) {
+	tests := []struct {
+		input        string
+		expectedDir  string
+		expectedFunc string
+	}{
+		// Empty string
+		{"", "", ""},
+		// Lazygophers prefix trimming
+		{"github.com/lazygophers/pkg.Func", "pkg", "Func"},
+		// Non-github domains
+		{"gitlab.com/user/repo.Func", "gitlab.com/user/repo", "Func"},
+		{"bitbucket.org/user/repo.Func", "bitbucket.org/user/repo", "Func"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			dir, funcName := SplitPackageName(tt.input)
+			if dir != tt.expectedDir {
+				t.Errorf("Expected dir %q, got %q", tt.expectedDir, dir)
+			}
+			if funcName != tt.expectedFunc {
+				t.Errorf("Expected func %q, got %q", tt.expectedFunc, funcName)
+			}
+		})
+	}
+}

@@ -541,3 +541,46 @@ func TestCleanupOldFiles(t *testing.T) {
 		rotator.Close()
 	})
 }
+
+func TestRotatorSyncCoverage(t *testing.T) {
+	t.Run("Sync_with_no_current_file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1024, 10)
+
+		// Sync without writing anything (currentFile is nil)
+		err := rotator.Sync()
+		if err != nil {
+			t.Errorf("Sync should return nil when no current file, got %v", err)
+		}
+
+		rotator.Close()
+	})
+
+	t.Run("Sync_with_current_file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1024, 10)
+
+		// Write something to create current file
+		rotator.Write([]byte("test\n"))
+
+		// Now sync should work
+		err := rotator.Sync()
+		if err != nil {
+			t.Errorf("Sync should succeed, got %v", err)
+		}
+
+		rotator.Close()
+	})
+}
+
+func TestRotatorWriteEmptyCoverage(t *testing.T) {
+	tmpDir := t.TempDir()
+	rotator := NewHourlyRotator(tmpDir, 1024, 10)
+	defer rotator.Close()
+
+	// Test writing empty byte slice
+	n, err := rotator.Write([]byte{})
+	if n != 0 || err != nil {
+		t.Errorf("Empty write should return (0, nil), got (%d, %v)", n, err)
+	}
+}

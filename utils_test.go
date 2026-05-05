@@ -93,3 +93,39 @@ func BenchmarkFmtSprintf_SimplePercentS(b *testing.B) {
 		_ = fmt.Sprintf("%s", "test message")
 	}
 }
+
+
+func TestFastStringifyCoverage(t *testing.T) {
+	tests := []struct {
+		name  string
+		input interface{}
+	}{
+		{"string", "hello"},
+		{"[]byte", []byte("world")},
+		{"int", 42},
+		{"int8", int8(8)},
+		{"int16", int16(16)},
+		{"int32", int32(32)},
+		{"int64", int64(64)},
+		{"uint", uint(10)},
+		{"uint8", uint8(8)},
+		{"uint16", uint16(16)},
+		{"uint32", uint32(32)},
+		{"uint64", uint64(64)},
+		{"float32", float32(3.14)},
+		{"float64", float64(6.28)},
+		{"bool true", true},
+		{"bool false", false},
+		{"error", fmt.Errorf("test error")},
+		{"nil error", error(nil)},
+		{"nil", nil},
+		{"custom type", struct{ Name string }{"test"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Just test that fastStringify doesn't panic for all types
+			_ = fastStringify(tt.input)
+		})
+	}
+}
