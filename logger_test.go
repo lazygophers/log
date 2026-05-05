@@ -228,71 +228,33 @@ func TestFormatterWithAllLevels(t *testing.T) {
 	}
 }
 
-func TestWriteSyncerWrapper(t *testing.T) {
-	t.Run("Write_delegates_to_writer", func(t *testing.T) {
-		var buf bytes.Buffer
-		wrapper := &WriteSyncerWrapper{writer: &buf}
-
-		data := []byte("test data\n")
-		n, err := wrapper.Write(data)
-
-		if err != nil {
-			t.Errorf("Write should not error, got %v", err)
-		}
-		if n != len(data) {
-			t.Errorf("Write should return %d, got %d", len(data), n)
-		}
-
-		if buf.String() != "test data\n" {
-			t.Error("Write should delegate to underlying writer")
-		}
-	})
-
-	t.Run("Sync_with_syncer", func(t *testing.T) {
+func TestAddSync(t *testing.T) {
+	t.Run("AddSync_with_WriteSyncer", func(t *testing.T) {
 		ms := &mockSyncer{Buffer: &bytes.Buffer{}}
-		wrapper := &WriteSyncerWrapper{writer: ms}
+		ws := constant.AddSync(ms)
 
-		err := wrapper.Sync()
-		if err != nil {
-			t.Errorf("Sync should not error, got %v", err)
-		}
-		if ms.syncCount != 1 {
-			t.Errorf("Sync should call underlying syncer, got %d calls", ms.syncCount)
-		}
-	})
-
-	t.Run("Sync_without_syncer", func(t *testing.T) {
-		var buf bytes.Buffer
-		wrapper := &WriteSyncerWrapper{writer: &buf}
-
-		err := wrapper.Sync()
-		if err != nil {
-			t.Errorf("Sync should return nil for non-syncer, got %v", err)
-		}
-	})
-}
-
-func TestWrapWriter(t *testing.T) {
-	t.Run("wrapWriter_with_WriteSyncer", func(t *testing.T) {
-		ms := &mockSyncer{Buffer: &bytes.Buffer{}}
-		ws := wrapWriter(ms)
-
+		// Should return the original WriteSyncer
 		if ws != ms {
-			t.Error("wrapWriter should return original WriteSyncer")
+			t.Error("AddSync should return original WriteSyncer")
 		}
 	})
 
-	t.Run("wrapWriter_with_io_Writer", func(t *testing.T) {
+	t.Run("AddSync_with_io_Writer", func(t *testing.T) {
 		var buf bytes.Buffer
-		ws := wrapWriter(&buf)
+		ws := constant.AddSync(&buf)
 
 		if ws == nil {
-			t.Error("wrapWriter should return wrapped writer")
+			t.Error("AddSync should return wrapped writer")
 		}
 
 		// Verify it implements WriteSyncer
 		if _, err := ws.Write([]byte("test")); err != nil {
 			t.Errorf("Wrapped writer should write, got %v", err)
+		}
+
+		// Sync should not error for non-syncer
+		if err := ws.Sync(); err != nil {
+			t.Errorf("Sync should return nil for non-syncer, got %v", err)
 		}
 	})
 }

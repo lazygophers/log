@@ -1,5 +1,7 @@
 package constant
 
+import "io"
+
 // Hook defines the interface for log processing hooks
 // Hooks can modify, filter, or enrich log entries before they are written
 type Hook interface {
@@ -39,4 +41,10 @@ type FormatFull interface {
 // Writer defines the output writer interface
 type Writer interface {
 	Write(p []byte) (n int, err error)
+}
+
+// WriteSyncer defines the interface for writers that support sync
+type WriteSyncer interface {
+	io.Writer
+	Sync() error
 }

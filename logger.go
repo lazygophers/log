@@ -9,43 +9,12 @@ import (
 
 	"github.com/lazygophers/log/constant"
 	"github.com/petermattis/goid"
-	"go.uber.org/zap/zapcore"
 )
-
-// WriteSyncerWrapper implements zapcore.WriteSyncer interface
-type WriteSyncerWrapper struct {
-	writer io.Writer
-}
-
-// Write implements io.Writer interface
-func (w *WriteSyncerWrapper) Write(p []byte) (n int, err error) {
-	return w.writer.Write(p)
-}
-
-// Sync implements zapcore.WriteSyncer interface
-func (w *WriteSyncerWrapper) Sync() error {
-	// Call Sync if writer implements it
-	if syncer, ok := w.writer.(interface{ Sync() error }); ok {
-		return syncer.Sync()
-	}
-	// Return nil for standard writers
-	return nil
-}
-
-// wrapWriter wraps io.Writer as zapcore.WriteSyncer
-func wrapWriter(w io.Writer) zapcore.WriteSyncer {
-	// Return directly if already WriteSyncer
-	if ws, ok := w.(zapcore.WriteSyncer); ok {
-		return ws
-	}
-	// Otherwise wrap it
-	return &WriteSyncerWrapper{writer: w}
-}
 
 // Logger is the core logging structure
 type Logger struct {
 	level       Level
-	out         zapcore.WriteSyncer
+	out         constant.WriteSyncer
 	Format      constant.Format
 	callerDepth int
 	PrefixMsg   []byte
@@ -65,7 +34,7 @@ func newLogger() *Logger {
 
 	logger := &Logger{
 		level: DebugLevel,
-		out:   wrapWriter(out),
+		out:   constant.AddSync(out),
 		Format: &Formatter{
 			DisableParsingAndEscaping: true,
 		},
@@ -160,12 +129,12 @@ func (p *Logger) Level() Level {
 
 // SetOutput sets the log output targets
 func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
-	var ws []zapcore.WriteSyncer
+	var ws []constant.WriteSyncer
 	for _, write := range writes {
 		if write == nil {
 			continue
 		}
-		ws = append(ws, zapcore.AddSync(write))
+		ws = append(ws, constant.AddSync(write))
 	}
 
 	if len(ws) == 0 {
@@ -173,7 +142,7 @@ func (p *Logger) SetOutput(writes ...io.Writer) *Logger {
 	} else if len(ws) == 1 {
 		p.out = ws[0]
 	} else {
-		p.out = zapcore.NewMultiWriteSyncer(ws...)
+		p.out = constant.NewMultiWriteSyncer(ws...)
 	}
 
 	return p
