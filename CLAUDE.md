@@ -1,386 +1,314 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 在本仓库中工作时提供指导。
 
-## 🚀 Quick Start
+## 项目概述
 
-### Development Commands
+**lazygophers/log** - 高性能 Go 日志库，专注于简洁 API 和强大扩展能力。
 
-**Testing:**
-- `go test ./...` - Run all tests in the project
-- `go test -v ./...` - Run tests with verbose output  
-- `go test -bench=.` - Run all benchmarks
-- `go test -cover ./...` - Run tests with coverage report
+### 核心特性
 
-**Building and Linting:**
-- `go build ./...` - Build all packages
-- `go vet ./...` - Run Go vet static analysis
-- `go fmt ./...` - Format all Go source files
-- `go mod tidy` - Clean up go.mod dependencies
+- **测试覆盖率**: 95.0% (486 个测试用例)
+- **性能优化**: 基于 `sync.Pool` 的对象池、缓存友好结构布局、早期级别检查
+- **扩展机制**: Hook 接口、可插拔格式化器、多 Writer 支持
+- **日志轮转**: 按小时轮转 + 基于大小分片
 
-## 🏗️ Project Architecture
+## 快速参考
 
-This is a high-performance Go logging library (`github.com/lazygophers/log`) designed for simplicity and extensibility.
+### 开发命令
 
-### 📋 Core Components
+**测试:**
+```bash
+go test ./...                    # 运行所有测试
+go test -v ./...                 # 详细输出
+go test -bench=. -benchmem       # 基准测试
+go test -cover ./...             # 覆盖率报告
+```
 
-**Logger (`logger.go`):**
-- Main `Logger` struct with configurable level, output, formatter, and caller depth
-- Supports multi-writer output via zap's WriteSyncer
-- Object pooling with `sync.Pool` for performance optimization
-- Levels: Trace, Debug, Info, Warn, Error, Fatal, Panic
-- Provides both simple (`.Info()`) and formatted (`.Infof()`) logging methods
+**构建和检查:**
+```bash
+go build ./...                   # 构建所有包
+go vet ./...                     # 静态分析
+go fmt ./...                     # 格式化代码
+go mod tidy                      # 整理依赖
+```
 
-**Entry System (`entry.go`):**
-- `Entry` struct represents a single log record with metadata:
-  - Process ID (Pid), Goroutine ID (Gid), Trace ID
-  - Timestamp, level, message, caller information (file, line, func)
-  - Prefix/suffix message support
-- Uses `sync.Pool` (`entryPool`) for object reuse to minimize allocations
+## 架构设计
 
-**Level System (`level.go`):**
-- 7 log levels from PanicLevel (highest) to TraceLevel (lowest)
-- Compatible with logrus library conventions
-- Implements `fmt.Stringer` and `encoding.TextMarshaler` interfaces
+### 核心组件
 
-**Formatting (`formatter.go`):**
-- `Format` interface for pluggable log formatting
-- `FormatFull` interface extends Format with parsing/escaping and caller controls  
-- Default `Formatter` struct provides standard text formatting
-- Uses buffer pooling (`pool.go`) for efficient string building
+**Logger** (`logger.go`):
+- 主日志结构，支持链式配置
+- 使用 `zapcore.WriteSyncer` 作为输出接口
+- Hook 系统支持日志处理扩展
+- 级别检查在外层进行，避免不必要的计算
 
-**Output Management (`output.go`, `writer.go`, `writer_async.go`):**
-- File rotation support via `GetOutputWriterHourly()` 
-- Async writing capabilities for high-throughput scenarios
-- Integration with `file-rotatelogs` for time-based log rotation
+**Entry** (`constant/entry.go`):
+- 日志条目结构，优化的内存布局（200 字节，仅 2% 填充浪费）
+- 字段按访问频率和大小排列，最小化缓存行浪费
+- 实现 `json.Marshaler` 接口，支持自定义 JSON 序列化
+- 使用 `Reset()` 方法支持对象池复用
 
-**Global Logger (`init.go`):**
-- Package-level functions (Info, Debug, etc.) that delegate to a global logger instance
-- Default logger configured with DebugLevel and stdout output
+**Level** (`constant/level.go`):
+- 七个日志级别：Panic、Fatal、Error、Warn、Info、Debug、Trace
+- 兼容 logrus 级别约定
+- 使用数组查找优化 `String()` 方法性能
 
-## 🔧 Key Design Patterns
+**Formatter** (`formatter.go`, `formatter_json.go`):
+- `Format` 接口：基本格式化
+- `FormatFull` 接口：扩展控制（解析/转义、调用者信息、克隆）
+- 默认文本格式化器：彩色输出、结构化字段支持
+- JSON 格式化器：紧凑/美化打印、条件字段序列化
 
-- **Object Pooling**: Extensive use of `sync.Pool` for Entry objects and byte buffers to reduce GC pressure
-- **Interface-based Design**: Pluggable formatters and writers via interfaces
-- **Chain Configuration**: Logger methods return `*Logger` for fluent configuration
-- **Conditional Compilation**: Build tags for different environments (debug/release)
-- **Performance Optimization**: Level checking before expensive operations, buffer reuse
+**Rotator** (`rotator.go`):
+- 按小时自动轮转日志文件
+- 基于大小的分片支持（单文件超过限制时创建分片）
+- 自动清理过期文件
 
-## 📦 Dependencies
+**Hook** (`constant/interface.go`):
+- `OnWrite(entry) interface{}` 方法：在日志写入前处理
+- 可以修改、过滤或丰富日志条目
+- 返回 `nil` 跳过该条日志
 
-- `go.uber.org/zap` - Used for WriteSyncer and multi-writer functionality
-- `github.com/petermattis/goid` - Goroutine ID extraction for tracing
-- `github.com/lestrrat-go/file-rotatelogs` - Time-based log file rotation
-- `github.com/google/uuid` - UUID generation (likely for trace IDs)
+### 接口设计
 
-## 🧪 Testing Structure
+```go
+// constant/interface.go
 
-Tests are co-located with source files (`*_test.go`). Key test files:
-- `logger_test.go` - Core logger functionality
-- `benchmark_test.go` - Performance benchmarks  
-- `formatter_test.go` - Format testing
-- `pool_test.go` - Object pool behavior
+type Hook interface {
+    OnWrite(entry interface{}) interface{}
+}
 
-**⚠️ 测试文件命名规范（严格限制）：**
-- 测试文件名必须是原始文件名 + `_test.go` 格式
-- **禁止**创建独立的覆盖率测试文件（如 `coverage_boost_test.go`、`coverage_test.go`）
+type Format interface {
+    Format(entry interface{}) []byte
+}
+
+type FormatFull interface {
+    Format
+    ParsingAndEscaping(disable bool)
+    Caller(disable bool)
+    Clone() Format
+}
+```
+
+### 性能优化模式
+
+- **对象池**: Entry 和 Buffer 使用 `sync.Pool` 复用
+- **早期检查**: 级别检查在 `levelEnabled()` 中完成，避免昂贵的 `populateEntry` 等操作
+- **内联函数**: 热点路径使用 `//go:inline` 标记
+- **时间缓存**: `TimeStr` 和 `TimeStrSet` 缓存格式化时间戳
+- **条件字段**: 调用者和追踪信息按需填充
+
+### 依赖管理
+
+**主要依赖:**
+- `go.uber.org/zap` - WriteSyncer 接口和多 Writer 支持
+- `github.com/petermattis/goid` - Goroutine ID 提取
+- `github.com/lestrrat-go/file-rotatelogs` - 时间日志轮转
+
+**内部包:**
+- `github.com/lazygophers/log/constant` - 核心类型和接口定义
+
+## 代码规范
+
+### 测试规范
+
+**测试文件命名（严格限制）:**
+- 测试文件名必须是源文件名 + `_test.go`
+- **禁止**创建独立的覆盖率测试文件（如 `coverage_boost_test.go`）
 - **禁止**创建功能特定的测试文件（如 `formatter_coverage_test.go`）
-- 所有测试必须合并到对应的标准测试文件中（如 `logger_test.go`、`formatter_test.go`）
-- 当前测试覆盖率：**95.0%**（486个测试用例）
+- 所有测试必须合并到对应的标准测试文件中
 
-## 📚 Documentation Structure
+**测试文件组织:**
+```
+logger.go           → logger_test.go
+formatter.go        → formatter_test.go
+rotator.go          → rotator_test.go
+constant/entry.go   → entry_test.go
+```
 
-### Main Documentation
-- `README.md` - Primary project documentation (English)
-- `docs/README_zh-CN.md` - Chinese documentation
-- `docs/API.md` - Complete API reference
-- `CHANGELOG.md` - Version history
+**测试要求:**
+- 所有公共 API 必须有测试
+- 性能关键代码需要基准测试
+- 测试覆盖率保持在 95% 以上
+- 使用表驱动测试（table-driven tests）
 
-### Contributing & Community
-- `docs/CONTRIBUTING.md` - Contribution guidelines
-- `docs/CODE_OF_CONDUCT.md` - Community standards
-- `docs/SECURITY.md` - Security policy
+### 代码风格
 
-### GitHub Templates
-- `.github/ISSUE_TEMPLATE/` - Bug reports, feature requests, questions
-- `.github/pull_request_template.md` - PR template
+- 遵循 Go 标准格式化（`go fmt`）
+- 使用描述性的变量和函数名
+- 复杂逻辑添加注释
+- 保持一致的错误处理模式
+- 使用 `//go:inline` 标记热点路径的函数
 
-## 🎯 Development Guidelines
+### 性能考虑
 
-### Code Style
-- Follow Go standard formatting (`go fmt`)
-- Use descriptive variable and function names
-- Add comments for complex logic
-- Maintain consistent error handling patterns
+- 始终为频繁分配的对象使用对象池
+- 在昂贵的操作前检查日志级别
+- 为性能关键代码路径编写基准测试
+- 注意 Entry 结构的缓存行对齐
 
-### Performance Considerations
-- Always use object pooling for frequently allocated objects
-- Check log levels before expensive operations
-- Use conditional compilation for environment-specific optimizations
-- Benchmark performance-critical code paths
+## 重要设计决策
 
-### Testing Requirements
-- Write tests for all public APIs
-- Include benchmarks for performance-critical code
-- Test across different build tag configurations
-- Ensure test coverage remains above 95%
-- Test file naming must follow source file + `_test.go` pattern (no standalone coverage test files)
+### Entry 移至 constant 包
 
-## 🔄 Build Tags
+**原因:**
+- Entry 是日志系统的核心数据结构
+- 移至 constant 包避免循环依赖
+- 便于其他包引用而不依赖主包
 
-This project uses build tags for conditional compilation:
+**影响:**
+- 主包通过类型别名 `type Entry = constant.Entry` 导出
+- 所有 Entry 操作保持不变
+- 测试文件需要导入 `constant` 包
 
-- `debug` - Enables additional debugging features
-- `release` - Optimizes for production performance  
-- `discard` - Discards all log output (for testing)
+### Hook 系统
 
-## 🚨 Important Notes
+**设计:**
+```go
+type Hook interface {
+    OnWrite(entry interface{}) interface{}
+}
+```
 
-### Memory Management
-- The library extensively uses `sync.Pool` for performance
-- Always return objects to pools after use
-- Be aware of pool contention in highly concurrent scenarios
+**使用场景:**
+- 添加全局字段（环境、版本）
+- 过滤敏感信息
+- 修改日志内容
+- 集成第三方服务
 
-### Concurrency Safety
-- Logger instances are designed to be thread-safe
-- Individual Entry objects are not thread-safe (single-use)
-- Use appropriate synchronization when extending functionality
+**注意:**
+- Hook 返回 `nil` 跳过日志
+- 多 Hook 按添加顺序执行
+- Hook 中应避免阻塞操作
 
-### Extension Points
-- The `Format` interface allows custom formatting implementations
-- Output can be customized via `io.Writer` implementations
-- Log levels can be extended by implementing the `Level` interface
+### Logger Clone
 
-## 📞 Getting Help
+**深度复制:**
+```go
+func (p *Logger) Clone() *Logger {
+    l := Logger{
+        level:        p.level,
+        out:          p.out,
+        callerDepth:  p.callerDepth,
+        PrefixMsg:    p.PrefixMsg,
+        SuffixMsg:    p.SuffixMsg,
+        enableCaller: p.enableCaller,
+        enableTrace:  p.enableTrace,
+    }
 
-- Check the [API Documentation](docs/API.md) for detailed usage
-- Review [examples](examples/) for common patterns
-- Open an [issue](https://github.com/lazygophers/log/issues) for bugs or questions
-- Refer to [contributing guidelines](docs/CONTRIBUTING.md) for development help
+    // Clone formatter if it supports cloning
+    switch f := p.Format.(type) {
+    case constant.FormatFull:
+        l.Format = f.Clone()
+    default:
+        l.Format = f
+    }
+
+    // Copy hooks
+    if len(p.hooks) > 0 {
+        l.hooks = make([]constant.Hook, len(p.hooks))
+        copy(l.hooks, p.hooks)
+    }
+
+    return &l
+}
+```
+
+**使用场景:**
+- 创建独立配置的日志器
+- 线程安全的日志器副本
+- 隔离的测试环境
+
+## 常见任务
+
+### 添加新的日志级别
+
+1. 在 `constant/level.go` 添加常量
+2. 更新 `levelStrings` 数组
+3. 在所有相关文件中添加级别方法
+
+### 实现自定义格式化器
+
+```go
+type MyFormatter struct{}
+
+func (f *MyFormatter) Format(entry interface{}) []byte {
+    e := entry.(*constant.Entry)
+    // 自定义格式化逻辑
+    return []byte(fmt.Sprintf("[%s] %s\n", e.Level, e.Message))
+}
+
+// 使用
+logger := log.New()
+logger.Format = &MyFormatter{}
+```
+
+### 实现自定义 Hook
+
+```go
+type MyHook struct{}
+
+func (h *MyHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*constant.Entry)
+    // 处理或修改 entry
+    return e // 返回 nil 跳过
+}
+
+// 使用
+logger.AddHook(&MyHook{})
+```
+
+## 重要注意事项
+
+### 内存管理
+
+- Entry 对象从池中获取，使用后自动归还
+- 不要保留 Entry 对象的引用
+- 注意 Hook 中的内存泄漏
+
+### 并发安全
+
+- Logger 实例设计为线程安全
+- Entry 对象不是线程安全的（单次使用）
+- 扩展功能时使用适当的同步
+
+### 扩展点
+
+- `Format` 接口：自定义格式化
+- `Hook` 接口：日志处理扩展
+- `io.Writer` 实现：自定义输出
+
+## 故障排查
+
+### 性能问题
+
+1. 检查是否启用了不必要的调用者/追踪信息
+2. 验证日志级别设置是否合理
+3. 运行基准测试识别瓶颈
+4. 检查 Hook 中是否有阻塞操作
+
+### 内存问题
+
+1. 确认没有保留 Entry 对象引用
+2. 检查 Hook 中的内存泄漏
+3. 验证对象池配置
+4. 使用 pprof 分析内存分配
+
+### 测试问题
+
+1. 确认测试文件命名正确
+2. 检查是否正确导入 `constant` 包
+3. 验证接口实现是否完整
+4. 使用 `-v` 标志查看详细输出
+
+## 获取帮助
+
+- 查看 [API 文档](docs/en/API.md)
+- 参考 [架构文档](docs/architecture.md)
+- 阅读 [Hook 指南](docs/hooks_guide.md)
+- 在 [Issues](https://github.com/lazygophers/log/issues) 报告问题
 
 ---
 
-**Remember**: This is a performance-focused logging library. Always consider the performance implications of any changes, especially in the hot path of logging operations.
-
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **log** (0 symbols, 0 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
-
-## Always Do
-
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
-
-## When Debugging
-
-1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
-2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/log/process/{processName}` — trace the full execution flow step by step
-4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
-
-## When Refactoring
-
-- **Renaming**: MUST use `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` first. Review the preview — graph edits are safe, text_search edits need manual review. Then run with `dry_run: false`.
-- **Extracting/Splitting**: MUST run `gitnexus_context({name: "target"})` to see all incoming/outgoing refs, then `gitnexus_impact({target: "target", direction: "upstream"})` to find all external callers before moving code.
-- After any refactor: run `gitnexus_detect_changes({scope: "all"})` to verify only expected files changed.
-
-## Never Do
-
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
-
-## Tools Quick Reference
-
-| Tool | When to use | Command |
-|------|-------------|---------|
-| `query` | Find code by concept | `gitnexus_query({query: "auth validation"})` |
-| `context` | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})` |
-| `impact` | Blast radius before editing | `gitnexus_impact({target: "X", direction: "upstream"})` |
-| `detect_changes` | Pre-commit scope check | `gitnexus_detect_changes({scope: "staged"})` |
-| `rename` | Safe multi-file rename | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
-| `cypher` | Custom graph queries | `gitnexus_cypher({query: "MATCH ..."})` |
-
-## Impact Risk Levels
-
-| Depth | Meaning | Action |
-|-------|---------|--------|
-| d=1 | WILL BREAK — direct callers/importers | MUST update these |
-| d=2 | LIKELY AFFECTED — indirect deps | Should test |
-| d=3 | MAY NEED TESTING — transitive | Test if critical path |
-
-## Resources
-
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/log/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/log/clusters` | All functional areas |
-| `gitnexus://repo/log/processes` | All execution flows |
-| `gitnexus://repo/log/process/{name}` | Step-by-step execution trace |
-
-## Self-Check Before Finishing
-
-Before completing any code modification task, verify:
-1. `gitnexus_impact` was run for all modified symbols
-2. No HIGH/CRITICAL risk warnings were ignored
-3. `gitnexus_detect_changes()` confirms changes match expected scope
-4. All d=1 (WILL BREAK) dependents were updated
-
-## Keeping the Index Fresh
-
-After committing code changes, the GitNexus index becomes stale. Re-run analyze to update it:
-
-```bash
-npx gitnexus analyze
-```
-
-If the index previously included embeddings, preserve them by adding `--embeddings`:
-
-```bash
-npx gitnexus analyze --embeddings
-```
-
-To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.embeddings` field shows the count (0 means no embeddings). **Running analyze without `--embeddings` will delete any previously generated embeddings.**
-
-> Claude Code users: A PostToolUse hook handles this automatically after `git commit` and `git merge`.
-
-## CLI
-
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->
-
-## Hydra Orchestration Toolkit
-
-Hydra is a Lead-driven orchestration toolkit. You (the Lead) make strategic
-decisions at decision points; Hydra handles operational management.
-`result.json` is the only completion evidence.
-
-Why this design (vs. other coding-agent products):
-- **SWF decider pattern, specialized for LLM deciders.** Hydra is the AWS SWF / Cadence / Temporal decider pattern. `hydra watch` is `PollForDecisionTask`; the Lead is the decider; `lead_terminal_id` enforces single-decider semantics.
-- **Parallel-first, not bolted on.** `dispatch` + worktree + `merge` are first-class. Lead sequences nodes manually and passes context explicitly via `--context-ref`. Other products treat parallelism as open research; Hydra makes it the default.
-- **Typed result contract.** Workers publish a schema-validated `result.json` (`outcome: completed | stuck | error`, optional `stuck_reason: needs_clarification | needs_credentials | needs_context | blocked_technical`). Other products return free-text final messages and require downstream parsing.
-- **Lead intervention points.** `hydra reset --feedback` lets the Lead actually intervene at decision points instead of being block-and-join. A stale or wrong run is one `reset` away.
-
-Core rules:
-- Root cause first. Fix the implementation problem before changing tests.
-- Do not hack tests, fixtures, or mocks to force a green result.
-- Do not add silent fallbacks or swallowed errors.
-- An assignment run is only complete when `result.json` exists and passes schema validation.
-
-Workflow patterns:
-1. Do the task directly when it is simple, local, or clearly faster without workflow overhead.
-2. Use Hydra for ambiguous, risky, parallel, or multi-step work:
-   ```
-   hydra init --intent "<task>" --repo .
-   hydra dispatch --workbench W --dispatch <id> --role <role> --intent "<desc>" --repo .
-   hydra watch --workbench W --repo .
-   # → DecisionPoint returned, decide next step
-   hydra complete --workbench W --repo .
-   ```
-3. Use a direct isolated worker when only a separate worker is needed:
-   `hydra spawn --task "<specific task>" --repo . [--worktree .]`
-
-Agent launch rule:
-- When dispatching Claude/Codex through TermCanvas CLI, start a fresh agent terminal with `termcanvas terminal create --prompt "..."`
-- Do not use `termcanvas terminal input` for task dispatch; it is not a supported automation path
-
-TermCanvas Computer Use:
-- TermCanvas may dynamically inject a Computer Use MCP server into Claude/Codex terminals; it does not have to appear in static MCP settings files.
-- For local macOS desktop apps or system UI, check for TermCanvas Computer Use before assuming only shell, browser, or Playwright tools are available.
-- If available, call `status` first, then `setup` if permissions or helper health are missing, then `get_instructions` for the current operating protocol.
-- Do not manually start `computer-use-helper`, write its state file, launch the MCP server, or hand-write JSON-RPC unless explicitly debugging Computer Use itself.
-
-Workflow control:
-- After dispatching, always call `hydra watch`. It returns at decision points.
-1. Watch until decision point: `hydra watch --workbench <workbenchId> --repo .`
-2. Inspect structured state: `hydra status --workbench <workbenchId> --repo .`
-3. Reset a dispatch for rework: `hydra reset --workbench W --dispatch N --feedback "..." --repo .`
-4. Approve a dispatch's output: `hydra approve --workbench W --dispatch N --repo .`
-5. Merge parallel branches: `hydra merge --workbench W --dispatches A,B --repo .`
-6. View event log: `hydra ledger --workbench <workbenchId> --repo .`
-7. Clean up: `hydra cleanup --workbench <workbenchId> --repo .`
-
-Telemetry polling:
-1. Treat `hydra watch` as the main polling loop; do not infer progress from terminal prose alone.
-2. Before deciding wait / retry / takeover, query:
-   - `termcanvas telemetry get --workbench <workbenchId> --repo .`
-   - `termcanvas telemetry get --terminal <terminalId>`
-   - `termcanvas telemetry events --terminal <terminalId> --limit 20`
-3. Trust `derived_status` and `task_status` as the primary decision signals.
-
-`result.json` must contain (slim, schema_version `hydra/result/v0.1`):
-- `schema_version`, `workbench_id`, `assignment_id`, `run_id` (passthrough IDs)
-- `outcome` (completed/stuck/error — Hydra routes on this)
-- `report_file` (path to a `report.md` written alongside `result.json`)
-
-All human-readable content (summary, outputs, evidence, reflection) lives in
-`report.md`. Hydra rejects any extra fields in `result.json`. Write `report.md`
-first, then publish `result.json` atomically as the final artifact of the run.
-
-When NOT to use: simple fixes, high-certainty tasks, or work that is faster to do directly in the current agent.
-
-## TermCanvas Pin System
-
-TermCanvas has a first-class pin store. Pins are persistent records of work
-the user wants done — captured when the user expresses intent, not when the
-work happens. Use the `termcanvas pin` CLI to read and write them. Any agent
-terminal can record, read, and update pins.
-
-When to record a pin:
-- User says "记一下", "回头处理", "帮我留意", "later", "todo this", or any phrasing that defers the work.
-- User describes a problem or idea but isn't asking you to fix it right now.
-- User pastes a GitHub issue URL and asks you to track it (record the URL via `--link`).
-
-Do NOT silently nod — capture the pin with `termcanvas pin add` so it survives the session.
-
-Recording a pin:
-```
-termcanvas pin add --title "<short imperative>" --body "<detail>" [--link <url>]
-```
-- `--title`: short, scannable. Rephrase the user's words into imperative mood.
-- `--body`: preserve enough context for a future agent or the user to resume without re-asking basic questions. Do not store only the user's raw sentence unless it is truly just a lightweight memo.
-- For bugs, feature requests, research threads, design feedback, or follow-up engineering work, write the body like a compact issue. Prefer sections such as:
-  `Background`: what prompted this and where it came from.
-  `Observed / Request`: the concrete symptom, ask, or idea.
-  `Expected / Goal`: what should be true when this is handled.
-  `Evidence / References`: user quote, screenshot, link, file path, command output, or code location if available.
-  `Next action`: the first useful step when someone picks it up.
-  `Why pinned`: why this is being saved instead of handled immediately.
-  `Unknowns`: missing decisions or facts that still need confirmation.
-- If the information is thin, choose deliberately:
-  If local context can answer it cheaply, inspect the relevant code, state, logs, or files before recording and include what you found.
-  If the missing information changes scope, product behavior, security, or architecture, ask the user one concise question before recording.
-  If the user is clearly deferring and cannot answer now, record the pin anyway but mark assumptions and unknowns explicitly.
-- If it is only a personal memo or reminder, a short body is acceptable, but still include why it matters or when to revisit it if that is known.
-- For multi-line bodies, pass real newlines. In shell commands, use ANSI-C quoting such as
-  `--body $'line 1\nline 2'`; do not put literal `\n` sequences inside ordinary quotes.
-- `--link <url>`: attach an external reference (GitHub issue, doc, etc.). Use `--link-type github_issue` for issue URLs.
-- Repo defaults to cwd. Pass `--repo <path>` only if you need a different one.
-
-Reading and updating pins:
-- `termcanvas pin list` — list pins for the current repo (filter `--status done` etc.)
-- `termcanvas pin show <id>` — read a single pin before acting on it
-- `termcanvas pin update <id> --status done` — mark complete after finishing the work
-- `termcanvas pin update <id> --body "..."` — refine the description as you learn more
-
-Rules:
-- Pins belong to the user. Don't invent pins the user didn't ask for.
-- One pin per intent. Three deferred items = three `pin add` calls.
-- After completing work that originated from a pin, call `pin update <id> --status done`.
-- The pin store is local to TermCanvas. It does NOT auto-sync to GitHub. If the user wants something on GitHub, they will say so explicitly.
-- Status values: `open` (default), `done`, `dropped`. Pick `dropped` (not delete) when a pin is abandoned, so the history is preserved.
+**记住**: 这是一个专注于性能的日志库。在任何更改中都要考虑对日志操作热路径的性能影响。

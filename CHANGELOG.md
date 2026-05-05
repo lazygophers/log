@@ -4,322 +4,299 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-05-05
 
 ### Added
-- Comprehensive multilingual documentation (15 languages)
-- GitHub issue templates (Bug Report, Feature Request, Questions)
-- Pull request template with build tag compatibility checks
-- Contributing guidelines in multiple languages
-- Code of conduct with enforcement guidelines
-- Security policy with vulnerability reporting process
-- Complete API documentation with examples
-- Professional project structure and templates
+- **Hook 接口系统**: 支持在日志写入前进行修改、过滤或丰富日志条目
+- **JSON 序列化优化**: Entry 实现 `json.Marshaler` 接口，支持条件字段序列化
+- **测试覆盖率提升**: 从 93.0% 提升到 95.0%，新增 40+ 测试用例
+- **文档重写**: 根据实际代码状态深度重写所有文档
 
 ### Changed
-- Enhanced README with comprehensive feature documentation
-- Improved test coverage across all build tag configurations (95.0%)
-- Updated project structure for better maintainability
-- **Refactored** log configuration and rotation mechanism, simplified Entry processing
-- **Removed** `logger_ctx` and related zap code to simplify logging logic
-- **Improved** rotator log rotation functionality and related documentation
-- **Refactored** debug log functionality implementation
-- **Increased** test coverage from 93.0% to 95.0% with 486 test cases
-- **Standardized** test file naming (removed coverage/boost test files, merged into standard test files)
-
-### Documentation
-- Added multilingual support for all major documentation
-- Created comprehensive API reference
-- Established contributing workflow guidelines
-- Implemented security reporting procedures
-
-## [0.0.0.19] - 2026-04-28
-
-### Changed
-- Simplified logging architecture by removing `logger_ctx` abstraction
-- Enhanced rotator log rotation mechanism
-- Refactored debug logging implementation
-- Updated `petermattis/goid` to latest version
+- **架构简化**: 移除 `logger_ctx` 和相关 zap 代码，简化日志处理逻辑
+- **Entry 重构**: 将 `Entry` 移至 `constant` 包，优化内存布局（200字节，2%填充浪费）
+- **日志轮转改进**: 完善按小时轮转功能，支持基于大小的分片
+- **测试文件规范化**: 统一测试文件命名标准，移除独立的覆盖率测试文件
 
 ### Removed
-- `logger_ctx.go` and `logger_ctx_test.go` — context-based logging layer
-- Legacy test files for removed features
+- `logger_ctx.go` 和 `logger_ctx_test.go` — context 日志层
+- 独立的覆盖率测试文件（`coverage_boost_test.go` 等）
+- 过时的文档和 API 说明
 
 ### Fixed
-- Simplified log entry processing pipeline
-- Improved build tag compatibility across different configurations
+- 修复格式化器的调用者信息处理
+- 改进时间戳缓存机制
+- 优化对象池复用逻辑
+
+### Performance
+- **缓存优化**: Entry 结构按访问频率和大小排列，最小化缓存行浪费
+- **时间缓存**: 格式化的时间戳缓存为字符串，避免重复格式化
+- **早期检查**: 级别检查在外层完成，避免不必要的 Entry 填充
+
+### Testing
+- 测试覆盖率: **95.0%** (486 个测试用例)
+- 所有测试合并到标准测试文件
+- 新增边界情况和分支覆盖测试
 
 ## [1.0.0] - 2024-01-01
 
 ### Added
-- Core logging functionality with multiple levels (Trace, Debug, Info, Warn, Error, Fatal, Panic)
-- Thread-safe logger implementation with object pooling
-- Build tag support (default, debug, release, discard modes)
-- Custom formatter interface with default text formatter
-- Multi-writer output support
-- Async writing capabilities for high-throughput scenarios
-- Automatic hourly log file rotation
-- Context-aware logging with goroutine ID and trace ID tracking
-- Caller information with configurable stack depth
-- Global package-level convenience functions
-- Zap logger integration support
+- 核心日志功能，支持多个级别（Trace、Debug、Info、Warn、Error、Fatal、Panic）
+- 线程安全的日志器实现，使用对象池优化
+- 构建标签支持（default、debug、release、discard 模式）
+- 自定义格式化器接口，提供默认文本格式化器
+- 多 Writer 输出支持
+- 异步写入能力，适用于高吞吐场景
+- 按小时自动轮转日志文件
+- 上下文感知日志，支持 Goroutine ID 和 Trace ID 追踪
+- 可配置的调用者信息（文件名、行号、函数名）
+- 全局包级便捷函数
+- Zap 日志器集成支持
 
 ### Performance
-- Object pooling with `sync.Pool` for entry objects and buffers
-- Early level checking to avoid expensive operations
-- Async writer for non-blocking log writes
-- Build tag optimizations for different environments
+- 使用 `sync.Pool` 对 Entry 对象和缓冲区进行对象池优化
+- 早期级别检查，避免昂贵的操作
+- 异步写入器实现非阻塞日志写入
+- 针对不同环境的构建标签优化
 
 ### Build Tags
-- **Default**: Full functionality with debug messages
-- **Debug**: Enhanced debug information and caller details
-- **Release**: Production-optimized with disabled debug messages
-- **Discard**: Maximum performance with no-op logging operations
+- **Default**: 完整功能，包含调试消息
+- **Debug**: 增强调试信息和调用者详情
+- **Release**: 生产优化，禁用调试消息
+- **Discard**: 最高性能，空操作日志
 
 ### Core Features
-- **Logger**: Main logger struct with configurable level, output, formatter
-- **Entry**: Log record structure with comprehensive metadata
-- **Levels**: Seven log levels from Panic (highest) to Trace (lowest)
-- **Formatters**: Pluggable formatting system
-- **Writers**: File rotation and async writing support
-- **Context**: Goroutine ID and distributed tracing support
+- **Logger**: 主日志器结构，可配置级别、输出、格式化器
+- **Entry**: 日志记录结构，包含全面的元数据
+- **Levels**: 七个日志级别，从 Panic（最高）到 Trace（最低）
+- **Formatters**: 可插拔格式化系统
+- **Writers**: 文件轮转和异步写入支持
+- **Context**: Goroutine ID 和分布式追踪支持
 
 ### API Highlights
-- Fluent configuration API with method chaining
-- Both simple and formatted logging methods (`.Info()` and `.Infof()`)
-- Logger cloning for isolated configurations
-- Context-aware logging with `CloneToCtx()`
-- Prefix and suffix message customization
-- Caller information toggle
+- 流式配置 API，支持方法链式调用
+- 简单和格式化日志方法（`.Info()` 和 `.Infof()`）
+- 日志器克隆，支持隔离配置
+- 前缀和后缀消息自定义
+- 调用者信息开关
 
 ### Testing
-- Comprehensive test suite with 93.5% coverage
-- Multi build-tag testing support
-- Automated testing workflows
-- Performance benchmarks
+- 全面的测试套件，93.5% 覆盖率
+- 多构建标签测试支持
+- 自动化测试工作流
+- 性能基准测试
 
 ## [0.9.0] - 2023-12-15
 
 ### Added
-- Initial project structure
-- Basic logging functionality
-- Level-based filtering
-- File output support
+- 初始项目结构
+- 基本日志功能
+- 级别过滤
+- 文件输出支持
 
 ### Changed
-- Improved performance with object pooling
-- Enhanced error handling
+- 使用对象池改进性能
+- 增强错误处理
 
 ## [0.8.0] - 2023-12-01
 
 ### Added
-- Multi-writer support
-- Custom formatter interface
-- Async writing capabilities
+- 多 Writer 支持
+- 自定义格式化器接口
+- 异步写入能力
 
 ### Fixed
-- Memory leaks in high-throughput scenarios
-- Race conditions in concurrent access
+- 高吞吐场景下的内存泄漏
+- 并发访问的竞态条件
 
 ## [0.7.0] - 2023-11-15
 
 ### Added
-- Build tag support for conditional compilation
-- Trace and debug level logging
-- Caller information tracking
+- 构建标签支持，实现条件编译
+- Trace 和 Debug 级别日志
+- 调用者信息追踪
 
 ### Changed
-- Optimized memory allocation patterns
-- Improved thread safety
+- 优化内存分配模式
+- 改进线程安全性
 
 ## [0.6.0] - 2023-11-01
 
 ### Added
-- Log rotation functionality
-- Context-aware logging
-- Goroutine ID tracking
-
-### Deprecated
-- Old configuration methods (will be removed in v1.0.0)
+- 日志轮转功能
+- 上下文感知日志
+- Goroutine ID 追踪
 
 ## [0.5.0] - 2023-10-15
 
 ### Added
-- JSON formatter
-- Multiple output destinations
-- Performance benchmarks
+- JSON 格式化器
+- 多个输出目标
+- 性能基准测试
 
 ### Changed
-- Refactored core logging engine
-- Improved API consistency
-
-### Removed
-- Legacy logging methods
+- 重构核心日志引擎
+- 改进 API 一致性
 
 ## [0.4.0] - 2023-10-01
 
 ### Added
-- Fatal and Panic level logging
-- Global package functions
-- Configuration validation
+- Fatal 和 Panic 级别日志
+- 全局包函数
+- 配置验证
 
 ### Fixed
-- Output synchronization issues
-- Memory usage optimization
+- 输出同步问题
+- 内存使用优化
 
 ## [0.3.0] - 2023-09-15
 
 ### Added
-- Custom log levels
-- Formatter interface
-- Thread-safe operations
+- 自定义日志级别
+- 格式化器接口
+- 线程安全操作
 
 ### Changed
-- Simplified API design
-- Enhanced documentation
+- 简化 API 设计
+- 增强文档
 
 ## [0.2.0] - 2023-09-01
 
 ### Added
-- File output support
-- Level-based filtering
-- Basic formatting options
+- 文件输出支持
+- 基于级别的过滤
+- 基本格式化选项
 
 ### Fixed
-- Performance bottlenecks
-- Memory leaks
+- 性能瓶颈
+- 内存泄漏
 
 ## [0.1.0] - 2023-08-15
 
 ### Added
-- Initial release
-- Basic console logging
-- Simple level support (Info, Warn, Error)
-- Core logger structure
+- 初始发布
+- 基本控制台日志
+- 简单级别支持（Info、Warn、Error）
+- 核心日志器结构
 
-## Version History Summary
+## 版本历史摘要
 
-| Version | Release Date | Key Features |
-|---------|--------------|--------------|
-| 1.0.0   | 2024-01-01  | Complete logging system, build tags, async writing, comprehensive documentation |
-| 0.9.0   | 2023-12-15  | Performance improvements, object pooling |
-| 0.8.0   | 2023-12-01  | Multi-writer, async writing, custom formatters |
-| 0.7.0   | 2023-11-15  | Build tags, trace/debug levels, caller info |
-| 0.6.0   | 2023-11-01  | Log rotation, context logging, goroutine tracking |
-| 0.5.0   | 2023-10-15  | JSON formatter, multiple outputs, benchmarks |
-| 0.4.0   | 2023-10-01  | Fatal/Panic levels, global functions |
-| 0.3.0   | 2023-09-15  | Custom levels, formatter interface |
-| 0.2.0   | 2023-09-01  | File output, level filtering |
-| 0.1.0   | 2023-08-15  | Initial release, basic console logging |
+| 版本 | 发布日期 | 主要特性 |
+|------|----------|----------|
+| 1.1.0 | 2026-05-05 | Hook 系统、Entry 优化、95% 测试覆盖率、文档重写 |
+| 1.0.0 | 2024-01-01 | 完整日志系统、构建标签、异步写入、全面文档 |
+| 0.9.0 | 2023-12-15 | 性能改进、对象池 |
+| 0.8.0 | 2023-12-01 | 多 Writer、异步写入、自定义格式化器 |
+| 0.7.0 | 2023-11-15 | 构建标签、Trace/Debug 级别、调用者信息 |
+| 0.6.0 | 2023-11-01 | 日志轮转、上下文日志、Goroutine 追踪 |
+| 0.5.0 | 2023-10-15 | JSON 格式化器、多输出、基准测试 |
+| 0.4.0 | 2023-10-01 | Fatal/Panic 级别、全局函数 |
+| 0.3.0 | 2023-09-15 | 自定义级别、格式化器接口 |
+| 0.2.0 | 2023-09-01 | 文件输出、级别过滤 |
+| 0.1.0 | 2023-08-15 | 初始发布、基本控制台日志 |
 
-## Migration Guides
+## 迁移指南
 
-### Migrating from v0.9.x to v1.0.0
+### 从 v1.0.x 迁移到 v1.1.0
 
-#### Breaking Changes
-- None - v1.0.0 is backward compatible with v0.9.x
+#### 破坏性变更
+- `Entry` 类型现在位于 `constant` 包中
+- 主包通过类型别名导出：`type Entry = constant.Entry`
+- 如果代码直接引用 `Entry`，需要更新导入路径
 
-#### New Features Available
-- Enhanced build tag support
-- Comprehensive documentation
-- Professional project templates
-- Security reporting procedures
+#### 新功能
+- Hook 接口支持：
+  ```go
+  type Hook interface {
+      OnWrite(entry interface{}) interface{}
+  }
+  ```
+- JSON 序列化优化：
+  ```go
+  // Entry 现在实现 json.Marshaler
+  data, _ := json.Marshal(entry)
+  ```
 
-#### Recommended Updates
+#### 推荐更新
 ```go
-// Old way (still supported)
-logger := log.New()
-logger.SetLevel(log.InfoLevel)
+// 旧代码
+if entry.Level == log.InfoLevel {
+    // ...
+}
 
-// New recommended way with method chaining
-logger := log.New().
-    SetLevel(log.InfoLevel).
-    Caller(true).
-    SetPrefixMsg("[MyApp] ")
+// 新代码（兼容）
+if entry.Level == log.InfoLevel {
+    // ...
+}
+
+// 或使用 constant 包
+if entry.Level == constant.InfoLevel {
+    // ...
+}
 ```
 
-### Migrating from v0.8.x to v0.9.x
+### 从 v0.9.x 迁移到 v1.0.0
 
-#### Breaking Changes
-- Removed deprecated configuration methods
-- Changed internal buffer management
+#### 破坏性变更
+- 无破坏性变更 - v1.0.0 与 v0.9.x 向后兼容
 
-#### Migration Steps
-1. Update import paths if needed
-2. Replace deprecated methods:
+#### 新功能
+- 增强的构建标签支持
+- 全面的文档
+- 专业的项目模板
+- 安全报告流程
+
+### 从 v0.8.x 迁移到 v0.9.x
+
+#### 破坏性变更
+- 移除了弃用的配置方法
+- 更改了内部缓冲区管理
+
+#### 迁移步骤
+1. 更新导入路径（如需要）
+2. 替换弃用的方法：
    ```go
-   // Old (deprecated)
+   // 旧（已弃用）
    logger.SetOutputFile("app.log")
    
-   // New
+   // 新
    file, _ := os.Create("app.log")
    logger.SetOutput(file)
    ```
 
-### Migrating from v0.5.x and Earlier
+## 贡献
 
-#### Major Changes
-- Complete API redesign for better consistency
-- Enhanced performance with object pooling
-- New build tag system
+欢迎贡献！请参阅[贡献指南](CONTRIBUTING.md)了解详情：
+- 报告错误和请求功能
+- 代码提交流程
+- 开发环境设置
+- 测试要求
+- 文档标准
 
-#### Migration Required
-- Update all logging calls to new API
-- Review and update formatter implementations
-- Test with new build tag configurations
+## 安全
 
-## Development Milestones
+关于安全漏洞，请参阅[安全策略](SECURITY.md)了解：
+- 支持的版本
+- 报告流程
+- 响应时间线
+- 安全最佳实践
 
-### 🎯 v1.1.0 Roadmap (Planned)
-- [ ] Structured logging with key-value pairs
-- [ ] Log sampling for high-volume scenarios  
-- [ ] Plugin system for custom outputs
-- [ ] Enhanced performance metrics
-- [ ] Cloud logging integrations
+## 支持
 
-### 🎯 v1.2.0 Roadmap (Future)
-- [ ] Configuration file support (YAML/JSON/TOML)
-- [ ] Log aggregation and filtering
-- [ ] Real-time log streaming
-- [ ] Enhanced security features
-- [ ] Performance dashboard integration
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
-
-- Reporting bugs and requesting features
-- Code submission process  
-- Development setup
-- Testing requirements
-- Documentation standards
-
-## Security
-
-For security vulnerabilities, please see our [Security Policy](docs/SECURITY.md) for:
-- Supported versions
-- Reporting procedures
-- Response timeline
-- Security best practices
-
-## Support
-
-- 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/lazygophers/log/issues)
-- 💬 [Discussions](https://github.com/lazygophers/log/discussions)
+- 📖 [文档](docs/)
+- 🐛 [问题追踪](https://github.com/lazygophers/log/issues)
+- 💬 [讨论](https://github.com/lazygophers/log/discussions)
 - 📧 Email: support@lazygophers.com
 
-## License
+## 许可证
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
----
+## 多语言文档
 
-## 🌍 Multilingual Documentation
+本变更日志提供多种语言版本：
 
-This changelog is available in multiple languages:
-
-- [🇺🇸 English](CHANGELOG.md) (Current)
+- [🇺🇸 English](CHANGELOG.md) (当前)
 - [🇨🇳 简体中文](docs/CHANGELOG_zh-CN.md)
 - [🇹🇼 繁體中文](docs/CHANGELOG_zh-TW.md)
 - [🇫🇷 Français](docs/CHANGELOG_fr.md)
@@ -329,8 +306,8 @@ This changelog is available in multiple languages:
 
 ---
 
-**Track every improvement and stay updated with LazygoPHers Log evolution! 🚀**
+**跟踪每一次改进，随时了解 LazygoPHers Log 的演进！🚀**
 
 ---
 
-*This changelog is automatically updated with each release. For the most current information, check the [GitHub Releases](https://github.com/lazygophers/log/releases) page.*
+*本变更日志在每次发布时自动更新。获取最新信息，请查看 [GitHub Releases](https://github.com/lazygophers/log/releases) 页面。*

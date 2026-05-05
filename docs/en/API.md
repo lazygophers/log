@@ -6,26 +6,26 @@ titleSuffix: " | LazyGophers Log"
 
 ## Overview
 
-LazyGophers Log provides a comprehensive logging API that supports multiple log levels, custom formatting, asynchronous writing, and build tag optimization. This document covers all public APIs, configuration options, and usage patterns.
+LazyGophers Log provides a comprehensive logging API with multiple log levels, custom formatting, structured logging, and a powerful Hook system. This document covers all public APIs, configuration options, and usage patterns.
 
 ## Table of Contents
 
--   [Core Types](#core-types)
--   [Logger API](#logger-api)
--   [Global Functions](#global-functions)
--   [Log Levels](#log-levels)
--   [Formatters](#formatters)
--   [Output Writers](#output-writers)
--   [Contextual Logging](#contextual-logging)
--   [Build Tags](#build-tags)
--   [Performance Optimization](#performance-optimization)
--   [Examples](#examples)
+- [Core Types](#core-types)
+- [Logger API](#logger-api)
+- [Global Functions](#global-functions)
+- [Log Levels](#log-levels)
+- [Structured Logging](#structured-logging)
+- [Formatters](#formatters)
+- [Hooks](#hooks)
+- [Output Writers](#output-writers)
+- [Build Tags](#build-tags)
+- [Examples](#examples)
 
 ## Core Types
 
 ### Logger
 
-The main logger struct that provides all logging functionality.
+The main logger struct providing all logging functionality.
 
 ```go
 type Logger struct {
@@ -33,18 +33,18 @@ type Logger struct {
 }
 ```
 
-#### Constructor
+**Constructor:**
 
 ```go
 func New() *Logger
 ```
 
 Creates a new logger instance with default configuration:
-
--   Level: `DebugLevel`
--   Output: `os.Stdout`
--   Formatter: Default text formatter
--   Caller tracking: Disabled
+- Level: `DebugLevel`
+- Output: `os.Stdout`
+- Formatter: Default text formatter with parsing/escaping disabled
+- Caller tracking: `enabled`
+- Trace tracking: `enabled`
 
 **Example:**
 
@@ -55,19 +55,58 @@ logger.Info("New logger created")
 
 ### Entry
 
-Represents a single log entry with all associated metadata.
+Represents a single log entry with comprehensive metadata.
+
+> **Note:** Entry is defined in the `constant` package to avoid circular dependencies.
 
 ```go
 type Entry struct {
-    Time       time.Time     // Timestamp when the entry was created
-    Level      Level         // Log level
-    Message    string        // Log message
-    Pid        int          // Process ID
-    Gid        uint64       // Goroutine ID
-    TraceID    string       // Trace ID for distributed tracing
-    CallerName string       // Caller function name
-    CallerFile string       // Caller file path
-    CallerLine int          // Caller line number
+    // Hot path fields - accessed on every log call
+    Level      Level     // Log level
+    Pid        int       // Process ID
+    Gid        int64     // Goroutine ID
+    CallerLine int       // Caller line number
+
+    // Timestamp
+    Time       time.Time // Timestamp
+    TimeStr    string    // Cached formatted timestamp
+    TimeStrSet bool      // Internal flag
+
+    // String fields (16 bytes each) - ordered by access frequency
+    Message    string    // Log message
+    File       string    // Caller file path
+    CallerFunc string    // Caller function name
+    CallerDir  string    // Caller directory
+    CallerName string    // Caller short name
+    TraceId    string    // Trace ID for distributed tracing
+
+    // Byte slices (24 bytes each)
+    PrefixMsg []byte     // Log prefix message
+    SuffixMsg []byte     // Log suffix message
+
+    // Structured fields
+    Fields []KV          // Key-value pairs
+}
+```
+
+**Key Methods:**
+
+```go
+// Reset resets Entry to initial values for pool reuse
+func (e *Entry) Reset()
+
+// MarshalJSON implements json.Marshaler for custom serialization
+func (e *Entry) MarshalJSON() ([]byte, error)
+```
+
+### KV
+
+Represents a key-value pair for structured logging.
+
+```go
+type KV struct {
+    Key   string
+    Value interface{}
 }
 ```
 
@@ -84,12 +123,10 @@ func (l *Logger) SetLevel(level Level) *Logger
 Sets the minimum log level. Messages below this level will be ignored.
 
 **Parameters:**
+- `level`: The minimum log level to process
 
--   `level`：The minimum log level to process
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
@@ -97,6 +134,24 @@ Sets the minimum log level. Messages below this level will be ignored.
 logger.SetLevel(log.InfoLevel)
 logger.Debug("This won't be displayed")  // Ignored
 logger.Info("This will be displayed")    // Processed
+```
+
+#### Level
+
+```go
+func (l *Logger) Level() Level
+```
+
+Returns the current log level.
+
+**Returns:**
+- `Level`: The current minimum log level
+
+**Example:**
+
+```go
+currentLevel := logger.Level()
+fmt.Printf("Current level: %v\n", currentLevel)
 ```
 
 #### SetOutput
@@ -108,12 +163,10 @@ func (l *Logger) SetOutput(writers ...io.Writer) *Logger
 Sets one or more output destinations for log messages.
 
 **Parameters:**
+- `writers`: One or more `io.Writer` output destinations
 
--   `writers`：One or more `io.Writer` output destinations
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
@@ -124,51 +177,12 @@ logger.SetOutput(os.Stdout)
 // Multiple outputs
 file, _ := os.Create("app.log")
 logger.SetOutput(os.Stdout, file)
-```
 
-#### SetFormatter
-
-```go
-func (l *Logger) SetFormatter(formatter Format) *Logger
-```
-
-Sets a custom formatter for log output.
-
-**Parameters:**
-
--   `formatter`：A formatter that implements the `Format` interface
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
-
-**Example:**
-
-```go
-logger.SetFormatter(&JSONFormatter{})
-```
-
-#### EnableCaller
-
-```go
-func (l *Logger) EnableCaller(enabled bool) *Logger
-```
-
-Enables or disables caller information in log entries.
-
-**Parameters:**
-
--   `enabled`：Whether to include caller information
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
-
-**Example:**
-
-```go
-logger.EnableCaller(true)
-logger.Info("This will include file:line information")
+// With rotating writer
+logger.SetOutput(
+    os.Stdout,
+    log.GetOutputWriterHourly("/var/log/app.log", 100*1024*1024, 168),
+)
 ```
 
 #### SetCallerDepth
@@ -177,165 +191,196 @@ logger.Info("This will include file:line information")
 func (l *Logger) SetCallerDepth(depth int) *Logger
 ```
 
-Sets the stack depth for caller information when wrapping loggers.
+Sets the caller stack depth for determining the calling location.
 
 **Parameters:**
+- `depth`: Stack depth (default: 4)
 
--   `depth`：Number of stack frames to skip
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
 ```go
-func logWrapper(msg string) {
-    logger.SetCallerDepth(1).Info(msg)  // Skip the wrapper function
-}
+logger.SetCallerDepth(5)
 ```
 
-#### SetPrefixMsg / SetSuffixMsg
+#### EnableCaller
+
+```go
+func (l *Logger) EnableCaller(enable bool) *Logger
+```
+
+Enables or disables caller information in log output.
+
+**Parameters:**
+- `enable`: `true` to include caller information
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
+
+**Example:**
+
+```go
+logger.EnableCaller(true)   // Include caller info
+logger.EnableCaller(false)  // Exclude caller info
+```
+
+#### EnableTrace
+
+```go
+func (l *Logger) EnableTrace(enable bool) *Logger
+```
+
+Enables or disables trace information (Goroutine ID, Trace ID).
+
+**Parameters:**
+- `enable`: `true` to include trace information
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
+
+**Example:**
+
+```go
+logger.EnableTrace(true)   // Include trace info
+logger.EnableTrace(false)  // Exclude trace info
+```
+
+#### SetPrefixMsg
 
 ```go
 func (l *Logger) SetPrefixMsg(prefix string) *Logger
+```
+
+Sets a prefix message for all log entries.
+
+**Parameters:**
+- `prefix`: The prefix string
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
+
+**Example:**
+
+```go
+logger.SetPrefixMsg("[MyApp] ")
+logger.Info("message")  // Output: [MyApp] message
+```
+
+#### AppendPrefixMsg
+
+```go
+func (l *Logger) AppendPrefixMsg(prefix string) *Logger
+```
+
+Appends to the existing prefix message.
+
+**Parameters:**
+- `prefix`: The string to append
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
+
+**Example:**
+
+```go
+logger.SetPrefixMsg("[App] ")
+logger.AppendPrefixMsg("[v1.0] ")
+logger.Info("message")  // Output: [App] [v1.0] message
+```
+
+#### SetSuffixMsg
+
+```go
 func (l *Logger) SetSuffixMsg(suffix string) *Logger
 ```
 
-Sets prefix or suffix text for all log messages.
+Sets a suffix message for all log entries.
 
 **Parameters:**
+- `suffix`: The suffix string
 
--   `prefix/suffix`：Text to prepend/append to messages
-
-**Return:**
-
--   `*Logger`：Returns itself to support method chaining
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
 ```go
-logger.SetPrefixMsg("[APP] ").SetSuffixMsg(" [END]")
-logger.Info("Hello")  // Output: [APP] Hello [END]
+logger.SetSuffixMsg(" [END]")
+logger.Info("message")  // Output: message [END]
 ```
 
-### Logging Methods
-
-All logging methods have two variants: simple and formatted versions.
-
-#### Trace Level
+#### AppendSuffixMsg
 
 ```go
-func (l *Logger) Trace(v ...any)
-func (l *Logger) Tracef(format string, v ...any)
+func (l *Logger) AppendSuffixMsg(suffix string) *Logger
 ```
 
-Logs at trace level (most detailed).
+Appends to the existing suffix message.
+
+**Parameters:**
+- `suffix`: The string to append
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
 ```go
-logger.Trace("Detailed execution trace")
-logger.Tracef("Processing item %d of %d", i, total)
+logger.SetSuffixMsg(" [1]")
+logger.AppendSuffixMsg(" [2]")
+logger.Info("message")  // Output: message [1] [2]
 ```
 
-#### Debug Level
+#### ParsingAndEscaping
 
 ```go
-func (l *Logger) Debug(v ...any)
-func (l *Logger) Debugf(format string, v ...any)
+func (l *Logger) ParsingAndEscaping(disable bool) *Logger
 ```
 
-Logs development information at debug level.
+Controls message parsing and character escaping.
+
+**Parameters:**
+- `disable`: `true` to disable parsing and escaping
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
 ```go
-logger.Debug("Variable state:", variable)
-logger.Debugf("User %s authenticated successfully", username)
+logger.ParsingAndEscaping(false)  // Enable parsing/escaping
+logger.ParsingAndEscaping(true)   // Disable parsing/escaping
 ```
 
-#### Info Level
+#### AddHook
 
 ```go
-func (l *Logger) Info(v ...any)
-func (l *Logger) Infof(format string, v ...any)
+func (l *Logger) AddHook(hook constant.Hook) *Logger
 ```
 
-Logs informational messages.
+Adds a hook to process log entries before writing.
+
+**Parameters:**
+- `hook`: A hook implementing the `constant.Hook` interface
+
+**Returns:**
+- `*Logger`: Returns itself for method chaining
 
 **Example:**
 
 ```go
-logger.Info("Application started")
-logger.Infof("Server listening on port %d", port)
+type MyHook struct{}
+
+func (h *MyHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*log.Entry)
+    e.Message = "[HOOK] " + e.Message
+    return e
+}
+
+logger.AddHook(&MyHook{})
 ```
-
-#### Warn Level
-
-```go
-func (l *Logger) Warn(v ...any)
-func (l *Logger) Warnf(format string, v ...any)
-```
-
-Logs warning messages for potential issue situations.
-
-**Example:**
-
-```go
-logger.Warn("Deprecated function called")
-logger.Warnf("High memory usage: %d%%", memoryPercent)
-```
-
-#### Error Level
-
-```go
-func (l *Logger) Error(v ...any)
-func (l *Logger) Errorf(format string, v ...any)
-```
-
-Logs error messages.
-
-**Example:**
-
-```go
-logger.Error("Database connection failed")
-logger.Errorf("Request processing failed: %v", err)
-```
-
-#### Fatal Level
-
-```go
-func (l *Logger) Fatal(v ...any)
-func (l *Logger) Fatalf(format string, v ...any)
-```
-
-Logs a fatal error and calls `os.Exit(1)`.
-
-**Example:**
-
-```go
-logger.Fatal("Critical system error")
-logger.Fatalf("Failed to start server: %v", err)
-```
-
-#### Panic Level
-
-```go
-func (l *Logger) Panic(v ...any)
-func (l *Logger) Panicf(format string, v ...any)
-```
-
-Logs an error message and calls `panic()`.
-
-**Example:**
-
-```go
-logger.Panic("Unrecoverable error occurred")
-logger.Panicf("Invalid state: %v", state)
-```
-
-### Utility Methods
 
 #### Clone
 
@@ -343,62 +388,273 @@ logger.Panicf("Invalid state: %v", state)
 func (l *Logger) Clone() *Logger
 ```
 
-Creates a copy of the logger with identical configuration.
+Creates a deep copy of the logger with independent configuration.
 
-**Return:**
-
--   `*Logger`：New logger instance with copied settings
-
-**Example:**
-
-```go
-dbLogger := logger.Clone()
-dbLogger.SetPrefixMsg("[DB] ")
-```
-
-#### CloneToCtx
-
-```go
-func (l *Logger) CloneToCtx() LoggerWithCtx
-```
-
-Creates a context-aware logger that accepts `context.Context` as the first parameter.
-
-**Return:**
-
--   `LoggerWithCtx`：Context-aware logger instance
+**Returns:**
+- `*Logger`: A new logger instance
 
 **Example:**
 
 ```go
-ctxLogger := logger.CloneToCtx()
-ctxLogger.Info(ctx, "Context-aware message")
+original := log.New().SetLevel(log.InfoLevel)
+cloned := original.Clone()
+
+// Cloned logger has independent configuration
+cloned.SetLevel(log.DebugLevel)  // Doesn't affect original
+```
+
+#### Sync
+
+```go
+func (l *Logger) Sync()
+```
+
+Flushes all buffered log entries to their output destinations.
+
+**Example:**
+
+```go
+logger.Info("Before sync")
+logger.Sync()
+logger.Info("After sync")
+```
+
+### Logging Methods
+
+#### Log
+
+```go
+func (l *Logger) Log(level Level, args ...interface{})
+```
+
+Logs a message at the specified level.
+
+**Parameters:**
+- `level`: The log level
+- `args`: The message arguments (formatted with `fmt.Sprint`)
+
+**Example:**
+
+```go
+logger.Log(log.InfoLevel, "Info message")
+logger.Log(log.WarnLevel, "Warning:", "something happened")
+```
+
+#### Logf
+
+```go
+func (l *Logger) Logf(level Level, format string, args ...interface{})
+```
+
+Logs a formatted message at the specified level.
+
+**Parameters:**
+- `level`: The log level
+- `format`: The format string
+- `args`: The format arguments
+
+**Example:**
+
+```go
+logger.Logf(log.InfoLevel, "User %s logged in", "admin")
+logger.Logf(log.ErrorLevel, "Failed to connect: %v", err)
+```
+
+#### Trace
+
+```go
+func (l *Logger) Trace(args ...interface{})
+```
+
+Logs a trace-level message.
+
+**Example:**
+
+```go
+logger.Trace("Detailed trace information")
+```
+
+#### Debug
+
+```go
+func (l *Logger) Debug(args ...interface{})
+```
+
+Logs a debug-level message.
+
+**Example:**
+
+```go
+logger.Debug("Debug information")
+```
+
+#### Info
+
+```go
+func (l *Logger) Info(args ...interface{})
+```
+
+Logs an info-level message.
+
+**Example:**
+
+```go
+logger.Info("Information message")
+```
+
+#### Warn
+
+```go
+func (l *Logger) Warn(args ...interface{})
+```
+
+Logs a warning-level message.
+
+**Example:**
+
+```go
+logger.Warn("Warning message")
+```
+
+#### Error
+
+```go
+func (l *Logger) Error(args ...interface{})
+```
+
+Logs an error-level message.
+
+**Example:**
+
+```go
+logger.Error("Error occurred")
+```
+
+#### Fatal
+
+```go
+func (l *Logger) Fatal(args ...interface{})
+```
+
+Logs a fatal-level message and exits the program.
+
+**Example:**
+
+```go
+logger.Fatal("Fatal error, exiting")
+```
+
+#### Panic
+
+```go
+func (l *Logger) Panic(args ...interface{})
+```
+
+Logs a panic-level message and panics.
+
+**Example:**
+
+```go
+logger.Panic("Panic condition")
+```
+
+#### Tracef, Debugf, Infof, Warnf, Errorf, Fatalf, Panicf
+
+Formatted versions of the logging methods.
+
+```go
+func (l *Logger) Tracef(format string, args ...interface{})
+func (l *Logger) Debugf(format string, args ...interface{})
+func (l *Logger) Infof(format string, args ...interface{})
+func (l *Logger) Warnf(format string, args ...interface{})
+func (l *Logger) Errorf(format string, args ...interface{})
+func (l *Logger) Fatalf(format string, args ...interface{})
+func (l *Logger) Panicf(format string, args ...interface{})
+```
+
+**Example:**
+
+```go
+logger.Infof("User %s logged in from %s", username, ip)
+logger.Errorf("Failed to connect: %v", err)
+```
+
+#### Structured Logging Methods
+
+##### Tracew, Debugw, Infow, Warnw, Errorw, Fatalw, Panicw
+
+Structured logging methods with key-value pairs.
+
+```go
+func (l *Logger) Tracew(msg string, args ...interface{})
+func (l *Logger) Debugw(msg string, args ...interface{})
+func (l *Logger) Infow(msg string, args ...interface{})
+func (l *Logger) Warnw(msg string, args ...interface{})
+func (l *Logger) Errorw(msg string, args ...interface{})
+func (l *Logger) Fatalw(msg string, args ...interface{})
+func (l *Logger) Panicw(msg string, args ...interface{})
+```
+
+**Parameters:**
+- `msg`: The log message
+- `args`: Key-value pairs (key1, value1, key2, value2, ...)
+
+**Example:**
+
+```go
+logger.Infow("User logged in",
+    "user_id", 12345,
+    "username", "admin",
+    "ip", "192.168.1.100",
+    "success", true,
+)
+
+// Output: ... User logged in user_id=12345 username=admin ip=192.168.1.100 success=true
 ```
 
 ## Global Functions
 
-Package-level functions that use the default global logger.
+Package-level functions that use the standard logger instance.
 
 ```go
-func SetLevel(level Level)
-func SetOutput(writers ...io.Writer)
-func SetFormatter(formatter Format)
-func EnableCaller(enabled bool)
+func New() *Logger
+func SetLevel(level Level) *Logger
+func GetLevel() Level
+func Sync()
+func Clone() *Logger
+func SetCallerDepth(callerDepth int) *Logger
+func SetPrefixMsg(prefixMsg string) *Logger
+func AppendPrefixMsg(prefixMsg string) *Logger
+func SetSuffixMsg(suffixMsg string) *Logger
+func AppendSuffixMsg(suffixMsg string) *Logger
+func ParsingAndEscaping(disable bool) *Logger
+func Caller(disable bool) *Logger
 
-func Trace(v ...any)
-func Tracef(format string, v ...any)
-func Debug(v ...any)
-func Debugf(format string, v ...any)
-func Info(v ...any)
-func Infof(format string, v ...any)
-func Warn(v ...any)
-func Warnf(format string, v ...any)
-func Error(v ...any)
-func Errorf(format string, v ...any)
-func Fatal(v ...any)
-func Fatalf(format string, v ...any)
-func Panic(v ...any)
-func Panicf(format string, v ...any)
+func Trace(args ...interface{})
+func Debug(args ...interface{})
+func Info(args ...interface{})
+func Warn(args ...interface{})
+func Error(args ...interface{})
+func Fatal(args ...interface{})
+func Panic(args ...interface{})
+
+func Tracef(format string, args ...interface{})
+func Debugf(format string, args ...interface{})
+func Infof(format string, args ...interface{})
+func Warnf(format string, args ...interface{})
+func Errorf(format string, args ...interface{})
+func Fatalf(format string, args ...interface{})
+func Panicf(format string, args ...interface{})
+
+func Tracew(msg string, args ...interface{})
+func Debugw(msg string, args ...interface{})
+func Infow(msg string, args ...interface{})
+func Warnw(msg string, args ...interface{})
+func Errorw(msg string, args ...interface{})
+func Fatalw(msg string, args ...interface{})
+func Panicw(msg string, args ...interface{})
+
+func Pid() int
 ```
 
 **Example:**
@@ -406,395 +662,372 @@ func Panicf(format string, v ...any)
 ```go
 import "github.com/lazygophers/log"
 
-log.SetLevel(log.InfoLevel)
-log.Info("Using global logger")
+func main() {
+    // Use global logger
+    log.Info("Application started")
+    log.SetLevel(log.WarnLevel)
+    log.Debug("This won't be logged")
+    log.Warn("This will be logged")
+}
 ```
 
 ## Log Levels
 
-### Level Type
-
-```go
-type Level int8
-```
-
-### Available Levels
+### Level Constants
 
 ```go
 const (
-    PanicLevel Level = iota  // 0 - Panic and exit
-    FatalLevel              // 1 - Fatal error and exit
-    ErrorLevel              // 2 - Error conditions
-    WarnLevel               // 3 - Warning conditions
-    InfoLevel               // 4 - Informational messages
-    DebugLevel              // 5 - Debug messages
-    TraceLevel              // 6 - Most detailed tracing
+    PanicLevel Level = iota  // Highest
+    FatalLevel
+    ErrorLevel
+    WarnLevel
+    InfoLevel
+    DebugLevel
+    TraceLevel               // Lowest
 )
 ```
+
+### Level Comparison
+
+Log levels are ordered from lowest to highest verbosity:
+
+```
+Trace (most verbose)
+  ↓
+Debug
+  ↓
+Info
+  ↓
+Warn
+  ↓
+Error
+  ↓
+Fatal
+  ↓
+Panic (least verbose)
+```
+
+When you set the log level to `InfoLevel`, only `Info`, `Warn`, `Error`, `Fatal`, and `Panic` messages will be logged. `Debug` and `Trace` messages will be ignored.
 
 ### Level Methods
 
 ```go
-func (l Level) String() string
-```
-
-Returns the string representation of the level.
-
-**Example:**
-
-```go
-fmt.Println(log.InfoLevel.String())  // "INFO"
-```
-
-## Formatters
-
-LazyGophers Log provides a flexible formatting system with built-in formatters for text and JSON output.
-
-### Format Interface
-
-```go
-type Format interface {
-    Format(entry *Entry) []byte
-}
-```
-
-Custom formatters must implement this interface.
-
-### Text Formatter (Default)
-
-The default `Formatter` provides human-readable text output with colored levels and timestamps.
-
-**Example:**
-
-```go
-logger := log.New()
-logger.Info("Application started")
-```
-
-**Output:**
-
-```
-(12345) 2026-05-04 12:00:00.000+08:00 [info] Application started
-```
-
-### JSON Formatter
-
-For structured logging and log aggregation systems, use `JSONFormatter` to output logs in JSON format.
-
-**Basic Usage:**
-
-```go
-logger := log.New()
-logger.Format = &log.JSONFormatter{}
-
-logger.Info("JSON output")
-```
-
-**Output:**
-
-```json
-{"level":"info","time":"2026-05-04T12:00:00.000+08:00","message":"JSON output","pid":12345}
-```
-
-#### JSONFormatter Options
-
-```go
-type JSONFormatter struct {
-    EnablePrettyPrint bool // Pretty print with indentation
-    DisableTimestamp bool // Disable timestamp field
-    DisableCaller    bool // Disable caller information
-    DisableTrace     bool // Disable trace information
-}
-```
-
-**Pretty Print Example:**
-
-```go
-logger.Format = &log.JSONFormatter{EnablePrettyPrint: true}
-logger.Info("Pretty JSON")
-```
-
-**Output:**
-
-```json
-{
-  "level": "info",
-  "time": "2026-05-04T12:00:00.000+08:00",
-  "message": "Pretty JSON",
-  "pid": 12345
-}
-```
-
-**Minimal JSON Example:**
-
-```go
-logger.Format = &log.JSONFormatter{
-    DisableCaller: true,
-    DisableTrace:  true,
-}
-logger.Error("Error log")
-```
-
-**Output:**
-
-```json
-{"level":"error","message":"Error log","pid":12345}
-```
-
-### Custom Formatters
-
-You can create custom formatters by implementing the `Format` interface:
-
-```go
-type MyFormatter struct {}
-
-func (f *MyFormatter) Format(entry *log.Entry) []byte {
-    // Custom formatting logic
-    return []byte("custom log output")
-}
-
-logger := log.New()
-logger.Format = &MyFormatter{}
-```
-
-For more control, implement `FormatFull` interface:
-
-```go
-type MyFormatter struct {
-    DisableCaller bool
-}
-
-func (f *MyFormatter) Format(entry *log.Entry) []byte {
-    // Format implementation
-}
-
-func (f *MyFormatter) ParsingAndEscaping(disable bool) {
-    f.DisableCaller = disable
-}
-
-func (f *MyFormatter) Caller(disable bool) {
-    f.DisableCaller = disable
-}
-
-func (f *MyFormatter) Clone() log.Format {
-    return &MyFormatter{
-        DisableCaller: f.DisableCaller,
-    }
-}
-```
-
-## Output Writers
-
-### File Output and Rotation
-
-```go
-func GetOutputWriterHourly(filename string) io.Writer
-```
-
-Creates a writer that rotates log files hourly.
-
-**Parameters:**
-
--   `filename`：Base filename for log files
-
-**Return:**
-
--   `io.Writer`：Rotating file writer
-
-**Example:**
-
-```go
-writer := log.GetOutputWriterHourly("./logs/app.log")
-logger.SetOutput(writer)
-// Creates files like: app-2024010115.log, app-2024010116.log, etc.
-```
-
-### Async Writer
-
-```go
-func NewAsyncWriter(writer io.Writer, bufferSize int) *AsyncWriter
-```
-
-Creates an asynchronous writer for high-performance logging.
-
-**Parameters:**
-
--   `writer`：Underlying writer
--   `bufferSize`：Internal buffer size
-
-**Return:**
-
--   `*AsyncWriter`：Async writer instance
-
-**Methods:**
-
-```go
-func (aw *AsyncWriter) Write(data []byte) (int, error)
-func (aw *AsyncWriter) Close() error
+func (level Level) String() string
+func (level Level) MarshalText() ([]byte, error)
 ```
 
 **Example:**
 
 ```go
-file, _ := os.Create("app.log")
-asyncWriter := log.NewAsyncWriter(file, 1000)
-defer asyncWriter.Close()
+level := log.InfoLevel
+fmt.Println(level.String())  // "info"
 
-logger.SetOutput(asyncWriter)
+data, _ := level.MarshalText()
+fmt.Println(string(data))    // "info"
 ```
 
-## Contextual Logging
+## Structured Logging
 
-### LoggerWithCtx Interface
-
-```go
-type LoggerWithCtx interface {
-    Trace(ctx context.Context, v ...any)
-    Tracef(ctx context.Context, format string, v ...any)
-    Debug(ctx context.Context, v ...any)
-    Debugf(ctx context.Context, format string, v ...any)
-    Info(ctx context.Context, v ...any)
-    Infof(ctx context.Context, format string, v ...any)
-    Warn(ctx context.Context, v ...any)
-    Warnf(ctx context.Context, format string, v ...any)
-    Error(ctx context.Context, v ...any)
-    Errorf(ctx context.Context, format string, v ...any)
-    Fatal(ctx context.Context, v ...any)
-    Fatalf(ctx context.Context, format string, v ...any)
-    Panic(ctx context.Context, v ...any)
-    Panicf(ctx context.Context, format string, v ...any)
-}
-```
-
-### Context Functions
-
-```go
-func SetTrace(traceID string)
-func GetTrace() string
-```
-
-Sets and gets the trace ID for the current goroutine.
-
-**Example:**
-
-```go
-log.SetTrace("trace-123-456")
-log.Info("This message will include trace ID")
-
-traceID := log.GetTrace()
-fmt.Println("Current trace ID:", traceID)
-```
-
-## Build Tags
-
-The library supports conditional compilation using build tags:
-
-### Default Mode
-
-```bash
-go build
-```
-
--   Full functionality enabled
--   Debug messages included
--   Standard performance
-
-### Debug Mode
-
-```bash
-go build -tags debug
-```
-
--   Enhanced debugging information
--   Additional runtime checks
--   Detailed caller information
-
-### Release Mode
-
-```bash
-go build -tags release
-```
-
--   Optimized for production
--   Debug messages disabled
--   Automatic log rotation enabled
-
-### Discard Mode
-
-```bash
-go build -tags discard
-```
-
--   Maximum performance
--   All logging operations are no-ops
--   Zero overhead
-
-### Combined Modes
-
-```bash
-go build -tags "debug,discard"    # Debug with discard
-go build -tags "release,discard"  # Release with discard
-```
-
-## Performance Optimization
-
-### Object Pooling
-
-The library internally uses `sync.Pool` to manage:
-
--   Log entry objects
--   Byte buffers
--   Formatter buffers
-
-This reduces garbage collection pressure in high-throughput scenarios.
-
-### Level Checking
-
-Log level checks occur before expensive operations:
-
-```go
-// Efficient - message formatting only happens if level is enabled
-logger.Debugf("Expensive operation result: %+v", expensiveCall())
-
-// Less efficient when debug is disabled in production
-result := expensiveCall()
-logger.Debug("Result:", result)
-```
-
-### Asynchronous Writing
-
-For high-throughput applications:
-
-```go
-asyncWriter := log.NewAsyncWriter(file, 10000)  // Large buffer
-logger.SetOutput(asyncWriter)
-defer asyncWriter.Close()
-```
-
-### Build Tag Optimization
-
-Use appropriate build tags based on environment:
-
--   Development: Default or debug tag
--   Production: Release tag
--   Performance-critical: Discard tag
-
-## Examples
+Structured logging allows you to attach key-value pairs to log messages for better querying and analysis.
 
 ### Basic Usage
 
 ```go
-package main
+logger.Infow("User action",
+    "user_id", 12345,
+    "action", "login",
+    "success", true,
+)
+```
 
-import (
-    "github.com/lazygophers/log"
+### Multiple Fields
+
+```go
+logger.Errorw("Database error",
+    "error", err,
+    "query", "SELECT * FROM users",
+    "duration_ms", 150,
+    "retry_count", 3,
+)
+```
+
+### With Dynamic Fields
+
+```go
+fields := []interface{}{
+    "request_id", uuid.New().String(),
+    "user_id", userID,
+    "method", r.Method,
+    "path", r.URL.Path,
+}
+
+logger.Infow("HTTP request", fields...)
+```
+
+## Formatters
+
+### Formatter Interface
+
+```go
+type Format interface {
+    Format(entry interface{}) []byte
+}
+
+type FormatFull interface {
+    Format
+    ParsingAndEscaping(disable bool)
+    Caller(disable bool)
+    Clone() Format
+}
+```
+
+### Text Formatter
+
+Default text formatter with color support.
+
+```go
+type Formatter struct {
+    DisableParsingAndEscaping bool
+    DisableCaller             bool
+}
+```
+
+**Example:**
+
+```go
+formatter := &log.Formatter{
+    DisableParsingAndEscaping: true,
+    DisableCaller:             false,
+}
+
+logger.Format = formatter
+```
+
+### JSON Formatter
+
+JSON output formatter.
+
+```go
+type JSONFormatter struct {
+    EnablePrettyPrint bool
+    DisableCaller     bool
+    DisableTrace      bool
+}
+```
+
+**Example:**
+
+```go
+// Compact JSON
+logger.Format = &log.JSONFormatter{}
+
+// Pretty printed JSON
+logger.Format = &log.JSONFormatter{EnablePrettyPrint: true}
+
+// JSON without caller information
+logger.Format = &log.JSONFormatter{DisableCaller: true}
+```
+
+### Custom Formatter
+
+```go
+type MyFormatter struct{}
+
+func (f *MyFormatter) Format(entry interface{}) []byte {
+    e := entry.(*log.Entry)
+    output := fmt.Sprintf("[%s] %s: %s\n",
+        e.Time.Format(time.RFC3339),
+        e.Level,
+        e.Message,
+    )
+    return []byte(output)
+}
+
+// Usage
+logger.Format = &MyFormatter{}
+```
+
+## Hooks
+
+### Hook Interface
+
+```go
+type Hook interface {
+    OnWrite(entry interface{}) interface{}
+}
+```
+
+### HookFunc Convenience Type
+
+```go
+type HookFunc func(entry interface{}) interface{}
+
+func (h HookFunc) OnWrite(entry interface{}) interface{} {
+    return h(entry)
+}
+```
+
+### Hook Examples
+
+#### Add Global Fields
+
+```go
+type EnvironmentHook struct {
+    Env string
+}
+
+func (h *EnvironmentHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*log.Entry)
+    e.Fields = append(e.Fields, log.KV{
+        Key:   "environment",
+        Value: h.Env,
+    })
+    return e
+}
+
+logger.AddHook(&EnvironmentHook{Env: "production"})
+```
+
+#### Filter Sensitive Data
+
+```go
+type SensitiveHook struct{}
+
+func (h *SensitiveHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*log.Entry)
+    if strings.Contains(e.Message, "password") {
+        return nil // Filter out
+    }
+    return e
+}
+
+logger.AddHook(&SensitiveHook{})
+```
+
+#### Modify Content
+
+```go
+type PrefixHook struct {
+    Prefix string
+}
+
+func (h *PrefixHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*log.Entry)
+    e.Message = h.Prefix + e.Message
+    return e
+}
+
+logger.AddHook(&PrefixHook{Prefix: "[HOOK] "})
+```
+
+## Output Writers
+
+### GetOutputWriterHourly
+
+```go
+func GetOutputWriterHourly(logDir string, maxSize int64, maxFiles int) io.Writer
+```
+
+Creates an hourly rotating log writer with size-based sharding.
+
+**Parameters:**
+- `logDir`: Directory for log files
+- `maxSize`: Maximum size per file in bytes
+- `maxFiles`: Maximum number of files to keep
+
+**Returns:**
+- `io.Writer`: A writer that handles rotation
+
+**Example:**
+
+```go
+writer := log.GetOutputWriterHourly(
+    "/var/log/app",
+    100*1024*1024,  // 100 MB per file
+    168,            // Keep 7 days (168 hours)
 )
 
+logger.SetOutput(os.Stdout, writer)
+```
+
+### Custom Writer
+
+```go
+type MyWriter struct{}
+
+func (w *MyWriter) Write(p []byte) (n int, err error) {
+    // Custom write logic
+    return os.Stdout.Write(p)
+}
+
+logger.SetOutput(&MyWriter{})
+```
+
+## Build Tags
+
+### Default
+
+```go
+// +build !debug,!release,!discard
+```
+
+Full functionality with all features enabled.
+
+### Debug
+
+```go
+// +build debug
+```
+
+Enhanced debugging information and verbose output.
+
+### Release
+
+```go
+// +build release
+```
+
+Production-optimized with debug messages disabled.
+
+### Discard
+
+```go
+// +build discard
+```
+
+Maximum performance - all log operations are no-ops.
+
+**Usage:**
+
+```bash
+# Default build
+go build
+
+# Debug build
+go build -tags=debug
+
+# Release build
+go build -tags=release
+
+# Discard build
+go build -tags=discard
+```
+
+## Examples
+
+### Basic Logging
+
+```go
+package main
+
+import "github.com/lazygophers/log"
+
 func main() {
-    log.SetLevel(log.InfoLevel)
-    log.Info("Application starting")
-    log.Warn("This is a warning")
-    log.Error("This is an error")
+    log.Trace("Trace message")
+    log.Debug("Debug message")
+    log.Info("Info message")
+    log.Warn("Warning message")
+    log.Error("Error message")
 }
 ```
 
@@ -809,342 +1042,80 @@ import (
 )
 
 func main() {
-    logger := log.New()
+    logger := log.New().
+        SetLevel(log.InfoLevel).
+        EnableCaller(true).
+        EnableTrace(true).
+        SetPrefixMsg("[MyApp] ").
+        SetOutput(
+            os.Stdout,
+            log.GetOutputWriterHourly("/var/log/app.log", 100*1024*1024, 168),
+        )
 
-    // Configure the logger
-    logger.SetLevel(log.DebugLevel)
-    logger.EnableCaller(true)
-    logger.SetPrefixMsg("[MyApp] ")
-
-    // Set output to file
-    file, err := os.Create("app.log")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-
-    logger.SetOutput(file)
-
-    logger.Info("Custom logger configured")
-    logger.Debug("Debug info with caller")
+    logger.Info("Application started")
+    logger.Infow("User logged in", "user_id", 12345)
 }
 ```
 
-### High Performance Logging
+### JSON Output
+
+```go
+package main
+
+import "github.com/lazygophers/log"
+
+func main() {
+    logger := log.New()
+    logger.Format = &log.JSONFormatter{EnablePrettyPrint: true}
+
+    logger.Infow("Service started",
+        "port", 8080,
+        "environment", "production",
+    )
+}
+```
+
+### With Hooks
 
 ```go
 package main
 
 import (
-    "os"
     "github.com/lazygophers/log"
+    "github.com/lazygophers/log/constant"
 )
 
-func main() {
-    // Create hourly rotating file writer
-    writer := log.GetOutputWriterHourly("./logs/app.log")
+type MyHook struct{}
 
-    // Wrap with async writer for performance
-    asyncWriter := log.NewAsyncWriter(writer, 5000)
-    defer asyncWriter.Close()
-
-    logger := log.New()
-    logger.SetOutput(asyncWriter)
-    logger.SetLevel(log.InfoLevel)  // Skip debug in production
-
-    // High-throughput logging
-    for i := 0; i < 10000; i++ {
-        logger.Infof("Processing request %d", i)
-    }
-}
-```
-
-### Context-aware Logging
-
-```go
-package main
-
-import (
-    "context"
-    "github.com/lazygophers/log"
-)
-
-func main() {
-    logger := log.New()
-    ctxLogger := logger.CloneToCtx()
-
-    ctx := context.Background()
-    log.SetTrace("trace-123-456")
-
-    ctxLogger.Info(ctx, "Processing user request")
-    ctxLogger.Debug(ctx, "Validation completed")
-}
-```
-
-### Custom JSON Formatter
-
-```go
-package main
-
-import (
-    "encoding/json"
-    "os"
-    "time"
-    "github.com/lazygophers/log"
-)
-
-type JSONFormatter struct{}
-
-func (f *JSONFormatter) Format(entry *log.Entry) []byte {
-    data := map[string]interface{}{
-        "timestamp": entry.Time.Format(time.RFC3339Nano),
-        "level":     entry.Level.String(),
-        "message":   entry.Message,
-        "pid":       entry.Pid,
-        "gid":       entry.Gid,
-    }
-
-    if entry.TraceID != "" {
-        data["trace_id"] = entry.TraceID
-    }
-
-    if entry.CallerName != "" {
-        data["caller"] = map[string]interface{}{
-            "function": entry.CallerName,
-            "file":     entry.CallerFile,
-            "line":     entry.CallerLine,
-        }
-    }
-
-    jsonData, _ := json.MarshalIndent(data, "", "  ")
-    return append(jsonData, '\n')
-}
-
-func main() {
-    logger := log.New()
-    logger.SetFormatter(&JSONFormatter{})
-    logger.EnableCaller(true)
-    logger.SetOutput(os.Stdout)
-
-    log.SetTrace("request-456")
-    logger.Info("JSON formatted message")
-}
-```
-
-## Error Handling
-
-For performance reasons, most logger methods do not return errors. If you need error handling for output operations, implement a custom writer:
-
-```go
-type ErrorCapturingWriter struct {
-    writer io.Writer
-    lastError error
-}
-
-func (w *ErrorCapturingWriter) Write(data []byte) (int, error) {
-    n, err := w.writer.Write(data)
-    if err != nil {
-        w.lastError = err
-    }
-    return n, err
-}
-
-func (w *ErrorCapturingWriter) LastError() error {
-    return w.lastError
-}
-```
-
-## Thread Safety
-
-All logger operations are thread-safe and can be used concurrently across multiple goroutines without additional synchronization mechanisms.
-
-## Package Functions
-
-### Global Configuration
-
-Set global logger configurations using these package-level functions:
-
-```go
-func SetLevel(level Level)
-func SetOutput(writers ...io.Writer)
-func SetFormatter(formatter Format)
-func EnableCaller(enabled bool)
-func EnableTrace(enable bool)
-func SetCallerDepth(depth int)
-func SetPrefixMsg(prefix string)
-func SetSuffixMsg(suffix string)
-func SetTrace(traceID string)
-func GetTrace() string
-```
-
-### Logging Functions
-
-All log levels are available in both simple and formatted versions:
-
-```go
-func Trace(v ...any)
-func Tracef(format string, v ...any)
-func Debug(v ...any)
-func Debugf(format string, v ...any)
-func Info(v ...any)
-func Infof(format string, v ...any)
-func Warn(v ...any)
-func Warnf(format string, v ...any)
-func Error(v ...any)
-func Errorf(format string, v ...any)
-func Fatal(v ...any)
-func Fatalf(format string, v ...any)
-func Panic(v ...any)
-func Panicf(format string, v ...any)
-```
-
-### Helper Functions
-
-```go
-func New() *Logger
-func GetOutputWriterHourly(filename string) io.Writer
-func NewAsyncWriter(writer io.Writer, bufferSize int) *AsyncWriter
-```
-
----
-
-## Advanced Features
-
-### Memory Pooling
-
-The library uses `sync.Pool` for performance optimization:
-
-```go
-// Entry pool - reuses Entry objects
-var entryPool = sync.NewPool(func() interface{} {
-    return &Entry{}
-})
-
-// Buffer pool - reuses byte buffers
-var bufferPool = sync.NewPool(func() interface{} {
-    return bytes.NewBuffer(make([]byte, 0, 1024))
-})
-```
-
-### Build Tags Configuration
-
-#### Debug Tag
-```bash
-go build -tags debug
-```
-- Enhanced caller information with full stack traces
-- Additional validation and checks
-- Detailed context information
-
-#### Release Tag
-```bash
-go build -tags release
-```
-- Optimized for production performance
-- Caller information disabled by default
-- Automatic log rotation enabled
-
-#### Discard Tag
-```bash
-go build -tags discard
-```
-- Maximum performance optimization
-- All logging operations are no-ops
-- Zero runtime overhead
-
-### Performance Benchmarks
-
-| Scenario | Operations/second | Memory Allocation |
-|----------|------------------|------------------|
-| Synchronous to stdout | ~250,000 | Minimal |
-| Asynchronous with buffer | ~500,000 | Reduced |
-| With caller info | ~180,000 | Moderate |
-| Debug mode | ~100,000 | Higher |
-
-### Integration Examples
-
-#### With Gin Framework
-```go
-package main
-
-import (
-    "github.com/gin-gonic/gin"
-    "github.com/lazygophers/log"
-)
-
-func main() {
-    // Configure logger
-    logger := log.New()
-    logger.SetLevel(log.InfoLevel)
-    logger.EnableCaller(true)
-
-    // Set up file rotation
-    writer := log.GetOutputWriterHourly("./logs/gin.log")
-    logger.SetOutput(writer)
-
-    // Create Gin router with middleware
-    r := gin.New()
-    r.Use(gin.Logger())  // Use built-in logger
-    r.Use(gin.Recovery())
-
-    // Your routes here
-    r.GET("/", func(c *gin.Context) {
-        log.Info("Request to root endpoint")
-        c.JSON(200, gin.H{"message": "Hello World"})
+func (h *MyHook) OnWrite(entry interface{}) interface{} {
+    e := entry.(*log.Entry)
+    e.Fields = append(e.Fields, log.KV{
+        Key:   "processed",
+        Value: "true",
     })
+    return e
+}
+
+func main() {
+    logger := log.New()
+    logger.AddHook(&MyHook{})
+
+    logger.Info("This will include the 'processed' field")
 }
 ```
 
-#### With gRPC
-```go
-package main
+## Best Practices
 
-import (
-    "context"
-    "google.golang.org/grpc"
-    "github.com/lazygophers/log"
-)
+1. **Use appropriate log levels**: Choose the right level for each message
+2. **Structure your logs**: Use `*w` methods for key-value pairs
+3. **Avoid sensitive data**: Use hooks to filter sensitive information
+4. **Set reasonable caller depth**: Default is 4, adjust for wrapper functions
+5. **Use object pools**: The library handles this automatically
+6. **Consider performance**: Disable caller/trace in production if not needed
+7. **Test your hooks**: Ensure hooks don't introduce performance issues
 
-type MyService struct {
-    log.Logger
-}
+## See Also
 
-func (s *MyService) Process(ctx context.Context, req *pb.Request) (*pb.Response, error) {
-    // Set trace from gRPC metadata
-    if traceID := metadata.ValueFromIncomingContext(ctx, "trace-id"); traceID != nil {
-        log.SetTrace(traceID[0])
-    }
-
-    s.Info(ctx, "Processing request", "method", "Process")
-    // ... business logic
-    return &pb.Response{}, nil
-}
-```
-
----
-
-## 🌍 Multilingual Documentation
-
-This document is available in multiple languages:
-
--   [🇺🇸 English](API.md) (current)
--   [🇨🇳 Simplified Chinese](API_zh-CN.md)
--   [🇹🇼 Traditional Chinese](API_zh-TW.md)
--   [🇫🇷 Français](API_fr.md)
--   [🇷🇺 Русский](API_ru.md)
--   [🇪🇸 Español](API_es.md)
--   [🇸🇦 العربية](API_ar.md)
-
----
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](/CONTRIBUTING) for details.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
-
----
-
-**LazyGophers Log Complete API Reference - Build Better Applications with Exceptional Logging! 🚀**
+- [Architecture Documentation](architecture.md)
+- [Hook Guide](hooks_guide.md)
+- [README](../README.md)
