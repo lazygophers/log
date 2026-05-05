@@ -121,7 +121,6 @@ func TestFormatter_Format_DisableCaller(t *testing.T) {
 
 func TestFormatter_Format_WithModule(t *testing.T) {
 	formatter := &Formatter{
-		Module:                    "TestModule",
 		DisableParsingAndEscaping: true,
 		DisableCaller:             true,
 	}
@@ -207,7 +206,6 @@ func TestFormatter_Caller(t *testing.T) {
 
 func TestFormatter_Clone(t *testing.T) {
 	original := &Formatter{
-		Module:                    "OriginalModule",
 		DisableParsingAndEscaping: true,
 		DisableCaller:             true,
 	}
@@ -223,22 +221,12 @@ func TestFormatter_Clone(t *testing.T) {
 		t.Fatal("Clone should return a *Formatter")
 	}
 
-	if clonedFormatter.Module != original.Module {
-		t.Error("Clone should have the same Module")
-	}
-
 	if clonedFormatter.DisableParsingAndEscaping != original.DisableParsingAndEscaping {
 		t.Error("Clone should have the same DisableParsingAndEscaping")
 	}
 
 	if clonedFormatter.DisableCaller != original.DisableCaller {
 		t.Error("Clone should have the same DisableCaller")
-	}
-
-	// 修改克隆不应该影响原始对象
-	clonedFormatter.Module = "ModifiedModule"
-	if original.Module == "ModifiedModule" {
-		t.Error("Modifying clone should not affect original")
 	}
 }
 
@@ -422,7 +410,6 @@ func TestFormatter_format_CallerWithoutTrace(t *testing.T) {
 func TestFormatter_format_ComplexScenarios(t *testing.T) {
 	// 测试复杂的格式化场景
 	formatter := &Formatter{
-		Module:                    "TestMod",
 		DisableParsingAndEscaping: false, // 启用解析和转义
 		DisableCaller:             false, // 启用调用者信息
 	}

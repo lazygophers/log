@@ -18,18 +18,17 @@ func TestJSONFormatter_Usage(t *testing.T) {
 	logger.Format = &JSONFormatter{EnablePrettyPrint: true}
 	logger.Info("Pretty JSON log")
 
-	// Example 3: JSON with disabled timestamp
-	logger.Format = &JSONFormatter{
-		DisableTimestamp: true,
-	}
-	logger.Info("JSON without timestamp")
-
-	// Example 4: JSON with only essential fields
-	logger.Format = &JSONFormatter{
+	// Example 3: JSON with disabled caller
+		logger.Format = &JSONFormatter{
 		DisableCaller: true,
-		DisableTrace:  true,
 	}
-	logger.Error("Minimal JSON error log")
+	logger.Info("JSON without caller info")
+
+	// Example 4: JSON with disabled trace
+	logger.Format = &JSONFormatter{
+		DisableTrace: true,
+	}
+	logger.Error("JSON without trace")
 }
 
 func TestJSONFormatter_Integration(t *testing.T) {

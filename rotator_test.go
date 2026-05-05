@@ -280,9 +280,8 @@ func TestJSONFormatterDetailedCoverage(t *testing.T) {
 
 	t.Run("JSON_with_all_disabled", func(t *testing.T) {
 		formatter := &JSONFormatter{
-			DisableTimestamp: true,
-			DisableCaller:    true,
-			DisableTrace:     true,
+			DisableCaller: true,
+			DisableTrace:  true,
 		}
 
 		entry := &Entry{

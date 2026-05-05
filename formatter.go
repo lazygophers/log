@@ -12,9 +12,8 @@ import (
 
 // Formatter implements FormatFull interface with default formatting
 type Formatter struct {
-	Module                    string // Log module name
-	DisableParsingAndEscaping bool   // Disable message parsing and escaping
-	DisableCaller             bool   // Disable caller information
+	DisableParsingAndEscaping bool // Disable message parsing and escaping
+	DisableCaller             bool // Disable caller information
 }
 
 // format handles single-line log formatting
@@ -176,7 +175,6 @@ func (p *Formatter) Caller(disable bool) {
 // Clone creates a deep copy of Formatter
 func (p *Formatter) Clone() constant.Format {
 	return &Formatter{
-		Module:                    p.Module,
 		DisableParsingAndEscaping: p.DisableParsingAndEscaping,
 		DisableCaller:             p.DisableCaller,
 	}
