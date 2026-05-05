@@ -81,6 +81,13 @@ Tests are co-located with source files (`*_test.go`). Key test files:
 - `formatter_test.go` - Format testing
 - `pool_test.go` - Object pool behavior
 
+**⚠️ 测试文件命名规范（严格限制）：**
+- 测试文件名必须是原始文件名 + `_test.go` 格式
+- **禁止**创建独立的覆盖率测试文件（如 `coverage_boost_test.go`、`coverage_test.go`）
+- **禁止**创建功能特定的测试文件（如 `formatter_coverage_test.go`）
+- 所有测试必须合并到对应的标准测试文件中（如 `logger_test.go`、`formatter_test.go`）
+- 当前测试覆盖率：**95.0%**（486个测试用例）
+
 ## 📚 Documentation Structure
 
 ### Main Documentation
@@ -116,7 +123,8 @@ Tests are co-located with source files (`*_test.go`). Key test files:
 - Write tests for all public APIs
 - Include benchmarks for performance-critical code
 - Test across different build tag configurations
-- Ensure test coverage remains above 90%
+- Ensure test coverage remains above 95%
+- Test file naming must follow source file + `_test.go` pattern (no standalone coverage test files)
 
 ## 🔄 Build Tags
 

@@ -1,7 +1,7 @@
 # lazygophers/log
 
 [![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
-[![Test Coverage](https://img.shields.io/badge/coverage-93.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
+[![Test Coverage](https://img.shields.io/badge/coverage-95.0%25-brightgreen.svg)](https://github.com/lazygophers/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lazygophers/log)](https://goreportcard.com/report/github.com/lazygophers/log)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

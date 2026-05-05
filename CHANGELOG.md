@@ -18,12 +18,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - Enhanced README with comprehensive feature documentation
-- Improved test coverage across all build tag configurations
+- Improved test coverage across all build tag configurations (95.0%)
 - Updated project structure for better maintainability
 - **Refactored** log configuration and rotation mechanism, simplified Entry processing
 - **Removed** `logger_ctx` and related zap code to simplify logging logic
 - **Improved** rotator log rotation functionality and related documentation
 - **Refactored** debug log functionality implementation
+- **Increased** test coverage from 93.0% to 95.0% with 486 test cases
+- **Standardized** test file naming (removed coverage/boost test files, merged into standard test files)
 
 ### Documentation
 - Added multilingual support for all major documentation
