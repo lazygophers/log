@@ -1,4 +1,2 @@
 github.com/lazygophers/log/constant v0.0.0-20260505024342-2c291363de69 h1:8uN1oGopM6kX6A7arTR0+bj2fPfEnyNCeJG+CTSt6P4=
 github.com/lazygophers/log/constant v0.0.0-20260505024342-2c291363de69/go.mod h1:yISq1wSIHzZASyikXZRZBye+WaOsYnnK0O+2k8fsGOo=
-github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741 h1:KPpdlQLZcHfTMQRi6bFQ7ogNO0ltFT4PmtwTLW4W+14=
-github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741/go.mod h1:pxMtw7cyUw6B2bRH0ZBANSPg+AoSud1I1iyJHI69jH4=
