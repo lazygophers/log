@@ -11,5 +11,8 @@ require (
 
 require go.uber.org/multierr v1.10.0 // indirect
 
+// Local development - use replace for subpackages
+// Remove these lines after pushing tags to remote
 replace github.com/lazygophers/log/constant => ./constant
+
 replace github.com/lazygophers/log/hooks => ./hooks
