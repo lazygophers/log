@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"io"
+
 
 	"github.com/lazygophers/log/constant"
 )
@@ -412,3 +414,110 @@ func (h *mockHookForClone) OnWrite(entry interface{}) interface{} {
 
 
 // mockHookForClone implements constant.Hook interface for testing
+
+func TestLoggerCloneWithHooksFull(t *testing.T) {
+	logger := New()
+
+	mockHook := &testCloneHook{}
+	logger.AddHook(mockHook)
+
+	cloned := logger.Clone()
+
+	if cloned == nil {
+		t.Error("Clone should return non-nil")
+	}
+
+	cloned.RemoveHooks()
+	if len(logger.hooks) == 0 {
+		t.Error("Original logger should still have hooks")
+	}
+}
+
+type testCloneHook struct{}
+
+func (h *testCloneHook) OnWrite(entry interface{}) interface{} {
+	return entry
+}
+
+func (h *testCloneHook) Levels() []constant.Level {
+	return []constant.Level{constant.InfoLevel}
+}
+
+func TestLoggerSetOutputVariations(t *testing.T) {
+	logger := New()
+
+	original := logger.out
+	logger.SetOutput(nil)
+	if logger.out != nil {
+		t.Error("output should be nil")
+	}
+
+	logger.SetOutput(original)
+	if logger.out != original {
+		t.Error("output should be restored")
+	}
+}
+
+func TestLoggerCloneAllFormats(t *testing.T) {
+	formats := []constant.Format{
+		&Formatter{},
+		&JSONFormatter{},
+		&JSONFormatter{EnablePrettyPrint: true},
+		&JSONFormatter{DisableCaller: true},
+		&JSONFormatter{DisableTrace: true},
+	}
+
+	for _, fmt := range formats {
+		logger := New()
+		logger.Format = fmt
+
+		cloned := logger.Clone()
+
+		if cloned == nil {
+			t.Error("Clone should return non-nil")
+		}
+		if cloned.level != logger.level {
+			t.Error("Clone should copy level")
+		}
+	}
+}
+
+func TestLoggerSetOutputAllCases(t *testing.T) {
+	logger := New()
+
+	outputs := []io.Writer{
+		nil,
+		io.Discard,
+		&bytes.Buffer{},
+	}
+
+	for _, out := range outputs {
+		logger.SetOutput(out)
+		// Just verify it doesn't panic
+	}
+}
+
+func TestLoggerCloneComprehensive(t *testing.T) {
+	logger := New()
+	logger.SetLevel(InfoLevel)
+	logger.EnableCaller(true)
+	logger.EnableTrace(true)
+	logger.SetPrefixMsg("[TEST]")
+	logger.SetSuffixMsg("[END]")
+	logger.SetCallerDepth(5)
+
+	cloned := logger.Clone()
+
+	if cloned.level != logger.level {
+		t.Error("level not cloned")
+	}
+	if cloned.callerDepth != logger.callerDepth {
+		t.Error("callerDepth not cloned")
+	}
+	if cloned.enableCaller != logger.enableCaller {
+		t.Error("enableCaller not cloned")
+	}
+	if cloned.enableTrace != logger.enableTrace {
+		t.Error("enableTrace not cloned")
+	}
+}

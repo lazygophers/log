@@ -624,3 +624,38 @@ func TestSplitPackageNameEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestFormatterSplitFull(t *testing.T) {
+	tests := []struct {
+		input string
+	}{
+		{""},
+		{"github.com/lazygophers/pkg.Func"},
+		{"gitlab.com/user/repo.Func"},
+		{"bitbucket.org/user/repo.Func"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+		// Just test it doesn't panic
+		_, _ = SplitPackageName(tt.input)
+		})
+	}
+}
+
+func TestFormatterFormatVariations(t *testing.T) {
+	formatter := &Formatter{}
+
+	entries := []*Entry{
+		{Level: InfoLevel, Message: "", Time: time.Now(), Pid: 123},
+		{Level: WarnLevel, Message: "test", Time: time.Now(), Pid: 123},
+		{Level: ErrorLevel, Message: "test\nmulti\nline", Time: time.Now(), Pid: 123},
+	}
+
+	for _, entry := range entries {
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Errorf("Should format entry")
+		}
+	}
+}

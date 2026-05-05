@@ -148,3 +148,73 @@ func TestEnsureDirCoverage(t *testing.T) {
 		}
 	})
 }
+
+func TestGetOutputWriterFullCoverage(t *testing.T) {
+	t.Run("GetOutputWriter_current_dir", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		oldDir, _ := os.Getwd()
+		defer os.Chdir(oldDir)
+
+		os.Chdir(tmpDir)
+		writer := GetOutputWriter("test.log")
+		if writer == nil {
+			t.Error("GetOutputWriter should work in current dir")
+		}
+	})
+}
+
+func TestOutputEnsureDirCases(t *testing.T) {
+	t.Run("ensureDir_current_dir", func(t *testing.T) {
+		// Test "." case (should not create directory)
+		ensureDir(".")
+	})
+
+	t.Run("ensureDir_nested_path", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		nested := tmpDir + "/a/b/c"
+
+		ensureDir(nested)
+
+		if _, err := os.Stat(nested); os.IsNotExist(err) {
+			t.Error("Nested directory should be created")
+		}
+	})
+}
+
+func TestGetOutputWriterAllCases(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+	}{
+		{"simple file", "test.log"},
+		{"nested path", "a/b/test.log"},
+		{"deep nested", "a/b/c/d/e/test.log"},
+		{"unicode path", "测试/test.log"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			fullPath := tmpDir + "/" + tt.path
+
+			writer := GetOutputWriter(fullPath)
+			if writer == nil {
+				t.Errorf("GetOutputWriter should return writer for %q", tt.path)
+			}
+		})
+	}
+}
+
+func TestOutputWriterErrorCase(t *testing.T) {
+	t.Run("ensureDir_error_handling", func(t *testing.T) {
+		// Test ensureDir with a path that's a file (not directory)
+		tmpDir := t.TempDir()
+		filePath := tmpDir + "/file.txt"
+
+		// Create a file
+		os.WriteFile(filePath, []byte("test"), 0644)
+
+		// ensureDir should handle this gracefully (file exists but is not dir)
+		ensureDir(filePath)
+	})
+}

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/lazygophers/log/constant"
 )
 
 func TestJSONFormatterSpecialCases(t *testing.T) {
@@ -254,4 +256,52 @@ func TestJSONFormatterCoverage(t *testing.T) {
 			t.Error("pretty print should have newlines")
 		}
 	})
+}
+
+func TestJSONFormatterAllLevels(t *testing.T) {
+	formatter := &JSONFormatter{}
+	levels := []constant.Level{
+		constant.TraceLevel,
+		constant.DebugLevel,
+		constant.InfoLevel,
+		constant.WarnLevel,
+		constant.ErrorLevel,
+		constant.FatalLevel,
+		constant.PanicLevel,
+	}
+
+	for _, level := range levels {
+		entry := &Entry{
+			Level: level,
+			Message: "test",
+			Time:  time.Now(),
+			Pid:   123,
+		}
+		result := formatter.Format(entry)
+		if len(result) == 0 {
+			t.Errorf("Should format entry for level %v", level)
+		}
+	}
+}
+
+func TestJSONFormatterEdgeCases(t *testing.T) {
+	formatter := &JSONFormatter{}
+
+	entries := []struct {
+		name  string
+		entry *Entry
+	}{
+		{"nil fields", &Entry{Level: InfoLevel, Message: "test", Time: time.Now(), Pid: 123, Fields: nil}},
+		{"empty fields", &Entry{Level: InfoLevel, Message: "test", Time: time.Now(), Pid: 123, Fields: []KV{}}},
+		{"zero time", &Entry{Level: InfoLevel, Message: "test", Time: time.Time{}, Pid: 123}},
+	}
+
+	for _, tt := range entries {
+		t.Run(tt.name, func(t *testing.T) {
+			result := formatter.Format(tt.entry)
+			if len(result) == 0 {
+				t.Errorf("Should format entry: %s", tt.name)
+			}
+		})
+	}
 }

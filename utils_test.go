@@ -129,3 +129,53 @@ func TestFastStringifyCoverage(t *testing.T) {
 		})
 	}
 }
+
+func TestFastStringifyAllTypes(t *testing.T) {
+	tests := []struct {
+		name  string
+		input interface{}
+	}{
+		{"string", "hello"},
+		{"[]byte", []byte("world")},
+		{"int", 42},
+		{"int8", int8(8)},
+		{"int16", int16(16)},
+		{"int32", int32(32)},
+		{"int64", int64(64)},
+		{"uint", uint(10)},
+		{"uint8", uint8(8)},
+		{"uint16", uint16(16)},
+		{"uint32", uint32(32)},
+		{"uint64", uint64(64)},
+		{"float32", float32(3.14)},
+		{"float64", float64(6.28)},
+		{"bool", true},
+		{"error", fmt.Errorf("test")},
+		{"nil error", error(nil)},
+		{"nil", nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+		_ = fastStringify(tt.input)
+	})
+}
+}
+
+func TestFastSprintfCoverage(t *testing.T) {
+	tests := []struct {
+		format string
+		args   []interface{}
+	}{
+		{"no args", nil},
+		{"one arg", []interface{}{"hello"}},
+		{"two args", []interface{}{"hello", "world"}},
+		{"three args", []interface{}{"hello", 123, true}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.format, func(t *testing.T) {
+			_ = fastSprintf(tt.format, tt.args...)
+		})
+	}
+}

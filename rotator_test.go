@@ -584,3 +584,81 @@ func TestRotatorWriteEmptyCoverage(t *testing.T) {
 		t.Errorf("Empty write should return (0, nil), got (%d, %v)", n, err)
 	}
 }
+
+func TestRotatorBranchesCoverage(t *testing.T) {
+	t.Run("Rotator_empty_write", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1024, 10)
+		defer rotator.Close()
+
+		n, err := rotator.Write([]byte{})
+		if n != 0 || err != nil {
+			t.Errorf("Empty write should return (0, nil), got (%d, %v)", n, err)
+		}
+	})
+
+	t.Run("Rotator_sync_no_file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1024, 10)
+		defer rotator.Close()
+
+		err := rotator.Sync()
+		if err != nil {
+			t.Errorf("Sync without file should succeed, got %v", err)
+		}
+	})
+}
+
+func TestRotatorWriteScenarios(t *testing.T) {
+	t.Run("Write_after_close", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		rotator := NewHourlyRotator(tmpDir, 1024, 10)
+		rotator.Close()
+
+		_, err := rotator.Write([]byte("test"))
+		// Should either succeed or fail gracefully, not panic
+		_ = err
+	})
+
+	t.Run("Multiple_rotators_same_dir", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		rotator1 := NewHourlyRotator(tmpDir, 1024, 10)
+		rotator2 := NewHourlyRotator(tmpDir, 1024, 10)
+
+		rotator1.Write([]byte("test1\n"))
+		rotator2.Write([]byte("test2\n"))
+
+		rotator1.Close()
+		rotator2.Close()
+	})
+}
+
+func TestRotatorFullCoverage(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	rotator := NewHourlyRotator(tmpDir, 100, 5)
+	defer rotator.Close()
+
+	// Test small write
+	rotator.Write([]byte("x"))
+
+	// Test sync after write
+	rotator.Sync()
+
+	// Test sync after close
+	rotator.Close()
+	rotator.Sync()
+}
+
+func TestRotatorWriteBranch(t *testing.T) {
+	tmpDir := t.TempDir()
+	rotator := NewHourlyRotator(tmpDir, 50, 5) // Small size to trigger rotation
+
+	// Write enough data to trigger rotation
+	for i := 0; i < 3; i++ {
+		rotator.Write([]byte("This is a long message to trigger rotation\n"))
+	}
+
+	rotator.Close()
+}
