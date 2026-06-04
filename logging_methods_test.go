@@ -611,3 +611,45 @@ func TestEntryPool_Coverage(t *testing.T) {
 
 // Note: TestLogger_PanicfLevelFiltering_Coverage removed because PanicLevel=0 is the highest priority
 // and there's no level higher than PanicLevel that can filter it out safely
+
+func TestLogger_Panicw_InProcess(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+	logger.SetLevel(TraceLevel)
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
+
+	t.Run("Panicw_panics", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("Panicw should have panicked")
+			}
+		}()
+		logger.Panicw("panic structured", "key", "value")
+	})
+
+	if !strings.Contains(buf.String(), "panic structured") {
+		t.Errorf("Output should contain panic message, got: %s", buf.String())
+	}
+}
+
+func TestLogger_LevelSkippedPaths(t *testing.T) {
+	var buf bytes.Buffer
+	logger := newLogger()
+	logger.SetOutput(&buf)
+	// PanicLevel=0: only Panic passes, everything else is skipped
+	logger.SetLevel(PanicLevel)
+	logger.EnableCaller(false)
+	logger.EnableTrace(false)
+
+	// These should all be skipped (level check returns early)
+	logger.Error("should skip")
+	logger.Fatalf("should skip %s", "too")
+	logger.Fatalw("should skip", "key", "value")
+	logger.Errorw("should skip", "key", "value")
+
+	if buf.Len() != 0 {
+		t.Errorf("All messages should be filtered at PanicLevel, got: %s", buf.String())
+	}
+}

@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/lazygophers/log/constant"
@@ -579,6 +580,253 @@ func TestChainHook(t *testing.T) {
 		}
 		if called {
 			t.Error("Should stop chain on nil result")
+		}
+	})
+}
+
+// --- Integration tests with real *constant.Entry ---
+
+func TestSensitiveDataMaskHook_WithEntry(t *testing.T) {
+	hook := NewSensitiveDataMaskHook()
+	entry := &constant.Entry{
+		Message: "user admin@test.com logged in, card 4111-1111-1111-1111",
+		Fields: []constant.KV{
+			{Key: "password", Value: "secret123"},
+			{Key: "token", Value: "abc123"},
+			{Key: "name", Value: "John"},
+			{Key: "contact", Value: "john@example.com"},
+			{Key: "age", Value: 30},
+		},
+		File:       "handler.go",
+		CallerName: "app.handle",
+	}
+
+	result := hook.OnWrite(entry)
+	e := result.(*constant.Entry)
+
+	if strings.Contains(e.Message, "admin@test.com") {
+		t.Error("email in message should be masked")
+	}
+	if strings.Contains(e.Message, "4111-1111-1111-1111") {
+		t.Error("card number in message should be masked")
+	}
+
+	for _, f := range e.Fields {
+		switch f.Key {
+		case "password", "token":
+			if f.Value != "***" {
+				t.Errorf("%s field should be masked by key, got %v", f.Key, f.Value)
+			}
+		case "name":
+			if f.Value != "John" {
+				t.Error("name field should not be masked")
+			}
+		case "contact":
+			if s, ok := f.Value.(string); ok && strings.Contains(s, "john@example.com") {
+				t.Error("contact email value should be masked")
+			}
+		case "age":
+			if f.Value != 30 {
+				t.Error("age field should not be masked")
+			}
+		}
+	}
+}
+
+func TestContextEnrichHook_WithEntry(t *testing.T) {
+	hook := NewContextEnrichHook(map[string]interface{}{"service": "api", "version": "1.0"})
+	entry := &constant.Entry{Message: "test"}
+
+	result := hook.OnWrite(entry)
+	e := result.(*constant.Entry)
+
+	if len(e.Fields) != 2 {
+		t.Fatalf("expected 2 enriched fields, got %d", len(e.Fields))
+	}
+
+	found := map[string]bool{}
+	for _, f := range e.Fields {
+		found[f.Key] = true
+	}
+	if !found["service"] || !found["version"] {
+		t.Error("both service and version fields should be enriched")
+	}
+}
+
+func TestLevelFilterHook_WithEntry(t *testing.T) {
+	// constant.Level: Panic=0, Fatal=1, Error=2, Warn=3, Info=4, Debug=5, Trace=6
+	// minLevel=4 means: filter entries where int(Level) < 4 (i.e. Error, Fatal, Panic)
+	hook := NewLevelFilterHook(4)
+
+	filteredEntry := &constant.Entry{Level: constant.Level(2)} // Error: 2 < 4 → filtered
+	result := hook.OnWrite(filteredEntry)
+	if result != nil {
+		t.Error("error level entry should be filtered when minLevel=4")
+	}
+
+	passEntry := &constant.Entry{Level: constant.Level(4)} // Info: 4 < 4 → false → passes
+	result = hook.OnWrite(passEntry)
+	if result == nil {
+		t.Error("info level entry should pass when minLevel=4")
+	}
+
+	traceEntry := &constant.Entry{Level: constant.Level(6)} // Trace: 6 < 4 → false → passes
+	result = hook.OnWrite(traceEntry)
+	if result == nil {
+		t.Error("trace level entry should pass when minLevel=4")
+	}
+}
+
+func TestMessageFilterHook_WithEntry(t *testing.T) {
+	t.Run("deny_pattern", func(t *testing.T) {
+		hook := NewMessageFilterHook()
+		hook.AddDenyPattern(`secret`)
+
+		denied := &constant.Entry{Message: "this is a secret message"}
+		result := hook.OnWrite(denied)
+		if result != nil {
+			t.Error("message matching deny pattern should be filtered")
+		}
+	})
+
+	t.Run("allow_deny_combined", func(t *testing.T) {
+		hook := NewMessageFilterHook()
+		hook.AddAllowPattern(`error`)
+		hook.AddDenyPattern(`internal`)
+
+		// Denied takes precedence
+		result := hook.OnWrite(&constant.Entry{Message: "internal error occurred"})
+		if result != nil {
+			t.Error("denied pattern should take precedence")
+		}
+
+		// Allowed
+		result = hook.OnWrite(&constant.Entry{Message: "error in module"})
+		if result == nil {
+			t.Error("allowed message should pass")
+		}
+
+		// No allow match
+		result = hook.OnWrite(&constant.Entry{Message: "info message"})
+		if result != nil {
+			t.Error("message not matching allow should be filtered")
+		}
+	})
+}
+
+func TestFieldFilterHook_WithEntry(t *testing.T) {
+	hook := NewFieldFilterHook()
+	hook.AllowField("env", "production")
+	hook.DenyField("user", "admin")
+
+	denied := &constant.Entry{
+		Fields: []constant.KV{{Key: "user", Value: "admin"}},
+	}
+	if result := hook.OnWrite(denied); result != nil {
+		t.Error("denied field value should be filtered")
+	}
+
+	allowed := &constant.Entry{
+		Fields: []constant.KV{{Key: "env", Value: "production"}},
+	}
+	if result := hook.OnWrite(allowed); result == nil {
+		t.Error("allowed field value should pass")
+	}
+
+	notAllowed := &constant.Entry{
+		Fields: []constant.KV{{Key: "env", Value: "staging"}},
+	}
+	if result := hook.OnWrite(notAllowed); result != nil {
+		t.Error("non-allowed field value should be filtered")
+	}
+}
+
+func TestMinLengthHook_WithEntry(t *testing.T) {
+	hook := NewMinLengthHook(5)
+
+	if result := hook.OnWrite(&constant.Entry{Message: "hi"}); result != nil {
+		t.Error("short message should be filtered")
+	}
+	if result := hook.OnWrite(&constant.Entry{Message: "hello world"}); result == nil {
+		t.Error("long enough message should pass")
+	}
+}
+
+func TestMaxLengthHook_WithEntry(t *testing.T) {
+	hook := NewMaxLengthHook(5)
+
+	long := &constant.Entry{Message: "hello world"}
+	result := hook.OnWrite(long)
+	e := result.(*constant.Entry)
+	if !strings.HasSuffix(e.Message, "...") {
+		t.Error("long message should be truncated with suffix")
+	}
+	if len([]rune(e.Message)) != 5+3 {
+		t.Errorf("expected 8 runes, got %d: %q", len([]rune(e.Message)), e.Message)
+	}
+
+	short := &constant.Entry{Message: "hi"}
+	result = hook.OnWrite(short)
+	e = result.(*constant.Entry)
+	if e.Message != "hi" {
+		t.Error("short message should not be truncated")
+	}
+}
+
+func TestPrefixHook_WithEntry(t *testing.T) {
+	hook := NewPrefixHook("[APP] ")
+	entry := &constant.Entry{Message: "started"}
+	e := hook.OnWrite(entry).(*constant.Entry)
+	if e.Message != "[APP] started" {
+		t.Errorf("expected prefix prepended, got %q", e.Message)
+	}
+}
+
+func TestSuffixHook_WithEntry(t *testing.T) {
+	hook := NewSuffixHook(" [END]")
+	entry := &constant.Entry{Message: "done"}
+	e := hook.OnWrite(entry).(*constant.Entry)
+	if e.Message != "done [END]" {
+		t.Errorf("expected suffix appended, got %q", e.Message)
+	}
+}
+
+func TestConditionalHook_WithEntry(t *testing.T) {
+	inner := NewPrefixHook("[ERR]")
+	hook := NewConditionalHook(
+		func(entry interface{}) bool {
+			if e, ok := entry.(*constant.Entry); ok {
+				return int(e.Level) <= 2 // Error(2), Fatal(1), Panic(0)
+			}
+			return false
+		},
+		inner,
+	)
+
+	e := hook.OnWrite(&constant.Entry{Level: constant.Level(2), Message: "error"}).(*constant.Entry)
+	if e.Message != "[ERR]error" {
+		t.Errorf("error entry should have prefix, got %q", e.Message)
+	}
+
+	e = hook.OnWrite(&constant.Entry{Level: constant.Level(4), Message: "info"}).(*constant.Entry)
+	if e.Message != "info" {
+		t.Errorf("info entry should be unchanged, got %q", e.Message)
+	}
+}
+
+func TestChainHook_WithEntry(t *testing.T) {
+	t.Run("chain_prefix_suffix", func(t *testing.T) {
+		chain := NewChainHook(NewPrefixHook("[A]"), NewSuffixHook("[B]"))
+		e := chain.OnWrite(&constant.Entry{Message: "msg"}).(*constant.Entry)
+		if e.Message != "[A]msg[B]" {
+			t.Errorf("expected [A]msg[B], got %q", e.Message)
+		}
+	})
+
+	t.Run("chain_with_filter", func(t *testing.T) {
+		chain := NewChainHook(NewMinLengthHook(10), NewPrefixHook("[A]"))
+		if result := chain.OnWrite(&constant.Entry{Message: "hi"}); result != nil {
+			t.Error("chain should stop after filter returns nil")
 		}
 	})
 }
