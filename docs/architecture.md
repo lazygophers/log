@@ -456,7 +456,7 @@ type Writer interface {
 ### Logger 线程安全
 
 - Logger 实例设计为线程安全
-- 内部使用 `sync.Mutex` 保护共享状态
+- 热路径无锁，通过早期级别检查和对象池保证安全
 - Hook 执行按顺序进行
 
 ### Entry 非线程安全

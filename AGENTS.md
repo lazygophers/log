@@ -143,7 +143,6 @@ Tag format at file top:
 ## Key Dependencies
 - `go.uber.org/zap` - WriteSyncer and zapcore
 - `github.com/petermattis/goid` - Goroutine ID
-- `github.com/lestrrat-go/file-rotatelogs` - File rotation (indirect)
 
 ## Pre-commit Checklist
 1. Run `go fmt ./...`
