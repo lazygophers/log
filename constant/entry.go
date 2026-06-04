@@ -111,5 +111,6 @@ func (p *Entry) Reset() {
 	p.CallerFunc = ""
 	p.PrefixMsg = p.PrefixMsg[:0]
 	p.SuffixMsg = p.SuffixMsg[:0]
+	p.Fields = p.Fields[:0]
 }
 

@@ -257,10 +257,11 @@ func (p *Logger) log(level Level, msg string, args ...interface{}) {
 	p.fillPrefixSuffix(entry)
 
 	// Apply hooks
+	orig := entry
 	entry = p.applyHooks(entry)
 	if entry == nil {
 		// Hook filtered out this log entry
-		putEntry(entry)
+		putEntry(orig)
 		return
 	}
 

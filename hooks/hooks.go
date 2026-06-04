@@ -60,20 +60,11 @@ func (h *SensitiveDataMaskHook) AddMaskField(key string) {
 
 // OnWrite implements Hook interface
 func (h *SensitiveDataMaskHook) OnWrite(entry interface{}) interface{} {
-	// Type assertion to access Entry fields
-	// This works because we pass the actual *Entry from logger
-	type entryLike struct {
-		Message    string
-		Fields     []interface{}
-		File       string
-		CallerName string
-	}
-
 	if entry == nil {
 		return nil
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
@@ -83,16 +74,10 @@ func (h *SensitiveDataMaskHook) OnWrite(entry interface{}) interface{} {
 
 	// Mask in fields
 	for i, field := range e.Fields {
-		if fieldMap, ok := field.(map[string]interface{}); ok {
-			// Handle field as map
-			for key, val := range fieldMap {
-				if h.maskFields[key] {
-					fieldMap[key] = h.mask
-				} else if strVal, ok := val.(string); ok {
-					fieldMap[key] = h.maskString(strVal)
-				}
-			}
-			e.Fields[i] = fieldMap
+		if h.maskFields[field.Key] {
+			e.Fields[i].Value = h.mask
+		} else if strVal, ok := field.Value.(string); ok {
+			e.Fields[i].Value = h.maskString(strVal)
 		}
 	}
 
@@ -135,22 +120,18 @@ func (h *ContextEnrichHook) SetFields(fields map[string]interface{}) {
 
 // OnWrite implements Hook interface
 func (h *ContextEnrichHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Fields []interface{}
-	}
-
 	if entry == nil || len(h.fields) == 0 {
 		return entry
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
 
 	// Append enrichment fields
 	for key, value := range h.fields {
-		e.Fields = append(e.Fields, map[string]interface{}{key: value})
+		e.Fields = append(e.Fields, constant.KV{Key: key, Value: value})
 	}
 
 	return entry
@@ -168,20 +149,16 @@ func NewLevelFilterHook(minLevel int) *LevelFilterHook {
 
 // OnWrite implements Hook interface
 func (h *LevelFilterHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Level int
-	}
-
 	if entry == nil {
 		return nil
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
 
-	if e.Level < h.minLevel {
+	if int(e.Level) < h.minLevel {
 		return nil // Filter out
 	}
 	return entry
@@ -222,15 +199,11 @@ func (h *MessageFilterHook) AddDenyPattern(pattern string) error {
 
 // OnWrite implements Hook interface
 func (h *MessageFilterHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Message string
-	}
-
 	if entry == nil {
 		return nil
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
@@ -294,35 +267,27 @@ func (h *FieldFilterHook) DenyField(key string, value interface{}) {
 
 // OnWrite implements Hook interface
 func (h *FieldFilterHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Fields []interface{}
-	}
-
 	if entry == nil {
 		return nil
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
 
 	for _, field := range e.Fields {
-		if fieldMap, ok := field.(map[string]interface{}); ok {
-			for key, value := range fieldMap {
-				// Check denied values first
-				if deniedValues, ok := h.deniedFields[key]; ok {
-					if deniedValues[value] {
-						return nil // Filter out
-					}
-				}
+		// Check denied values first
+		if deniedValues, ok := h.deniedFields[field.Key]; ok {
+			if deniedValues[field.Value] {
+				return nil // Filter out
+			}
+		}
 
-				// Check allowed values
-				if allowedValues, ok := h.allowedFields[key]; ok {
-					if len(allowedValues) > 0 && !allowedValues[value] {
-						return nil // Filter out
-					}
-				}
+		// Check allowed values
+		if allowedValues, ok := h.allowedFields[field.Key]; ok {
+			if len(allowedValues) > 0 && !allowedValues[field.Value] {
+				return nil // Filter out
 			}
 		}
 	}
@@ -342,15 +307,11 @@ func NewMinLengthHook(minLength int) *MinLengthHook {
 
 // OnWrite implements Hook interface
 func (h *MinLengthHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Message string
-	}
-
 	if entry == nil {
 		return nil
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
@@ -380,15 +341,11 @@ func NewMaxLengthHook(maxLength int) *MaxLengthHook {
 
 // OnWrite implements Hook interface
 func (h *MaxLengthHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Message string
-	}
-
 	if entry == nil {
-		return nil
+		return entry
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
@@ -416,15 +373,11 @@ func NewPrefixHook(prefix string) *PrefixHook {
 
 // OnWrite implements Hook interface
 func (h *PrefixHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Message string
-	}
-
 	if entry == nil || h.Prefix == "" {
 		return entry
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}
@@ -445,15 +398,11 @@ func NewSuffixHook(suffix string) *SuffixHook {
 
 // OnWrite implements Hook interface
 func (h *SuffixHook) OnWrite(entry interface{}) interface{} {
-	type entryLike struct {
-		Message string
-	}
-
 	if entry == nil || h.Suffix == "" {
 		return entry
 	}
 
-	e, ok := entry.(entryLike)
+	e, ok := entry.(*constant.Entry)
 	if !ok {
 		return entry
 	}

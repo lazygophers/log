@@ -47,7 +47,7 @@
 //	    log.Infof("listening on port %d", 8080)
 //
 //	    // Create custom logger
-//	    logger := log.NewLogger()
+//	    logger := log.New()
 //	    logger.SetLevel(log.DebugLevel)
 //	    logger.Debug("debug message")
 //	}
@@ -55,8 +55,8 @@
 // # Context-Aware Logging
 //
 //	ctx := context.Background()
-//	logger := log.NewLoggerWithCtx()
-//	logger.Log(ctx, log.InfoLevel, "message with context")
+//	logger := logctx.New()
+//	logger.Log(ctx, logctx.InfoLevel, "message with context")
 //
 // # Performance
 //
