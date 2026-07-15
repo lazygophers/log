@@ -37,10 +37,5 @@ tmp/
 temp/
 
 *.prof
-build-log.zip
-/.claude/plans/
-*.db
-.gitnexus
-.claude/skills/gitnexus/
 # skein worktree 隔离 (任务源码改动落此, 不入库)
 .worktrees/
