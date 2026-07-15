@@ -28,6 +28,7 @@
 //   - release: Production mode with optimized performance (aliases: prod, production)
 //   - discard: Disables all logging output
 //   - canary: Similar to debug mode for canary deployments
+//   - test: Debug-level logging to stdout for test builds
 //
 // # Thread Safety
 //
