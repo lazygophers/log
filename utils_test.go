@@ -179,3 +179,32 @@ func TestFastSprintfCoverage(t *testing.T) {
 		})
 	}
 }
+
+func TestFastSprint(t *testing.T) {
+	tests := []struct {
+		name string
+		args []interface{}
+		want string
+	}{
+		{"no args", nil, ""},
+		{"single string", []interface{}{"hello"}, "hello"},
+		{"single int", []interface{}{42}, "42"},
+		{"multiple args", []interface{}{"a", 1, "b"}, "a1b"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := fastSprint(tt.args...)
+			if got != tt.want {
+				t.Errorf("fastSprint(%v) = %q, want %q", tt.args, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFastSprintfFastPath(t *testing.T) {
+	// ponytail: %s 单参快速路径 (fastStringify) 是 fastSprintf 的热路径分支
+	got := fastSprintf("%s", "value")
+	if got != "value" {
+		t.Errorf("fastSprintf(\"%%s\", \"value\") = %q, want %q", got, "value")
+	}
+}

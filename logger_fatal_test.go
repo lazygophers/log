@@ -229,3 +229,64 @@ func TestPanicFunctions(t *testing.T) {
 		Panicf("test %s", "panicf")
 	})
 }
+
+// logger method forms (Fatal/Panic/Panicf) — cover write() panic/exit branches
+func TestLoggerFatalMethodExits(t *testing.T) {
+	if os.Getenv("TEST_LOGGER_FATAL_EXIT") == "1" {
+		logger := New()
+		logger.SetLevel(FatalLevel)
+		logger.Fatal("fatal method")
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=TestLoggerFatalMethodExits$")
+	cmd.Env = append(os.Environ(), "TEST_LOGGER_FATAL_EXIT=1")
+	if err := cmd.Run(); err == nil {
+		t.Error("expected non-zero exit status")
+	}
+}
+
+func TestLoggerPanicMethodPanics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+	logger := New()
+	logger.SetLevel(PanicLevel)
+	logger.Panic("panic method")
+}
+
+func TestLoggerPanicfMethodPanics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+	logger := New()
+	logger.SetLevel(PanicLevel)
+	logger.Panicf("panic %s", "method")
+}
+
+// Errorf disabled early-return branch
+func TestLoggerErrorfDisabled(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New()
+	logger.SetOutput(&buf)
+	logger.SetLevel(FatalLevel) // ErrorLevel disabled
+	logger.Errorf("should not log %s", "arg")
+	if buf.Len() != 0 {
+		t.Errorf("Errorf should not log when level disabled, got %q", buf.String())
+	}
+}
+
+// Fatal disabled early-return (level < FatalLevel, i.e. PanicLevel)
+func TestLoggerFatalMethodDisabled(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New()
+	logger.SetOutput(&buf)
+	logger.SetLevel(PanicLevel) // FatalLevel disabled
+	logger.Fatal("should not exit")
+	if buf.Len() != 0 {
+		t.Errorf("Fatal should not log when level disabled, got %q", buf.String())
+	}
+}
