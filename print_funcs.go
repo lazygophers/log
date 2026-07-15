@@ -1,4 +1,4 @@
-//go:build !discard && (debug || canary || (!debug && !release && !canary))
+//go:build !discard && (debug || canary || (!debug && !release && !canary && !prod && !production))
 
 package log
 

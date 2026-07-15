@@ -25,7 +25,7 @@
 //
 // The package supports conditional compilation for different environments:
 //   - debug: Enables all logging (default)
-//   - release: Production mode with optimized performance
+//   - release: Production mode with optimized performance (aliases: prod, production)
 //   - discard: Disables all logging output
 //   - canary: Similar to debug mode for canary deployments
 //

@@ -1,4 +1,4 @@
-//go:build release && !discard
+//go:build (release || prod || production) && !discard
 
 package log
 
